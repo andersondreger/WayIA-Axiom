@@ -9,7 +9,7 @@ import {
   Activity, Shield, Zap, TrendingUp, TrendingDown, RefreshCw, 
   Crown, Trophy, LineChart, Wallet, History, ChevronDown, 
   CheckCircle2, Loader2, Camera, Image as ImageIcon, Eye, User, LogOut, LayoutGrid,
-  MessageSquare, Settings, Link as LinkIcon, Calendar
+  MessageSquare, Settings, Link as LinkIcon, Calendar, Target
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -167,14 +167,16 @@ export default function App() {
           >
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-primary-purple/20 blur-3xl rounded-full" />
-              <Eye className="w-24 h-24 text-white relative" strokeWidth={1} />
+              <div className="w-[500px] h-[250px] flex items-center justify-center relative group">
+                <div className="absolute inset-0 bg-primary-purple/10 rounded-full blur-2xl group-hover:bg-primary-purple/20 transition-all" />
+                <img 
+                  src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png" 
+                  alt="WAY AXIOM Logo" 
+                  className="w-full h-full object-contain relative z-10"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
             </div>
-            <h1 className="text-6xl font-light tracking-widest text-white mb-2">
-              ORÁCULO
-            </h1>
-            <h2 className="text-6xl font-bold tracking-widest text-white">
-              VISION
-            </h2>
           </motion.div>
 
           <motion.div 
@@ -204,11 +206,14 @@ export default function App() {
     <div className="min-h-screen flex flex-col pb-24">
       {/* Header */}
       <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <Eye className="w-8 h-8 text-white" strokeWidth={1.5} />
-          <div className="flex flex-col leading-none">
-            <span className="text-xs font-light tracking-[0.3em] text-white/50">ORÁCULO</span>
-            <span className="text-sm font-bold tracking-[0.3em] text-white">VISION</span>
+        <div className="flex items-center gap-3">
+          <div className="h-14 flex items-center justify-center">
+            <img 
+              src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png" 
+              alt="Logo" 
+              className="h-full w-auto object-contain"
+              referrerPolicy="no-referrer"
+            />
           </div>
         </div>
 
