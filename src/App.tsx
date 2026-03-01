@@ -55,8 +55,43 @@ export default function App() {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   
   // Integrations State
-  const [evolutionConfig, setEvolutionConfig] = useState({ url: '', key: '' });
+  const [evolutionConfig, setEvolutionConfig] = useState({ url: '', key: '', instance: 'WayAxiom' });
   const [n8nConfig, setN8nConfig] = useState({ webhook: '' });
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
+  const [isFetchingQR, setIsFetchingQR] = useState(false);
+
+  const fetchQRCode = async () => {
+    if (!evolutionConfig.url || !evolutionConfig.key) return;
+    
+    setIsFetchingQR(true);
+    setConnectionStatus('CONNECTING');
+    
+    try {
+      // First, check if instance exists or create it
+      // For this demo, we'll try to get the QR code directly
+      const response = await fetch(`${evolutionConfig.url}/instance/connect/${evolutionConfig.instance}`, {
+        method: 'GET',
+        headers: {
+          'apikey': evolutionConfig.key
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.base64) {
+        setQrCode(data.base64);
+        setConnectionStatus('DISCONNECTED');
+      } else if (data.instance?.status === 'open') {
+        setConnectionStatus('CONNECTED');
+        setQrCode(null);
+      }
+    } catch (error) {
+      console.error('Error fetching QR Code:', error);
+    } finally {
+      setIsFetchingQR(false);
+    }
+  };
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -154,7 +189,46 @@ export default function App() {
 
   if (!showDashboard) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 sm:px-8 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center px-4 sm:px-8 relative overflow-hidden bg-black">
+        {/* Purple Waves Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.8">
+              {/* Left Fan - Dense radiating lines */}
+              {Array.from({ length: 120 }).map((_, i) => (
+                <path
+                  key={`left-${i}`}
+                  d={`M -100 ${800 - i * 8} Q ${400} ${400}, 1600 ${400 + (i - 60) * 15}`}
+                  stroke="#8B5CF6"
+                  strokeWidth="0.4"
+                  strokeOpacity={0.05 + (i / 120) * 0.3}
+                />
+              ))}
+              {/* Right Fan - Dense radiating lines */}
+              {Array.from({ length: 120 }).map((_, i) => (
+                <path
+                  key={`right-${i}`}
+                  d={`M 1540 ${0 + i * 8} Q ${1040} ${400}, -200 ${400 - (i - 60) * 15}`}
+                  stroke="#A78BFA"
+                  strokeWidth="0.4"
+                  strokeOpacity={0.05 + (i / 120) * 0.3}
+                />
+              ))}
+              
+              {/* Central Glow/Flow lines */}
+              {Array.from({ length: 20 }).map((_, i) => (
+                <path
+                  key={`center-${i}`}
+                  d={`M -100 ${400} Q 720 ${350 + i * 5}, 1540 ${400}`}
+                  stroke="#C084FC"
+                  strokeWidth="1"
+                  strokeOpacity="0.1"
+                />
+              ))}
+            </g>
+          </svg>
+        </div>
+
         {/* Background Glows */}
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary-purple/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary-purple/5 rounded-full blur-[120px]" />
@@ -353,17 +427,61 @@ export default function App() {
                       onChange={(e) => setEvolutionConfig({...evolutionConfig, url: e.target.value})}
                     />
                   </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">API Key</label>
-                    <input 
-                      type="password" 
-                      placeholder="Sua chave secreta"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
-                      value={evolutionConfig.key}
-                      onChange={(e) => setEvolutionConfig({...evolutionConfig, key: e.target.value})}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">API Key</label>
+                      <input 
+                        type="password" 
+                        placeholder="Sua chave secreta"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
+                        value={evolutionConfig.key}
+                        onChange={(e) => setEvolutionConfig({...evolutionConfig, key: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">Nome da Instância</label>
+                      <input 
+                        type="text" 
+                        placeholder="WayAxiom"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
+                        value={evolutionConfig.instance}
+                        onChange={(e) => setEvolutionConfig({...evolutionConfig, instance: e.target.value})}
+                      />
+                    </div>
                   </div>
-                  <button className="w-full py-3 btn-secondary rounded-xl text-sm font-bold">Testar Conexão</button>
+
+                  {qrCode && connectionStatus === 'DISCONNECTED' && (
+                    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-white/10">
+                      <p className="text-black text-xs font-bold mb-4 uppercase tracking-widest">Escaneie para Conectar</p>
+                      <img src={qrCode} alt="WhatsApp QR Code" className="w-48 h-48" />
+                      <button 
+                        onClick={fetchQRCode}
+                        className="mt-4 text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold"
+                      >
+                        Atualizar QR Code
+                      </button>
+                    </div>
+                  )}
+
+                  {connectionStatus === 'CONNECTED' && (
+                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-sm font-bold text-emerald-500">WhatsApp Conectado</span>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={fetchQRCode}
+                    disabled={isFetchingQR || !evolutionConfig.url || !evolutionConfig.key}
+                    className="w-full py-3 btn-secondary rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isFetchingQR ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        Buscando QR Code...
+                      </>
+                    ) : connectionStatus === 'CONNECTED' ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
+                  </button>
                 </div>
               </div>
 
