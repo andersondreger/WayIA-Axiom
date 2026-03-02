@@ -60,6 +60,7 @@ export default function App() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
   const [isFetchingQR, setIsFetchingQR] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
@@ -106,21 +107,28 @@ export default function App() {
         };
 
         const response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        console.log(`Polling status for ${instanceName}:`, response.status);
         
         if (response.ok) {
           const data = await response.json();
           const state = data?.instance?.state || data?.state || data?.status;
+          console.log(`Instance state: ${state}`);
           
           if (state === 'open' || state === 'CONNECTED') {
             if (connectionStatus !== 'CONNECTED') {
               setConnectionStatus('CONNECTED');
               setQrCode(null);
-              // Fetch instance info when connected
-              const infoRes = await callApi('GET', `/instance/fetchInstances?instanceName=${instanceName}`);
-              if (infoRes.ok) {
-                const infoData = await infoRes.json();
-                const info = Array.isArray(infoData) ? infoData.find((i: any) => i.instanceName === instanceName) : infoData;
-                setInstanceInfo(info);
+              
+              // Fetch info separately
+              try {
+                const infoRes = await callApi('GET', `/instance/fetchInstances?instanceName=${instanceName}`);
+                if (infoRes.ok) {
+                  const infoData = await infoRes.json();
+                  const info = Array.isArray(infoData) ? infoData.find((i: any) => i.instanceName === instanceName) : infoData;
+                  setInstanceInfo(info);
+                }
+              } catch (infoErr) {
+                console.error('Error fetching instance info:', infoErr);
               }
             }
           } else {
@@ -143,7 +151,7 @@ export default function App() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, connectionStatus, isFetchingQR]);
+  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, isFetchingQR, connectionStatus]);
 
   const logoutInstance = async () => {
     if (!evolutionConfig.url || !evolutionConfig.key) return;
@@ -200,6 +208,7 @@ export default function App() {
     setIsFetchingQR(true);
     setConnectionStatus('CONNECTING');
     setQrCode(null);
+    setApiError(null);
     
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
@@ -336,7 +345,7 @@ export default function App() {
     } catch (error: any) {
       console.error('Error in Evolution API flow:', error);
       const message = error.message || 'Falha na conexão';
-      alert(`Erro: ${message}\n\nVerifique se:\n1. A URL está correta (ex: https://api.exemplo.com)\n2. A API Key está correta\n3. O servidor da API permite conexões externas (CORS)`);
+      setApiError(`Erro: ${message}. Verifique a URL, API Key e se o CORS está habilitado no servidor.`);
       setConnectionStatus('DISCONNECTED');
     } finally {
       setIsFetchingQR(false);
@@ -700,6 +709,20 @@ export default function App() {
                     </div>
                   </div>
 
+                  {apiError && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
+                      {apiError}
+                    </div>
+                  )}
+
+                  {connectionStatus === 'CONNECTING' && (
+                    <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10">
+                      <Loader2 className="w-8 h-8 text-primary-purple animate-spin mb-4" />
+                      <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
+                      <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
+                    </div>
+                  )}
+
                   {qrCode && connectionStatus === 'DISCONNECTED' && (
                     <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
                       <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
@@ -755,7 +778,9 @@ export default function App() {
                           </div>
                           <div className="bg-white/5 p-3 rounded-xl">
                             <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
-                            <p className="text-xs text-zinc-300 font-medium">{instanceInfo.owner || instanceInfo.number || '---'}</p>
+                            <p className="text-xs text-zinc-300 font-medium">
+                              {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
+                            </p>
                           </div>
                         </div>
                       )}
