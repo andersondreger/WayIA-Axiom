@@ -61,33 +61,98 @@ export default function App() {
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
   const [isFetchingQR, setIsFetchingQR] = useState(false);
 
+  // Poll for connection status
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const checkStatus = async () => {
+      if (!evolutionConfig.url || !evolutionConfig.key || connectionStatus === 'CONNECTED') return;
+
+      try {
+        const response = await fetch(`${evolutionConfig.url}/instance/connectionStatus/${evolutionConfig.instance}`, {
+          method: 'GET',
+          headers: {
+            'apikey': evolutionConfig.key
+          }
+        });
+        const data = await response.json();
+        
+        if (data.instance?.state === 'open' || data.state === 'open') {
+          setConnectionStatus('CONNECTED');
+          setQrCode(null);
+        }
+      } catch (error) {
+        // Silent error for polling
+      }
+    };
+
+    if (evolutionConfig.url && evolutionConfig.key && connectionStatus !== 'CONNECTED') {
+      interval = setInterval(checkStatus, 5000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, connectionStatus]);
+
   const fetchQRCode = async () => {
     if (!evolutionConfig.url || !evolutionConfig.key) return;
     
     setIsFetchingQR(true);
     setConnectionStatus('CONNECTING');
+    setQrCode(null);
     
     try {
-      // First, check if instance exists or create it
-      // For this demo, we'll try to get the QR code directly
-      const response = await fetch(`${evolutionConfig.url}/instance/connect/${evolutionConfig.instance}`, {
+      // 1. Check if instance already exists and its status
+      const statusResponse = await fetch(`${evolutionConfig.url}/instance/connectionStatus/${evolutionConfig.instance}`, {
         method: 'GET',
         headers: {
           'apikey': evolutionConfig.key
         }
       });
       
-      const data = await response.json();
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        if (statusData.instance?.state === 'open' || statusData.state === 'open') {
+          setConnectionStatus('CONNECTED');
+          setQrCode(null);
+          setIsFetchingQR(false);
+          return;
+        }
+      }
+
+      // 2. Try to create the instance (it might already exist, which is fine)
+      await fetch(`${evolutionConfig.url}/instance/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': evolutionConfig.key
+        },
+        body: JSON.stringify({
+          instanceName: evolutionConfig.instance,
+          qrcode: true
+        })
+      });
+      
+      // 3. Now try to connect/get QR code
+      const connectResponse = await fetch(`${evolutionConfig.url}/instance/connect/${evolutionConfig.instance}`, {
+        method: 'GET',
+        headers: {
+          'apikey': evolutionConfig.key
+        }
+      });
+      
+      const data = await connectResponse.json();
       
       if (data.base64) {
         setQrCode(data.base64);
         setConnectionStatus('DISCONNECTED');
-      } else if (data.instance?.status === 'open') {
+      } else if (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open') {
         setConnectionStatus('CONNECTED');
         setQrCode(null);
       }
     } catch (error) {
-      console.error('Error fetching QR Code:', error);
+      console.error('Error in Evolution API flow:', error);
     } finally {
       setIsFetchingQR(false);
     }
