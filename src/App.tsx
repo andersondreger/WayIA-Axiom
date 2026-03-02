@@ -69,12 +69,17 @@ export default function App() {
       if (!evolutionConfig.url || !evolutionConfig.key || connectionStatus === 'CONNECTED' || isFetchingQR) return;
 
       try {
-        const baseUrl = evolutionConfig.url.replace(/\/$/, '');
-        const response = await fetch(`${baseUrl}/instance/connectionStatus/${evolutionConfig.instance}`, {
-          method: 'GET',
-          headers: {
-            'apikey': evolutionConfig.key
-          }
+        const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+        
+        const response = await fetch('/api/evolution-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: evolutionConfig.url,
+            key: evolutionConfig.key,
+            method: 'GET',
+            endpoint: `/instance/connectionStatus/${instanceName}`
+          })
         });
         
         if (!response.ok) return;
@@ -108,15 +113,19 @@ export default function App() {
     setQrCode(null);
     
     try {
-      const baseUrl = evolutionConfig.url.replace(/\/$/, '');
+      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
       
       // 1. Check if instance already exists and its status
       try {
-        const statusResponse = await fetch(`${baseUrl}/instance/connectionStatus/${evolutionConfig.instance}`, {
-          method: 'GET',
-          headers: {
-            'apikey': evolutionConfig.key
-          }
+        const statusResponse = await fetch('/api/evolution-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: evolutionConfig.url,
+            key: evolutionConfig.key,
+            method: 'GET',
+            endpoint: `/instance/connectionStatus/${instanceName}`
+          })
         });
         
         if (statusResponse.ok) {
@@ -135,51 +144,110 @@ export default function App() {
 
       // 2. Try to create the instance (it might already exist, which is fine)
       try {
-        await fetch(`${baseUrl}/instance/create`, {
+        const createResponse = await fetch('/api/evolution-proxy', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': evolutionConfig.key
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            instanceName: evolutionConfig.instance,
-            qrcode: true
+            url: evolutionConfig.url,
+            key: evolutionConfig.key,
+            method: 'POST',
+            endpoint: '/instance/create',
+            data: {
+              instanceName: instanceName,
+              qrcode: true,
+              integration: "WHATSAPP-BAILEYS"
+            }
           })
         });
+        
+        if (createResponse.ok) {
+          const createData = await createResponse.json();
+          const qrFromCreate = createData.base64 || createData.qrcode?.base64 || createData.code?.base64;
+          if (qrFromCreate) {
+            let qr = qrFromCreate;
+            if (!qr.startsWith('data:image')) qr = `data:image/png;base64,${qr}`;
+            setQrCode(qr);
+            setConnectionStatus('DISCONNECTED');
+            setIsFetchingQR(false);
+            return;
+          }
+        }
+        // Small delay to allow instance initialization if it was just created
+        await new Promise(resolve => setTimeout(resolve, 1500));
       } catch (e) {
         console.log('Instance creation failed or already exists');
       }
       
       // 3. Now try to connect/get QR code
-      const connectResponse = await fetch(`${baseUrl}/instance/connect/${evolutionConfig.instance}`, {
-        method: 'GET',
-        headers: {
-          'apikey': evolutionConfig.key
-        }
+      const connectResponse = await fetch('/api/evolution-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: evolutionConfig.url,
+          key: evolutionConfig.key,
+          method: 'GET',
+          endpoint: `/instance/connect/${instanceName}`
+        })
       });
       
       if (!connectResponse.ok) {
-        throw new Error(`Failed to connect: ${connectResponse.statusText}`);
+        let errorMsg = `Erro ${connectResponse.status}`;
+        try {
+          const errorData = await connectResponse.json();
+          errorMsg = errorData.message || errorData.error || errorMsg;
+        } catch (e) {
+          errorMsg = connectResponse.statusText || errorMsg;
+        }
+        throw new Error(errorMsg);
       }
 
       const data = await connectResponse.json();
+      console.log('Connect response:', data);
+
+      // Check for QR code in various possible fields (Evolution API v1 and v2)
+      const qrBase64 = data.base64 || data.qrcode?.base64 || data.code?.base64;
       
-      if (data && typeof data.base64 === 'string') {
-        let qr = data.base64;
+      if (qrBase64 && typeof qrBase64 === 'string') {
+        let qr = qrBase64;
         if (!qr.startsWith('data:image')) {
           qr = `data:image/png;base64,${qr}`;
         }
         setQrCode(qr);
         setConnectionStatus('DISCONNECTED');
-      } else if (data && (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open')) {
+      } else if (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open' || data.instance?.state === 'open') {
         setConnectionStatus('CONNECTED');
         setQrCode(null);
+      } else if (data.code === 'instance_not_found') {
+        throw new Error('Instância não encontrada. Tente novamente.');
       } else {
-        console.error('Unexpected response from Evolution API:', data);
+        // If we get here and there's no QR, maybe it's already connected but the status field is different
+        // Let's try one last check of the status
+        const finalStatusCheck = await fetch('/api/evolution-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: evolutionConfig.url,
+            key: evolutionConfig.key,
+            method: 'GET',
+            endpoint: `/instance/connectionStatus/${instanceName}`
+          })
+        });
+        if (finalStatusCheck.ok) {
+          const finalData = await finalStatusCheck.json();
+          const finalState = finalData?.instance?.state || finalData?.state || finalData?.status;
+          if (finalState === 'open' || finalState === 'CONNECTED') {
+            setConnectionStatus('CONNECTED');
+            setQrCode(null);
+            return;
+          }
+        }
+        throw new Error('Não foi possível obter o QR Code. Verifique se a instância já está conectada em outro lugar.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in Evolution API flow:', error);
-      alert('Erro ao conectar com a Evolution API. Verifique a URL e a API Key.');
+      const message = error.message || 'Falha na conexão';
+      alert(`[Evolution API Proxy] Erro: ${message}\n\nVerifique se:\n1. A URL está correta (ex: https://api.exemplo.com)\n2. A API Key está correta\n3. O servidor da API está online`);
+      setConnectionStatus('DISCONNECTED');
     } finally {
       setIsFetchingQR(false);
     }
