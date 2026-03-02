@@ -70,26 +70,49 @@ export default function App() {
 
       try {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+        let url = evolutionConfig.url.trim();
+        if (!url.startsWith('http')) url = `https://${url}`;
+        const baseUrl = url.replace(/\/$/, '');
         
-        const response = await fetch('/api/evolution-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: evolutionConfig.url,
-            key: evolutionConfig.key,
+        // Try proxy first
+        try {
+          const response = await fetch('/api/evolution-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: evolutionConfig.url,
+              key: evolutionConfig.key,
+              method: 'GET',
+              endpoint: `/instance/connectionStatus/${instanceName}`
+            })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const state = data?.instance?.state || data?.state || data?.status;
+            if (state === 'open' || state === 'CONNECTED') {
+              setConnectionStatus('CONNECTED');
+              setQrCode(null);
+              return;
+            }
+          } else if (response.status === 405 || response.status === 404) {
+            // Proxy not available, try direct
+            throw new Error('Proxy unavailable');
+          }
+        } catch (proxyError) {
+          // Fallback to direct call
+          const directResponse = await fetch(`${baseUrl}/instance/connectionStatus/${instanceName}`, {
             method: 'GET',
-            endpoint: `/instance/connectionStatus/${instanceName}`
-          })
-        });
-        
-        if (!response.ok) return;
-        
-        const data = await response.json();
-        const state = data?.instance?.state || data?.state || data?.status;
-        
-        if (state === 'open' || state === 'CONNECTED') {
-          setConnectionStatus('CONNECTED');
-          setQrCode(null);
+            headers: { 'apikey': evolutionConfig.key }
+          });
+          if (directResponse.ok) {
+            const data = await directResponse.json();
+            const state = data?.instance?.state || data?.state || data?.status;
+            if (state === 'open' || state === 'CONNECTED') {
+              setConnectionStatus('CONNECTED');
+              setQrCode(null);
+            }
+          }
         }
       } catch (error) {
         // Silent error for polling
@@ -114,19 +137,49 @@ export default function App() {
     
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+      let url = evolutionConfig.url.trim();
+      if (!url.startsWith('http')) url = `https://${url}`;
+      const baseUrl = url.replace(/\/$/, '');
+
+      const callApi = async (method: string, endpoint: string, data?: any) => {
+        // Try proxy first
+        try {
+          const response = await fetch('/api/evolution-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: evolutionConfig.url,
+              key: evolutionConfig.key,
+              method,
+              endpoint,
+              data
+            })
+          });
+          
+          if (response.status === 405 || response.status === 404) {
+            throw new Error('PROXY_UNAVAILABLE');
+          }
+          
+          return response;
+        } catch (err: any) {
+          if (err.message === 'PROXY_UNAVAILABLE') {
+            // Fallback to direct call
+            const headers: any = { 'apikey': evolutionConfig.key };
+            if (data) headers['Content-Type'] = 'application/json';
+            
+            return fetch(`${baseUrl}${endpoint}`, {
+              method,
+              headers,
+              body: data ? JSON.stringify(data) : undefined
+            });
+          }
+          throw err;
+        }
+      };
       
       // 1. Check if instance already exists and its status
       try {
-        const statusResponse = await fetch('/api/evolution-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: evolutionConfig.url,
-            key: evolutionConfig.key,
-            method: 'GET',
-            endpoint: `/instance/connectionStatus/${instanceName}`
-          })
-        });
+        const statusResponse = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
         
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
@@ -144,20 +197,10 @@ export default function App() {
 
       // 2. Try to create the instance (it might already exist, which is fine)
       try {
-        const createResponse = await fetch('/api/evolution-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: evolutionConfig.url,
-            key: evolutionConfig.key,
-            method: 'POST',
-            endpoint: '/instance/create',
-            data: {
-              instanceName: instanceName,
-              qrcode: true,
-              integration: "WHATSAPP-BAILEYS"
-            }
-          })
+        const createResponse = await callApi('POST', '/instance/create', {
+          instanceName: instanceName,
+          qrcode: true,
+          integration: "WHATSAPP-BAILEYS"
         });
         
         if (createResponse.ok) {
@@ -179,16 +222,7 @@ export default function App() {
       }
       
       // 3. Now try to connect/get QR code
-      const connectResponse = await fetch('/api/evolution-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: evolutionConfig.url,
-          key: evolutionConfig.key,
-          method: 'GET',
-          endpoint: `/instance/connect/${instanceName}`
-        })
-      });
+      const connectResponse = await callApi('GET', `/instance/connect/${instanceName}`);
       
       if (!connectResponse.ok) {
         let errorMsg = `Erro ${connectResponse.status}`;
@@ -221,17 +255,7 @@ export default function App() {
         throw new Error('Instância não encontrada. Tente novamente.');
       } else {
         // If we get here and there's no QR, maybe it's already connected but the status field is different
-        // Let's try one last check of the status
-        const finalStatusCheck = await fetch('/api/evolution-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: evolutionConfig.url,
-            key: evolutionConfig.key,
-            method: 'GET',
-            endpoint: `/instance/connectionStatus/${instanceName}`
-          })
-        });
+        const finalStatusCheck = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
         if (finalStatusCheck.ok) {
           const finalData = await finalStatusCheck.json();
           const finalState = finalData?.instance?.state || finalData?.state || finalData?.status;
@@ -246,7 +270,7 @@ export default function App() {
     } catch (error: any) {
       console.error('Error in Evolution API flow:', error);
       const message = error.message || 'Falha na conexão';
-      alert(`[Evolution API Proxy] Erro: ${message}\n\nVerifique se:\n1. A URL está correta (ex: https://api.exemplo.com)\n2. A API Key está correta\n3. O servidor da API está online`);
+      alert(`Erro: ${message}\n\nVerifique se:\n1. A URL está correta (ex: https://api.exemplo.com)\n2. A API Key está correta\n3. O servidor da API permite conexões externas (CORS)`);
       setConnectionStatus('DISCONNECTED');
     } finally {
       setIsFetchingQR(false);

@@ -24,16 +24,21 @@ async function startServer() {
       
       console.log(`Proxying ${method} request to ${fullUrl}`);
 
-      const response = await axios({
+      const config: any = {
         url: fullUrl,
         method: method || "GET",
         headers: {
           "apikey": key,
           "Content-Type": "application/json"
         },
-        data: data || {},
-        timeout: 15000 // 15s timeout
-      });
+        timeout: 15000
+      };
+
+      if (method && method.toUpperCase() !== "GET" && data) {
+        config.data = data;
+      }
+
+      const response = await axios(config);
 
       res.status(response.status).json(response.data);
     } catch (error: any) {
