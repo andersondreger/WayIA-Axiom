@@ -63,21 +63,26 @@ export default function App() {
 
   // Poll for connection status
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: any;
 
     const checkStatus = async () => {
-      if (!evolutionConfig.url || !evolutionConfig.key || connectionStatus === 'CONNECTED') return;
+      if (!evolutionConfig.url || !evolutionConfig.key || connectionStatus === 'CONNECTED' || isFetchingQR) return;
 
       try {
-        const response = await fetch(`${evolutionConfig.url}/instance/connectionStatus/${evolutionConfig.instance}`, {
+        const baseUrl = evolutionConfig.url.replace(/\/$/, '');
+        const response = await fetch(`${baseUrl}/instance/connectionStatus/${evolutionConfig.instance}`, {
           method: 'GET',
           headers: {
             'apikey': evolutionConfig.key
           }
         });
-        const data = await response.json();
         
-        if (data.instance?.state === 'open' || data.state === 'open') {
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        const state = data?.instance?.state || data?.state || data?.status;
+        
+        if (state === 'open' || state === 'CONNECTED') {
           setConnectionStatus('CONNECTED');
           setQrCode(null);
         }
@@ -93,7 +98,7 @@ export default function App() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, connectionStatus]);
+  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, connectionStatus, isFetchingQR]);
 
   const fetchQRCode = async () => {
     if (!evolutionConfig.url || !evolutionConfig.key) return;
@@ -103,56 +108,78 @@ export default function App() {
     setQrCode(null);
     
     try {
-      // 1. Check if instance already exists and its status
-      const statusResponse = await fetch(`${evolutionConfig.url}/instance/connectionStatus/${evolutionConfig.instance}`, {
-        method: 'GET',
-        headers: {
-          'apikey': evolutionConfig.key
-        }
-      });
+      const baseUrl = evolutionConfig.url.replace(/\/$/, '');
       
-      if (statusResponse.ok) {
-        const statusData = await statusResponse.json();
-        if (statusData.instance?.state === 'open' || statusData.state === 'open') {
-          setConnectionStatus('CONNECTED');
-          setQrCode(null);
-          setIsFetchingQR(false);
-          return;
+      // 1. Check if instance already exists and its status
+      try {
+        const statusResponse = await fetch(`${baseUrl}/instance/connectionStatus/${evolutionConfig.instance}`, {
+          method: 'GET',
+          headers: {
+            'apikey': evolutionConfig.key
+          }
+        });
+        
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          const state = statusData?.instance?.state || statusData?.state || statusData?.status;
+          if (state === 'open' || state === 'CONNECTED') {
+            setConnectionStatus('CONNECTED');
+            setQrCode(null);
+            setIsFetchingQR(false);
+            return;
+          }
         }
+      } catch (e) {
+        console.log('Status check failed, proceeding to create/connect');
       }
 
       // 2. Try to create the instance (it might already exist, which is fine)
-      await fetch(`${evolutionConfig.url}/instance/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': evolutionConfig.key
-        },
-        body: JSON.stringify({
-          instanceName: evolutionConfig.instance,
-          qrcode: true
-        })
-      });
+      try {
+        await fetch(`${baseUrl}/instance/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': evolutionConfig.key
+          },
+          body: JSON.stringify({
+            instanceName: evolutionConfig.instance,
+            qrcode: true
+          })
+        });
+      } catch (e) {
+        console.log('Instance creation failed or already exists');
+      }
       
       // 3. Now try to connect/get QR code
-      const connectResponse = await fetch(`${evolutionConfig.url}/instance/connect/${evolutionConfig.instance}`, {
+      const connectResponse = await fetch(`${baseUrl}/instance/connect/${evolutionConfig.instance}`, {
         method: 'GET',
         headers: {
           'apikey': evolutionConfig.key
         }
       });
       
+      if (!connectResponse.ok) {
+        throw new Error(`Failed to connect: ${connectResponse.statusText}`);
+      }
+
       const data = await connectResponse.json();
       
-      if (data.base64) {
-        setQrCode(data.base64);
+      if (data && typeof data.base64 === 'string') {
+        let qr = data.base64;
+        if (!qr.startsWith('data:image')) {
+          qr = `data:image/png;base64,${qr}`;
+        }
+        setQrCode(qr);
         setConnectionStatus('DISCONNECTED');
-      } else if (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open') {
+      } else if (data && (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open')) {
         setConnectionStatus('CONNECTED');
         setQrCode(null);
+      } else {
+        console.error('Unexpected response from Evolution API:', data);
       }
     } catch (error) {
       console.error('Error in Evolution API flow:', error);
+      alert('Erro ao conectar com a Evolution API. Verifique a URL e a API Key.');
     } finally {
       setIsFetchingQR(false);
     }
@@ -516,22 +543,55 @@ export default function App() {
                   </div>
 
                   {qrCode && connectionStatus === 'DISCONNECTED' && (
-                    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-white/10">
-                      <p className="text-black text-xs font-bold mb-4 uppercase tracking-widest">Escaneie para Conectar</p>
-                      <img src={qrCode} alt="WhatsApp QR Code" className="w-48 h-48" />
-                      <button 
-                        onClick={fetchQRCode}
-                        className="mt-4 text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold"
-                      >
-                        Atualizar QR Code
-                      </button>
+                    <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
+                      <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
+                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
+                        <img 
+                          src={qrCode} 
+                          alt="WhatsApp QR Code" 
+                          className="w-48 h-48 object-contain"
+                          onError={() => {
+                            console.error('Failed to load QR code image');
+                            setQrCode(null);
+                          }}
+                        />
+                      </div>
+                      <div className="flex gap-4 mt-6">
+                        <button 
+                          onClick={fetchQRCode}
+                          className="text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold flex items-center gap-2"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          Atualizar
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setQrCode(null);
+                            setConnectionStatus('DISCONNECTED');
+                          }}
+                          className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
                     </div>
                   )}
 
                   {connectionStatus === 'CONNECTED' && (
-                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-sm font-bold text-emerald-500">WhatsApp Conectado</span>
+                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] flex flex-col items-center gap-4 text-center">
+                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                      </div>
+                      <div>
+                        <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
+                        <p className="text-zinc-500 text-xs mt-1">Sua instância está ativa e pronta para uso.</p>
+                      </div>
+                      <button 
+                        onClick={() => setConnectionStatus('DISCONNECTED')}
+                        className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold mt-2"
+                      >
+                        Desconectar Instância
+                      </button>
                     </div>
                   )}
 
