@@ -675,7 +675,7 @@ export default function App() {
                     <p className="text-zinc-500 text-sm">Conecte seu WhatsApp para receber sinais</p>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); fetchQRCode(); }} className="space-y-4">
                   <div>
                     <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">URL da Instância</label>
                     <input 
@@ -695,6 +695,7 @@ export default function App() {
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
                         value={evolutionConfig.key}
                         onChange={(e) => setEvolutionConfig({...evolutionConfig, key: e.target.value})}
+                        autoComplete="current-password"
                       />
                     </div>
                     <div>
@@ -709,8 +710,8 @@ export default function App() {
                     </div>
                   </div>
 
-                  <AnimatePresence mode="wait">
-                    {apiError && (
+                  <AnimatePresence mode="wait" initial={false}>
+                    {apiError ? (
                       <motion.div 
                         key="error"
                         initial={{ opacity: 0, height: 0 }}
@@ -720,9 +721,7 @@ export default function App() {
                       >
                         {apiError}
                       </motion.div>
-                    )}
-
-                    {connectionStatus === 'CONNECTING' && (
+                    ) : connectionStatus === 'CONNECTING' ? (
                       <motion.div 
                         key="connecting"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -734,9 +733,7 @@ export default function App() {
                         <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
                         <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
                       </motion.div>
-                    )}
-
-                    {qrCode && connectionStatus === 'DISCONNECTED' && (
+                    ) : (qrCode && connectionStatus === 'DISCONNECTED') ? (
                       <motion.div 
                         key="qrcode"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -758,6 +755,7 @@ export default function App() {
                         </div>
                         <div className="flex gap-4 mt-6">
                           <button 
+                            type="button"
                             onClick={fetchQRCode}
                             className="text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold flex items-center gap-2"
                           >
@@ -765,6 +763,7 @@ export default function App() {
                             Atualizar
                           </button>
                           <button 
+                            type="button"
                             onClick={() => {
                               setQrCode(null);
                               setConnectionStatus('DISCONNECTED');
@@ -775,9 +774,7 @@ export default function App() {
                           </button>
                         </div>
                       </motion.div>
-                    )}
-
-                    {connectionStatus === 'CONNECTED' && (
+                    ) : connectionStatus === 'CONNECTED' ? (
                       <motion.div 
                         key="connected"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -812,6 +809,7 @@ export default function App() {
 
                         <div className="pt-2">
                           <button 
+                            type="button"
                             onClick={logoutInstance}
                             className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
                           >
@@ -820,11 +818,11 @@ export default function App() {
                           </button>
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
 
                   <button 
-                    onClick={fetchQRCode}
+                    type="submit"
                     disabled={isFetchingQR || !evolutionConfig.url || !evolutionConfig.key}
                     className="w-full py-3 btn-secondary rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                   >
@@ -835,7 +833,7 @@ export default function App() {
                       </>
                     ) : connectionStatus === 'CONNECTED' ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
                   </button>
-                </div>
+                </form>
               </div>
 
               <div className="glass-card p-8 rounded-[32px] border border-white/5">
