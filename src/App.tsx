@@ -89,11 +89,9 @@ export default function App() {
                 endpoint,
                 data
               })
-            });
-            if (response.status === 405 || response.status === 404) throw new Error('PROXY_UNAVAILABLE');
-            return response;
-          } catch (err: any) {
-            if (err.message === 'PROXY_UNAVAILABLE') {
+            }).catch(() => ({ status: 405 } as Response));
+
+            if (response.status === 405 || response.status === 404 || !response.ok) {
               const headers: any = { 'apikey': evolutionConfig.key };
               if (data) headers['Content-Type'] = 'application/json';
               return fetch(`${baseUrl}${endpoint}`, {
@@ -102,7 +100,15 @@ export default function App() {
                 body: data ? JSON.stringify(data) : undefined
               });
             }
-            throw err;
+            return response;
+          } catch (err) {
+            const headers: any = { 'apikey': evolutionConfig.key };
+            if (data) headers['Content-Type'] = 'application/json';
+            return fetch(`${baseUrl}${endpoint}`, {
+              method,
+              headers,
+              body: data ? JSON.stringify(data) : undefined
+            });
           }
         };
 
@@ -176,17 +182,20 @@ export default function App() {
               method,
               endpoint
             })
-          });
-          if (response.status === 405 || response.status === 404) throw new Error('PROXY_UNAVAILABLE');
-          return response;
-        } catch (err: any) {
-          if (err.message === 'PROXY_UNAVAILABLE') {
+          }).catch(() => ({ status: 405 } as Response));
+
+          if (response.status === 405 || response.status === 404 || !response.ok) {
             return fetch(`${baseUrl}${endpoint}`, {
               method,
               headers: { 'apikey': evolutionConfig.key }
             });
           }
-          throw err;
+          return response;
+        } catch (err) {
+          return fetch(`${baseUrl}${endpoint}`, {
+            method,
+            headers: { 'apikey': evolutionConfig.key }
+          });
         }
       };
 
@@ -217,8 +226,8 @@ export default function App() {
       const baseUrl = url.replace(/\/$/, '');
 
       const callApi = async (method: string, endpoint: string, data?: any) => {
-        // Try proxy first
         try {
+          // Try proxy first
           const response = await fetch('/api/evolution-proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -229,16 +238,13 @@ export default function App() {
               endpoint,
               data
             })
+          }).catch(() => {
+            // If fetch fails (network error), treat as proxy unavailable
+            return { status: 405 } as Response;
           });
-          
-          if (response.status === 405 || response.status === 404) {
-            throw new Error('PROXY_UNAVAILABLE');
-          }
-          
-          return response;
-        } catch (err: any) {
-          if (err.message === 'PROXY_UNAVAILABLE') {
-            // Fallback to direct call
+
+          if (response.status === 405 || response.status === 404 || !response.ok) {
+            // Fallback to direct call if proxy fails or returns error
             const headers: any = { 'apikey': evolutionConfig.key };
             if (data) headers['Content-Type'] = 'application/json';
             
@@ -248,7 +254,17 @@ export default function App() {
               body: data ? JSON.stringify(data) : undefined
             });
           }
-          throw err;
+          
+          return response;
+        } catch (err) {
+          // Final fallback
+          const headers: any = { 'apikey': evolutionConfig.key };
+          if (data) headers['Content-Type'] = 'application/json';
+          return fetch(`${baseUrl}${endpoint}`, {
+            method,
+            headers,
+            body: data ? JSON.stringify(data) : undefined
+          });
         }
       };
       
@@ -579,7 +595,7 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center p-6 max-w-5xl mx-auto w-full">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {activeTab === 'planos' && (
             <motion.div 
               key="planos"
@@ -710,37 +726,23 @@ export default function App() {
                     </div>
                   </div>
 
-                  <AnimatePresence mode="wait" initial={false}>
-                    {apiError ? (
-                      <motion.div 
-                        key="error"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500 overflow-hidden"
-                      >
+                  <div className="mt-6">
+                    {apiError && (
+                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
                         {apiError}
-                      </motion.div>
-                    ) : connectionStatus === 'CONNECTING' ? (
-                      <motion.div 
-                        key="connecting"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10"
-                      >
+                      </div>
+                    )}
+
+                    {connectionStatus === 'CONNECTING' && (
+                      <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10">
                         <Loader2 className="w-8 h-8 text-primary-purple animate-spin mb-4" />
                         <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
                         <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
-                      </motion.div>
-                    ) : (qrCode && connectionStatus === 'DISCONNECTED') ? (
-                      <motion.div 
-                        key="qrcode"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner"
-                      >
+                      </div>
+                    )}
+
+                    {qrCode && connectionStatus === 'DISCONNECTED' && (
+                      <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
                         <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
                         <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
                           <img 
@@ -773,15 +775,11 @@ export default function App() {
                             Cancelar
                           </button>
                         </div>
-                      </motion.div>
-                    ) : connectionStatus === 'CONNECTED' ? (
-                      <motion.div 
-                        key="connected"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4"
-                      >
+                      </div>
+                    )}
+
+                    {connectionStatus === 'CONNECTED' && (
+                      <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
                             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -817,9 +815,9 @@ export default function App() {
                             Desconectar WhatsApp
                           </button>
                         </div>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
 
                   <button 
                     type="submit"
