@@ -62,11 +62,13 @@ export default function App() {
   const [isFetchingQR, setIsFetchingQR] = useState(false);
 
   // Poll for connection status
+  const [instanceInfo, setInstanceInfo] = useState<any>(null);
+
   useEffect(() => {
     let interval: any;
 
     const checkStatus = async () => {
-      if (!evolutionConfig.url || !evolutionConfig.key || connectionStatus === 'CONNECTED' || isFetchingQR) return;
+      if (!evolutionConfig.url || !evolutionConfig.key || isFetchingQR) return;
 
       try {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
@@ -74,43 +76,57 @@ export default function App() {
         if (!url.startsWith('http')) url = `https://${url}`;
         const baseUrl = url.replace(/\/$/, '');
         
-        // Try proxy first
-        try {
-          const response = await fetch('/api/evolution-proxy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              url: evolutionConfig.url,
-              key: evolutionConfig.key,
-              method: 'GET',
-              endpoint: `/instance/connectionStatus/${instanceName}`
-            })
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            const state = data?.instance?.state || data?.state || data?.status;
-            if (state === 'open' || state === 'CONNECTED') {
-              setConnectionStatus('CONNECTED');
-              setQrCode(null);
-              return;
+        const callApi = async (method: string, endpoint: string, data?: any) => {
+          try {
+            const response = await fetch('/api/evolution-proxy', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                url: evolutionConfig.url,
+                key: evolutionConfig.key,
+                method,
+                endpoint,
+                data
+              })
+            });
+            if (response.status === 405 || response.status === 404) throw new Error('PROXY_UNAVAILABLE');
+            return response;
+          } catch (err: any) {
+            if (err.message === 'PROXY_UNAVAILABLE') {
+              const headers: any = { 'apikey': evolutionConfig.key };
+              if (data) headers['Content-Type'] = 'application/json';
+              return fetch(`${baseUrl}${endpoint}`, {
+                method,
+                headers,
+                body: data ? JSON.stringify(data) : undefined
+              });
             }
-          } else if (response.status === 405 || response.status === 404) {
-            // Proxy not available, try direct
-            throw new Error('Proxy unavailable');
+            throw err;
           }
-        } catch (proxyError) {
-          // Fallback to direct call
-          const directResponse = await fetch(`${baseUrl}/instance/connectionStatus/${instanceName}`, {
-            method: 'GET',
-            headers: { 'apikey': evolutionConfig.key }
-          });
-          if (directResponse.ok) {
-            const data = await directResponse.json();
-            const state = data?.instance?.state || data?.state || data?.status;
-            if (state === 'open' || state === 'CONNECTED') {
+        };
+
+        const response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const state = data?.instance?.state || data?.state || data?.status;
+          
+          if (state === 'open' || state === 'CONNECTED') {
+            if (connectionStatus !== 'CONNECTED') {
               setConnectionStatus('CONNECTED');
               setQrCode(null);
+              // Fetch instance info when connected
+              const infoRes = await callApi('GET', `/instance/fetchInstances?instanceName=${instanceName}`);
+              if (infoRes.ok) {
+                const infoData = await infoRes.json();
+                const info = Array.isArray(infoData) ? infoData.find((i: any) => i.instanceName === instanceName) : infoData;
+                setInstanceInfo(info);
+              }
+            }
+          } else {
+            if (connectionStatus === 'CONNECTED') {
+              setConnectionStatus('DISCONNECTED');
+              setInstanceInfo(null);
             }
           }
         }
@@ -119,14 +135,64 @@ export default function App() {
       }
     };
 
-    if (evolutionConfig.url && evolutionConfig.key && connectionStatus !== 'CONNECTED') {
-      interval = setInterval(checkStatus, 5000);
+    if (evolutionConfig.url && evolutionConfig.key) {
+      checkStatus(); // Initial check
+      interval = setInterval(checkStatus, 10000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, connectionStatus, isFetchingQR]);
+
+  const logoutInstance = async () => {
+    if (!evolutionConfig.url || !evolutionConfig.key) return;
+    
+    const confirmLogout = window.confirm("Tem certeza que deseja desconectar o WhatsApp?");
+    if (!confirmLogout) return;
+
+    try {
+      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+      let url = evolutionConfig.url.trim();
+      if (!url.startsWith('http')) url = `https://${url}`;
+      const baseUrl = url.replace(/\/$/, '');
+
+      const callApi = async (method: string, endpoint: string) => {
+        try {
+          const response = await fetch('/api/evolution-proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: evolutionConfig.url,
+              key: evolutionConfig.key,
+              method,
+              endpoint
+            })
+          });
+          if (response.status === 405 || response.status === 404) throw new Error('PROXY_UNAVAILABLE');
+          return response;
+        } catch (err: any) {
+          if (err.message === 'PROXY_UNAVAILABLE') {
+            return fetch(`${baseUrl}${endpoint}`, {
+              method,
+              headers: { 'apikey': evolutionConfig.key }
+            });
+          }
+          throw err;
+        }
+      };
+
+      await callApi('DELETE', `/instance/logout/${instanceName}`);
+      setConnectionStatus('DISCONNECTED');
+      setQrCode(null);
+      setInstanceInfo(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+      setConnectionStatus('DISCONNECTED');
+      setQrCode(null);
+      setInstanceInfo(null);
+    }
+  };
 
   const fetchQRCode = async () => {
     if (!evolutionConfig.url || !evolutionConfig.key) return;
@@ -670,20 +736,39 @@ export default function App() {
                   )}
 
                   {connectionStatus === 'CONNECTED' && (
-                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                        </div>
+                        <div>
+                          <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
+                          <p className="text-zinc-500 text-xs">Instância: <span className="text-zinc-300 font-mono">{evolutionConfig.instance}</span></p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
-                        <p className="text-zinc-500 text-xs mt-1">Sua instância está ativa e pronta para uso.</p>
+                      
+                      {instanceInfo && (
+                        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                          <div className="bg-white/5 p-3 rounded-xl">
+                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Status</p>
+                            <p className="text-xs text-emerald-400 font-medium">Online</p>
+                          </div>
+                          <div className="bg-white/5 p-3 rounded-xl">
+                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
+                            <p className="text-xs text-zinc-300 font-medium">{instanceInfo.owner || instanceInfo.number || '---'}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-2">
+                        <button 
+                          onClick={logoutInstance}
+                          className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
+                        >
+                          <LogOut className="w-3 h-3" />
+                          Desconectar WhatsApp
+                        </button>
                       </div>
-                      <button 
-                        onClick={() => setConnectionStatus('DISCONNECTED')}
-                        className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold mt-2"
-                      >
-                        Desconectar Instância
-                      </button>
                     </div>
                   )}
 
