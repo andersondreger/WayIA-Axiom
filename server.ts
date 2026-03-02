@@ -14,7 +14,10 @@ async function startServer() {
   app.post("/api/evolution-proxy", async (req, res) => {
     const { url, key, method, data, endpoint } = req.body;
 
+    console.log(`[Proxy] Received request: ${method} ${endpoint} to ${url}`);
+
     if (!url || !key || !endpoint) {
+      console.error("[Proxy] Missing required fields:", { url: !!url, key: !!key, endpoint: !!endpoint });
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -22,8 +25,6 @@ async function startServer() {
       const baseUrl = url.trim().replace(/\/$/, "");
       const fullUrl = `${baseUrl}${endpoint}`;
       
-      console.log(`Proxying ${method} request to ${fullUrl}`);
-
       const config: any = {
         url: fullUrl,
         method: method || "GET",
@@ -31,7 +32,7 @@ async function startServer() {
           "apikey": key,
           "Content-Type": "application/json"
         },
-        timeout: 15000
+        timeout: 20000 // Increased timeout
       };
 
       if (method && method.toUpperCase() !== "GET" && data) {
@@ -39,11 +40,13 @@ async function startServer() {
       }
 
       const response = await axios(config);
-
+      console.log(`[Proxy] Success: ${response.status} from ${fullUrl}`);
       res.status(response.status).json(response.data);
     } catch (error: any) {
-      console.error("Proxy error:", error.response?.data || error.message);
-      res.status(error.response?.status || 500).json(error.response?.data || { error: error.message });
+      const status = error.response?.status || 500;
+      const errorData = error.response?.data || { error: error.message };
+      console.error(`[Proxy] Error ${status}:`, errorData);
+      res.status(status).json(errorData);
     }
   });
 

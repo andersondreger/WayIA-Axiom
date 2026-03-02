@@ -709,93 +709,119 @@ export default function App() {
                     </div>
                   </div>
 
-                  {apiError && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
-                      {apiError}
-                    </div>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {apiError && (
+                      <motion.div 
+                        key="error"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500 overflow-hidden"
+                      >
+                        {apiError}
+                      </motion.div>
+                    )}
 
-                  {connectionStatus === 'CONNECTING' && (
-                    <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10">
-                      <Loader2 className="w-8 h-8 text-primary-purple animate-spin mb-4" />
-                      <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
-                      <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
-                    </div>
-                  )}
+                    {connectionStatus === 'CONNECTING' && (
+                      <motion.div 
+                        key="connecting"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10"
+                      >
+                        <Loader2 className="w-8 h-8 text-primary-purple animate-spin mb-4" />
+                        <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
+                        <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
+                      </motion.div>
+                    )}
 
-                  {qrCode && connectionStatus === 'DISCONNECTED' && (
-                    <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
-                      <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
-                      <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
-                        <img 
-                          src={qrCode} 
-                          alt="WhatsApp QR Code" 
-                          className="w-48 h-48 object-contain"
-                          onError={() => {
-                            console.error('Failed to load QR code image');
-                            setQrCode(null);
-                          }}
-                        />
-                      </div>
-                      <div className="flex gap-4 mt-6">
-                        <button 
-                          onClick={fetchQRCode}
-                          className="text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold flex items-center gap-2"
-                        >
-                          <RefreshCw className="w-3 h-3" />
-                          Atualizar
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setQrCode(null);
-                            setConnectionStatus('DISCONNECTED');
-                          }}
-                          className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {connectionStatus === 'CONNECTED' && (
-                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-                          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    {qrCode && connectionStatus === 'DISCONNECTED' && (
+                      <motion.div 
+                        key="qrcode"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner"
+                      >
+                        <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
+                        <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
+                          <img 
+                            src={qrCode} 
+                            alt="WhatsApp QR Code" 
+                            className="w-48 h-48 object-contain"
+                            onError={() => {
+                              console.error('Failed to load QR code image');
+                              setQrCode(null);
+                            }}
+                          />
                         </div>
-                        <div>
-                          <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
-                          <p className="text-zinc-500 text-xs">Instância: <span className="text-zinc-300 font-mono">{evolutionConfig.instance}</span></p>
+                        <div className="flex gap-4 mt-6">
+                          <button 
+                            onClick={fetchQRCode}
+                            className="text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold flex items-center gap-2"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            Atualizar
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setQrCode(null);
+                              setConnectionStatus('DISCONNECTED');
+                            }}
+                            className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold"
+                          >
+                            Cancelar
+                          </button>
                         </div>
-                      </div>
-                      
-                      {instanceInfo && (
-                        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
-                          <div className="bg-white/5 p-3 rounded-xl">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Status</p>
-                            <p className="text-xs text-emerald-400 font-medium">Online</p>
+                      </motion.div>
+                    )}
+
+                    {connectionStatus === 'CONNECTED' && (
+                      <motion.div 
+                        key="connected"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                           </div>
-                          <div className="bg-white/5 p-3 rounded-xl">
-                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
-                            <p className="text-xs text-zinc-300 font-medium">
-                              {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
-                            </p>
+                          <div>
+                            <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
+                            <p className="text-zinc-500 text-xs">Instância: <span className="text-zinc-300 font-mono">{evolutionConfig.instance}</span></p>
                           </div>
                         </div>
-                      )}
+                        
+                        {instanceInfo && (
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                            <div className="bg-white/5 p-3 rounded-xl">
+                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Status</p>
+                              <p className="text-xs text-emerald-400 font-medium">Online</p>
+                            </div>
+                            <div className="bg-white/5 p-3 rounded-xl">
+                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
+                              <p className="text-xs text-zinc-300 font-medium">
+                                {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
-                      <div className="pt-2">
-                        <button 
-                          onClick={logoutInstance}
-                          className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
-                        >
-                          <LogOut className="w-3 h-3" />
-                          Desconectar WhatsApp
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                        <div className="pt-2">
+                          <button 
+                            onClick={logoutInstance}
+                            className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
+                          >
+                            <LogOut className="w-3 h-3" />
+                            Desconectar WhatsApp
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <button 
                     onClick={fetchQRCode}
