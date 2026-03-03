@@ -65,57 +65,58 @@ export default function App() {
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
 
+  const callApi = useCallback(async (method: string, endpoint: string, data?: any) => {
+    if (!evolutionConfig.url || !evolutionConfig.key) return null;
+    
+    const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
+    let url = evolutionConfig.url.trim();
+    if (!url.startsWith('http')) url = `https://${url}`;
+    const baseUrl = url.replace(/\/$/, '');
+    const headers: any = { 'apikey': evolutionConfig.key };
+    if (data) headers['Content-Type'] = 'application/json';
+
+    try {
+      // Try proxy first
+      const response = await fetch('/api/evolution-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: evolutionConfig.url,
+          key: evolutionConfig.key,
+          method,
+          endpoint,
+          data
+        })
+      }).catch(() => {
+        console.warn('[Proxy] Proxy endpoint not available (405). Falling back to direct call.');
+        return { status: 405 } as Response;
+      });
+
+      if (response && response.ok) return response;
+      
+      // If it's an auth error, don't fallback to direct as it will likely fail too
+      if (response && (response.status === 401 || response.status === 403)) {
+        return response;
+      }
+
+      // Fallback to direct call if proxy is unavailable (405/404) or other errors
+      return fetch(`${baseUrl}${endpoint}`, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined
+      });
+    } catch (err) {
+      // Final fallback to direct
+      return fetch(`${baseUrl}${endpoint}`, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined
+      });
+    }
+  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance]);
+
   useEffect(() => {
     let interval: any;
-
-    const callApi = async (method: string, endpoint: string, data?: any) => {
-      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-      let url = evolutionConfig.url.trim();
-      if (!url.startsWith('http')) url = `https://${url}`;
-      const baseUrl = url.replace(/\/$/, '');
-      const headers: any = { 'apikey': evolutionConfig.key };
-      if (data) headers['Content-Type'] = 'application/json';
-
-      try {
-        // Try proxy first
-        const response = await fetch('/api/evolution-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: evolutionConfig.url,
-            key: evolutionConfig.key,
-            method,
-            endpoint,
-            data
-          })
-        }).catch(() => ({ status: 405 } as Response));
-
-        if (response.ok) return response;
-        
-        // If it's an auth error, don't fallback to direct as it will likely fail too
-        if (response.status === 401 || response.status === 403) {
-          return response;
-        }
-
-        // Fallback to direct call if proxy is unavailable or other errors
-        if (response.status === 405 || response.status === 404 || !response.ok) {
-          return fetch(`${baseUrl}${endpoint}`, {
-            method,
-            headers,
-            body: data ? JSON.stringify(data) : undefined
-          });
-        }
-        
-        return response;
-      } catch (err) {
-        // Final fallback to direct
-        return fetch(`${baseUrl}${endpoint}`, {
-          method,
-          headers,
-          body: data ? JSON.stringify(data) : undefined
-        });
-      }
-    };
 
     const checkStatus = async () => {
       if (!evolutionConfig.url || !evolutionConfig.key || isFetchingQR) return;
@@ -124,6 +125,8 @@ export default function App() {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
         const response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
         
+        if (!response) return;
+
         if (response.status === 401 || response.status === 403) {
           console.error('API Key inválida detectada no polling');
           return;
@@ -141,7 +144,7 @@ export default function App() {
               // Fetch info separately
               try {
                 const infoRes = await callApi('GET', `/instance/fetchInstances?instanceName=${instanceName}`);
-                if (infoRes.ok) {
+                if (infoRes && infoRes.ok) {
                   const infoData = await infoRes.json();
                   const info = Array.isArray(infoData) ? infoData.find((i: any) => i.instanceName === instanceName) : infoData;
                   setInstanceInfo(info);
@@ -170,7 +173,7 @@ export default function App() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, isFetchingQR, connectionStatus]);
+  }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance, isFetchingQR, connectionStatus, callApi]);
 
   const logoutInstance = async () => {
     if (!evolutionConfig.url || !evolutionConfig.key) return;
@@ -180,45 +183,6 @@ export default function App() {
 
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-      let url = evolutionConfig.url.trim();
-      if (!url.startsWith('http')) url = `https://${url}`;
-      const baseUrl = url.replace(/\/$/, '');
-
-      const callApi = async (method: string, endpoint: string) => {
-        const headers: any = { 'apikey': evolutionConfig.key };
-        try {
-          const response = await fetch('/api/evolution-proxy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              url: evolutionConfig.url,
-              key: evolutionConfig.key,
-              method,
-              endpoint
-            })
-          }).catch(() => ({ status: 405 } as Response));
-
-          if (response.ok) return response;
-          
-          if (response.status === 401 || response.status === 403) {
-            return response;
-          }
-
-          if (response.status === 405 || response.status === 404 || !response.ok) {
-            return fetch(`${baseUrl}${endpoint}`, {
-              method,
-              headers
-            });
-          }
-          return response;
-        } catch (err) {
-          return fetch(`${baseUrl}${endpoint}`, {
-            method,
-            headers
-          });
-        }
-      };
-
       await callApi('DELETE', `/instance/logout/${instanceName}`);
       setConnectionStatus('DISCONNECTED');
       setQrCode(null);
@@ -241,60 +205,12 @@ export default function App() {
     
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-      let url = evolutionConfig.url.trim();
-      if (!url.startsWith('http')) url = `https://${url}`;
-      const baseUrl = url.replace(/\/$/, '');
-
-      const callApi = async (method: string, endpoint: string, data?: any) => {
-        const headers: any = { 'apikey': evolutionConfig.key };
-        if (data) headers['Content-Type'] = 'application/json';
-
-        try {
-          // Try proxy first
-          const response = await fetch('/api/evolution-proxy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              url: evolutionConfig.url,
-              key: evolutionConfig.key,
-              method,
-              endpoint,
-              data
-            })
-          }).catch(() => ({ status: 405 } as Response));
-
-          // If proxy works but returns 401/403, it's a credential issue, don't fallback to direct (it will fail too)
-          if (response.ok) return response;
-          
-          if (response.status === 401 || response.status === 403) {
-            return response; // Return the auth error
-          }
-
-          // Fallback to direct call if proxy is unavailable (405/404) or other errors
-          if (response.status === 405 || response.status === 404 || !response.ok) {
-            return fetch(`${baseUrl}${endpoint}`, {
-              method,
-              headers,
-              body: data ? JSON.stringify(data) : undefined
-            });
-          }
-          
-          return response;
-        } catch (err) {
-          // Final fallback to direct
-          return fetch(`${baseUrl}${endpoint}`, {
-            method,
-            headers,
-            body: data ? JSON.stringify(data) : undefined
-          });
-        }
-      };
       
       // 1. Check if instance already exists and its status
       try {
         const statusResponse = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
         
-        if (statusResponse.ok) {
+        if (statusResponse && statusResponse.ok) {
           const statusData = await statusResponse.json();
           const state = statusData?.instance?.state || statusData?.state || statusData?.status;
           if (state === 'open' || state === 'CONNECTED') {
@@ -316,11 +232,11 @@ export default function App() {
           integration: "WHATSAPP-BAILEYS"
         });
         
-        if (createResponse.status === 401 || createResponse.status === 403) {
+        if (createResponse && (createResponse.status === 401 || createResponse.status === 403)) {
           throw new Error('API Key inválida ou sem permissão para criar instâncias.');
         }
 
-        if (createResponse.ok) {
+        if (createResponse && createResponse.ok) {
           const createData = await createResponse.json();
           const qrFromCreate = createData.base64 || createData.qrcode?.base64 || createData.code?.base64;
           if (qrFromCreate) {
@@ -342,20 +258,22 @@ export default function App() {
       // 3. Now try to connect/get QR code
       const connectResponse = await callApi('GET', `/instance/connect/${instanceName}`);
       
-      if (!connectResponse.ok) {
-        if (connectResponse.status === 401 || connectResponse.status === 403) {
+      if (!connectResponse || !connectResponse.ok) {
+        if (connectResponse && (connectResponse.status === 401 || connectResponse.status === 403)) {
           throw new Error('API Key inválida ou expirada.');
         }
-        if (connectResponse.status === 404) {
+        if (connectResponse && connectResponse.status === 404) {
           throw new Error('Instância não encontrada e falha ao criar. Verifique se o nome da instância é válido.');
         }
         
-        let errorMsg = `Erro ${connectResponse.status}`;
+        let errorMsg = connectResponse ? `Erro ${connectResponse.status}` : 'Falha na conexão';
         try {
-          const errorData = await connectResponse.json();
-          errorMsg = errorData.message || errorData.error || errorMsg;
+          if (connectResponse) {
+            const errorData = await connectResponse.json();
+            errorMsg = errorData.message || errorData.error || errorMsg;
+          }
         } catch (e) {
-          errorMsg = connectResponse.statusText || errorMsg;
+          errorMsg = (connectResponse && connectResponse.statusText) || errorMsg;
         }
         throw new Error(errorMsg);
       }
@@ -381,7 +299,7 @@ export default function App() {
       } else {
         // If we get here and there's no QR, maybe it's already connected but the status field is different
         const finalStatusCheck = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
-        if (finalStatusCheck.ok) {
+        if (finalStatusCheck && finalStatusCheck.ok) {
           const finalData = await finalStatusCheck.json();
           const finalState = finalData?.instance?.state || finalData?.state || finalData?.status;
           if (finalState === 'open' || finalState === 'CONNECTED') {
@@ -760,9 +678,9 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="mt-6">
+                  <div className="mt-6 min-h-[100px] flex flex-col justify-center">
                     {apiError && (
-                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
+                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500 animate-in fade-in slide-in-from-top-2">
                         {apiError}
                       </div>
                     )}
@@ -775,7 +693,7 @@ export default function App() {
                       </div>
                     )}
 
-                    {qrCode && connectionStatus === 'DISCONNECTED' && (
+                    {qrCode && connectionStatus === 'DISCONNECTED' && !isFetchingQR && (
                       <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
                         <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
                         <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
@@ -851,19 +769,38 @@ export default function App() {
                         </div>
                       </div>
                     )}
+
+                    {connectionStatus === 'DISCONNECTED' && !qrCode && !isFetchingQR && !apiError && (
+                      <div className="p-12 border-2 border-dashed border-white/5 rounded-[24px] flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                          <LinkIcon className="w-8 h-8 text-zinc-600" />
+                        </div>
+                        <p className="text-zinc-500 text-sm max-w-[200px]">Configure os dados acima e clique em conectar</p>
+                      </div>
+                    )}
                   </div>
 
                   <button 
                     type="submit"
                     disabled={isFetchingQR || !evolutionConfig.url || !evolutionConfig.key}
-                    className="w-full py-3 btn-secondary rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-4 btn-primary rounded-2xl font-bold text-sm flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-95 transition-all"
                   >
                     {isFetchingQR ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                         Buscando QR Code...
                       </>
-                    ) : connectionStatus === 'CONNECTED' ? 'Reconectar WhatsApp' : 'Conectar WhatsApp'}
+                    ) : connectionStatus === 'CONNECTED' ? (
+                      <>
+                        <RefreshCw className="w-5 h-5" />
+                        Reconectar WhatsApp
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-5 h-5" />
+                        Conectar WhatsApp
+                      </>
+                    )}
                   </button>
                 </form>
               </div>
