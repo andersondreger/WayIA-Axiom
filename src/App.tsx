@@ -67,14 +67,22 @@ export default function App() {
 
   if (hasError) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-        <div>
-          <h1 className="text-2xl font-bold mb-4">Ops! Algo deu errado.</h1>
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center text-white">
+        <div className="max-w-md">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-6 opacity-50" />
+          <h1 className="text-2xl font-bold mb-4">Sistema de Segurança Ativado</h1>
+          <p className="text-zinc-400 mb-8 text-sm leading-relaxed">
+            O Google Chrome bloqueou uma tentativa de conexão insegura ou ocorreu um erro crítico de renderização. 
+            Verifique se a URL da sua Evolution API começa com <span className="text-primary-purple font-mono">https://</span>.
+          </p>
           <button 
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-primary-purple rounded-xl font-bold"
+            onClick={() => {
+              setHasError(false);
+              window.location.reload();
+            }}
+            className="px-8 py-4 bg-primary-purple rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_30px_rgba(168,85,247,0.3)]"
           >
-            Recarregar Aplicativo
+            Reiniciar e Tentar Novamente
           </button>
         </div>
       </div>
@@ -139,7 +147,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
     if (data) headers['Content-Type'] = 'application/json';
 
     try {
-      // Try proxy first
+      // ALWAYS use proxy to avoid Chrome Mixed Content and CORS blocks
       console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint}`);
       const response = await fetch('/api/evo-proxy-v2', {
         method: 'POST',
@@ -151,33 +159,22 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
           endpoint,
           data
         })
-      }).catch((err) => {
-        console.warn('[Proxy] Proxy endpoint not available or failed:', err);
-        return { status: 405, ok: false } as Response;
       });
 
       if (response && response.ok) return response;
       
-      // If it's an auth error, don't fallback to direct as it will likely fail too
       if (response && (response.status === 401 || response.status === 403)) {
+        console.error('[Evolution] Auth error via proxy');
         return response;
       }
 
-      // Fallback to direct call if proxy is unavailable (405/404) or other errors
-      console.log(`[Evolution] Falling back to direct call: ${baseUrl}${endpoint}`);
-      return fetch(`${baseUrl}${endpoint}`, {
-        method,
-        headers,
-        body: data ? JSON.stringify(data) : undefined
-      });
+      // If proxy fails, don't fallback to direct if it's not HTTPS or has CORS issues
+      // Chrome will block it anyway. We'll return the failed response.
+      console.warn('[Evolution] Proxy call failed with status:', response?.status);
+      return response;
     } catch (err) {
       console.error('[Evolution] API call error:', err);
-      // Final fallback to direct
-      return fetch(`${baseUrl}${endpoint}`, {
-        method,
-        headers,
-        body: data ? JSON.stringify(data) : undefined
-      });
+      return null;
     }
   }, [evolutionConfig.url, evolutionConfig.key, evolutionConfig.instance]);
 
@@ -189,12 +186,13 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
 
       try {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-        // Try connectionStatus first, then connectionState as fallback
-        let response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        // Add timestamp to bypass Chrome cache
+        const ts = Date.now();
+        let response = await callApi('GET', `/instance/connectionStatus/${instanceName}?t=${ts}`);
         
         if (!response || !response.ok) {
           console.log('[Evolution] connectionStatus failed, trying connectionState...');
-          response = await callApi('GET', `/instance/connectionState/${instanceName}`);
+          response = await callApi('GET', `/instance/connectionState/${instanceName}?t=${ts}`);
         }
         
         if (!response) return;
@@ -213,7 +211,11 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
           const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
           
           if (isConnected) {
+            // Force QR Code removal immediately
+            if (qrCode) setQrCode(null);
+            
             if (connectionStatus !== 'CONNECTED') {
+              console.log(`[Evolution] Connection detected for ${instanceName}! Updating UI...`);
               setConnectionStatus('CONNECTED');
               setQrCode(null);
               
@@ -243,7 +245,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
 
     if (evolutionConfig.url && evolutionConfig.key) {
       checkStatus(); // Initial check
-      interval = setInterval(checkStatus, 10000);
+      interval = setInterval(checkStatus, 5000); // Faster polling (5s) for better UX
     }
 
     return () => {
@@ -729,14 +731,26 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
           {activeTab === 'gestao' && (
             <div className="w-full max-w-2xl space-y-6">
               <div className="glass-card p-8 rounded-[32px] border border-white/5">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 text-emerald-500" />
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                      <MessageSquare className="w-6 h-6 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Integração Evolution API</h3>
+                      <p className="text-zinc-500 text-sm">Conecte seu WhatsApp para receber sinais</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Integração Evolution API</h3>
-                    <p className="text-zinc-500 text-sm">Conecte seu WhatsApp para receber sinais</p>
-                  </div>
+                  {evolutionConfig.url && evolutionConfig.key && (
+                    <button 
+                      onClick={() => fetchQRCode()}
+                      disabled={isFetchingQR}
+                      className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-white"
+                      title="Forçar atualização de status"
+                    >
+                      <RefreshCw className={`w-5 h-5 ${isFetchingQR ? 'animate-spin' : ''}`} />
+                    </button>
+                  )}
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); fetchQRCode(); }} className="space-y-4">
                   <div>
