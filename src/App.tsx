@@ -68,57 +68,70 @@ export default function App() {
   useEffect(() => {
     let interval: any;
 
+    const callApi = async (method: string, endpoint: string, data?: any) => {
+      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+      let url = evolutionConfig.url.trim();
+      if (!url.startsWith('http')) url = `https://${url}`;
+      const baseUrl = url.replace(/\/$/, '');
+      const headers: any = { 'apikey': evolutionConfig.key };
+      if (data) headers['Content-Type'] = 'application/json';
+
+      try {
+        // Try proxy first
+        const response = await fetch('/api/evolution-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: evolutionConfig.url,
+            key: evolutionConfig.key,
+            method,
+            endpoint,
+            data
+          })
+        }).catch(() => ({ status: 405 } as Response));
+
+        if (response.ok) return response;
+        
+        // If it's an auth error, don't fallback to direct as it will likely fail too
+        if (response.status === 401 || response.status === 403) {
+          return response;
+        }
+
+        // Fallback to direct call if proxy is unavailable or other errors
+        if (response.status === 405 || response.status === 404 || !response.ok) {
+          return fetch(`${baseUrl}${endpoint}`, {
+            method,
+            headers,
+            body: data ? JSON.stringify(data) : undefined
+          });
+        }
+        
+        return response;
+      } catch (err) {
+        // Final fallback to direct
+        return fetch(`${baseUrl}${endpoint}`, {
+          method,
+          headers,
+          body: data ? JSON.stringify(data) : undefined
+        });
+      }
+    };
+
     const checkStatus = async () => {
       if (!evolutionConfig.url || !evolutionConfig.key || isFetchingQR) return;
 
       try {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-        let url = evolutionConfig.url.trim();
-        if (!url.startsWith('http')) url = `https://${url}`;
-        const baseUrl = url.replace(/\/$/, '');
-        
-        const callApi = async (method: string, endpoint: string, data?: any) => {
-          try {
-            const response = await fetch('/api/evolution-proxy', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                url: evolutionConfig.url,
-                key: evolutionConfig.key,
-                method,
-                endpoint,
-                data
-              })
-            }).catch(() => ({ status: 405 } as Response));
-
-            if (response.status === 405 || response.status === 404 || !response.ok) {
-              const headers: any = { 'apikey': evolutionConfig.key };
-              if (data) headers['Content-Type'] = 'application/json';
-              return fetch(`${baseUrl}${endpoint}`, {
-                method,
-                headers,
-                body: data ? JSON.stringify(data) : undefined
-              });
-            }
-            return response;
-          } catch (err) {
-            const headers: any = { 'apikey': evolutionConfig.key };
-            if (data) headers['Content-Type'] = 'application/json';
-            return fetch(`${baseUrl}${endpoint}`, {
-              method,
-              headers,
-              body: data ? JSON.stringify(data) : undefined
-            });
-          }
-        };
-
         const response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
-        console.log(`Polling status for ${instanceName}:`, response.status);
         
+        if (response.status === 401 || response.status === 403) {
+          console.error('API Key inválida detectada no polling');
+          return;
+        }
+
         if (response.ok) {
           const data = await response.json();
           const state = data?.instance?.state || data?.state || data?.status;
-          console.log(`Instance state: ${state}`);
           
           if (state === 'open' || state === 'CONNECTED') {
             if (connectionStatus !== 'CONNECTED') {
@@ -172,6 +185,7 @@ export default function App() {
       const baseUrl = url.replace(/\/$/, '');
 
       const callApi = async (method: string, endpoint: string) => {
+        const headers: any = { 'apikey': evolutionConfig.key };
         try {
           const response = await fetch('/api/evolution-proxy', {
             method: 'POST',
@@ -184,17 +198,23 @@ export default function App() {
             })
           }).catch(() => ({ status: 405 } as Response));
 
+          if (response.ok) return response;
+          
+          if (response.status === 401 || response.status === 403) {
+            return response;
+          }
+
           if (response.status === 405 || response.status === 404 || !response.ok) {
             return fetch(`${baseUrl}${endpoint}`, {
               method,
-              headers: { 'apikey': evolutionConfig.key }
+              headers
             });
           }
           return response;
         } catch (err) {
           return fetch(`${baseUrl}${endpoint}`, {
             method,
-            headers: { 'apikey': evolutionConfig.key }
+            headers
           });
         }
       };
@@ -226,6 +246,9 @@ export default function App() {
       const baseUrl = url.replace(/\/$/, '');
 
       const callApi = async (method: string, endpoint: string, data?: any) => {
+        const headers: any = { 'apikey': evolutionConfig.key };
+        if (data) headers['Content-Type'] = 'application/json';
+
         try {
           // Try proxy first
           const response = await fetch('/api/evolution-proxy', {
@@ -238,16 +261,17 @@ export default function App() {
               endpoint,
               data
             })
-          }).catch(() => {
-            // If fetch fails (network error), treat as proxy unavailable
-            return { status: 405 } as Response;
-          });
+          }).catch(() => ({ status: 405 } as Response));
 
+          // If proxy works but returns 401/403, it's a credential issue, don't fallback to direct (it will fail too)
+          if (response.ok) return response;
+          
+          if (response.status === 401 || response.status === 403) {
+            return response; // Return the auth error
+          }
+
+          // Fallback to direct call if proxy is unavailable (405/404) or other errors
           if (response.status === 405 || response.status === 404 || !response.ok) {
-            // Fallback to direct call if proxy fails or returns error
-            const headers: any = { 'apikey': evolutionConfig.key };
-            if (data) headers['Content-Type'] = 'application/json';
-            
             return fetch(`${baseUrl}${endpoint}`, {
               method,
               headers,
@@ -257,9 +281,7 @@ export default function App() {
           
           return response;
         } catch (err) {
-          // Final fallback
-          const headers: any = { 'apikey': evolutionConfig.key };
-          if (data) headers['Content-Type'] = 'application/json';
+          // Final fallback to direct
           return fetch(`${baseUrl}${endpoint}`, {
             method,
             headers,
@@ -294,6 +316,10 @@ export default function App() {
           integration: "WHATSAPP-BAILEYS"
         });
         
+        if (createResponse.status === 401 || createResponse.status === 403) {
+          throw new Error('API Key inválida ou sem permissão para criar instâncias.');
+        }
+
         if (createResponse.ok) {
           const createData = await createResponse.json();
           const qrFromCreate = createData.base64 || createData.qrcode?.base64 || createData.code?.base64;
@@ -308,7 +334,8 @@ export default function App() {
         }
         // Small delay to allow instance initialization if it was just created
         await new Promise(resolve => setTimeout(resolve, 1500));
-      } catch (e) {
+      } catch (e: any) {
+        if (e.message.includes('API Key')) throw e;
         console.log('Instance creation failed or already exists');
       }
       
@@ -316,6 +343,13 @@ export default function App() {
       const connectResponse = await callApi('GET', `/instance/connect/${instanceName}`);
       
       if (!connectResponse.ok) {
+        if (connectResponse.status === 401 || connectResponse.status === 403) {
+          throw new Error('API Key inválida ou expirada.');
+        }
+        if (connectResponse.status === 404) {
+          throw new Error('Instância não encontrada e falha ao criar. Verifique se o nome da instância é válido.');
+        }
+        
         let errorMsg = `Erro ${connectResponse.status}`;
         try {
           const errorData = await connectResponse.json();
