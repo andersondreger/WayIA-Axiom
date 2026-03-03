@@ -15,13 +15,32 @@ import { GoogleGenAI } from "@google/genai";
 // Initialize Gemini with environment variable support for multiple platforms
 const getApiKey = () => {
   try {
-    return (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || import.meta.env.VITE_GEMINI_API_KEY || '';
-  } catch (e) {
-    return import.meta.env.VITE_GEMINI_API_KEY || '';
-  }
+    // Safely check for process.env
+    if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
+      return process.env.GEMINI_API_KEY;
+    }
+  } catch (e) {}
+  
+  try {
+    // Safely check for import.meta.env
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
+      return import.meta.env.VITE_GEMINI_API_KEY;
+    }
+  } catch (e) {}
+  
+  return '';
 };
+
 const apiKey = getApiKey();
-const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+
+// Lazy initialization of Gemini to prevent startup crashes
+let aiInstance: GoogleGenAI | null = null;
+const getAi = () => {
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey: apiKey || 'dummy_key' });
+  }
+  return aiInstance;
+};
 
 type SignalState = 'IDLE' | 'SCANNING' | 'SIGNAL_FOUND';
 type Tab = 'planos' | 'ranking' | 'analise' | 'gestao' | 'historico' | 'calendario';
@@ -40,7 +59,6 @@ const ASSETS = [
 ];
 
 export default function App() {
-  const [showDashboard, setShowDashboard] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('analise');
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [isAssetDropdownOpen, setIsAssetDropdownOpen] = useState(false);
@@ -400,6 +418,7 @@ export default function App() {
       };
 
       // First, identify the asset and get the analysis
+      const ai = getAi();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: {
@@ -454,89 +473,33 @@ export default function App() {
     setAiInsight("");
   };
 
-  if (!showDashboard) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 sm:px-8 relative overflow-hidden bg-black">
-        {/* Purple Waves Background */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g opacity="0.8">
-              {/* Left Fan - Dense radiating lines */}
-              {Array.from({ length: 120 }).map((_, i) => (
-                <path
-                  key={`left-${i}`}
-                  d={`M -100 ${800 - i * 8} Q ${400} ${400}, 1600 ${400 + (i - 60) * 15}`}
-                  stroke="#8B5CF6"
-                  strokeWidth="0.4"
-                  strokeOpacity={0.05 + (i / 120) * 0.3}
-                />
-              ))}
-              {/* Right Fan - Dense radiating lines */}
-              {Array.from({ length: 120 }).map((_, i) => (
-                <path
-                  key={`right-${i}`}
-                  d={`M 1540 ${0 + i * 8} Q ${1040} ${400}, -200 ${400 - (i - 60) * 15}`}
-                  stroke="#A78BFA"
-                  strokeWidth="0.4"
-                  strokeOpacity={0.05 + (i / 120) * 0.3}
-                />
-              ))}
-              
-              {/* Central Glow/Flow lines */}
-              {Array.from({ length: 20 }).map((_, i) => (
-                <path
-                  key={`center-${i}`}
-                  d={`M -100 ${400} Q 720 ${350 + i * 5}, 1540 ${400}`}
-                  stroke="#C084FC"
-                  strokeWidth="1"
-                  strokeOpacity="0.1"
-                />
-              ))}
-            </g>
-          </svg>
-        </div>
-
-        {/* Background Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary-purple/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary-purple/5 rounded-full blur-[120px]" />
-        
-        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-primary-purple/20 blur-3xl rounded-full" />
-              <div className="w-[500px] h-[250px] flex items-center justify-center relative group">
-                <div className="absolute inset-0 bg-primary-purple/10 rounded-full blur-2xl group-hover:bg-primary-purple/20 transition-all" />
-                <img 
-                  src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png" 
-                  alt="WAY AXIOM Logo" 
-                  className="w-full h-full object-contain relative z-10"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center lg:justify-end">
-            <div className="glass-card w-full max-w-md p-10 rounded-3xl text-center">
-              <h3 className="text-3xl font-bold mb-6 text-white">Bem-vindo</h3>
-              <p className="text-zinc-400 mb-10 leading-relaxed">
-                Acesse agora a tecnologia mais avançada de análise de mercado com inteligência artificial.
-              </p>
-              <button 
-                onClick={() => setShowDashboard(true)}
-                className="w-full py-5 btn-primary rounded-2xl text-lg hover:scale-[1.02] active:scale-95"
-              >
-                Acessar Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col pb-24">
+    <div className="min-h-screen flex flex-col pb-24 bg-black">
+      {/* Purple Waves Background (Moved from welcome screen to main app) */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-30">
+        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g opacity="0.8">
+            {Array.from({ length: 120 }).map((_, i) => (
+              <path
+                key={`left-${i}`}
+                d={`M -100 ${800 - i * 8} Q ${400} ${400}, 1600 ${400 + (i - 60) * 15}`}
+                stroke="#8B5CF6"
+                strokeWidth="0.4"
+                strokeOpacity={0.05 + (i / 120) * 0.3}
+              />
+            ))}
+            {Array.from({ length: 120 }).map((_, i) => (
+              <path
+                key={`right-${i}`}
+                d={`M 1540 ${0 + i * 8} Q ${1040} ${400}, -200 ${400 - (i - 60) * 15}`}
+                stroke="#A78BFA"
+                strokeWidth="0.4"
+                strokeOpacity={0.05 + (i / 120) * 0.3}
+              />
+            ))}
+          </g>
+        </svg>
+      </div>
       {/* Header */}
       <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-black/50 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3">
@@ -569,10 +532,10 @@ export default function App() {
             <User className="w-5 h-5" />
           </div>
           <button 
-            onClick={() => setShowDashboard(false)}
+            onClick={() => window.location.reload()}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
           >
-            <LogOut className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5" />
           </button>
         </div>
       </header>
