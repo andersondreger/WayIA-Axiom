@@ -134,9 +134,13 @@ export default function App() {
 
         if (response.ok) {
           const data = await response.json();
-          const state = data?.instance?.state || data?.state || data?.status;
+          // Handle both English and Portuguese keys (common in some Evolution API distributions)
+          const state = data?.instance?.state || data?.state || data?.status || 
+                        data?.instância?.estado || data?.estado || data?.status;
           
-          if (state === 'open' || state === 'CONNECTED') {
+          const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
+          
+          if (isConnected) {
             if (connectionStatus !== 'CONNECTED') {
               setConnectionStatus('CONNECTED');
               setQrCode(null);
@@ -146,7 +150,7 @@ export default function App() {
                 const infoRes = await callApi('GET', `/instance/fetchInstances?instanceName=${instanceName}`);
                 if (infoRes && infoRes.ok) {
                   const infoData = await infoRes.json();
-                  const info = Array.isArray(infoData) ? infoData.find((i: any) => i.instanceName === instanceName) : infoData;
+                  const info = Array.isArray(infoData) ? infoData.find((i: any) => (i.instanceName || i.nomeInstância) === instanceName) : infoData;
                   setInstanceInfo(info);
                 }
               } catch (infoErr) {
@@ -204,16 +208,22 @@ export default function App() {
     setApiError(null);
     
     try {
-      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
+      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
+      console.log(`[Evolution] Starting connection flow for instance: ${instanceName}`);
       
       // 1. Check if instance already exists and its status
       try {
         const statusResponse = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        console.log(`[Evolution] Status check for ${instanceName}:`, statusResponse?.status);
         
         if (statusResponse && statusResponse.ok) {
           const statusData = await statusResponse.json();
-          const state = statusData?.instance?.state || statusData?.state || statusData?.status;
-          if (state === 'open' || state === 'CONNECTED') {
+          const state = statusData?.instance?.state || statusData?.state || statusData?.status || 
+                        statusData?.instância?.estado || statusData?.estado;
+          
+          const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
+          
+          if (isConnected) {
             setConnectionStatus('CONNECTED');
             setQrCode(null);
             setIsFetchingQR(false);
@@ -263,7 +273,7 @@ export default function App() {
           throw new Error('API Key inválida ou expirada.');
         }
         if (connectResponse && connectResponse.status === 404) {
-          throw new Error('Instância não encontrada e falha ao criar. Verifique se o nome da instância é válido.');
+          throw new Error('Instância não encontrada (404). Verifique se o Nome da Instância no painel da Evolution é exatamente igual ao digitado.');
         }
         
         let errorMsg = connectResponse ? `Erro ${connectResponse.status}` : 'Falha na conexão';
@@ -291,29 +301,40 @@ export default function App() {
         }
         setQrCode(qr);
         setConnectionStatus('DISCONNECTED');
-      } else if (data.instance?.status === 'open' || data.status === 'open' || data.state === 'open' || data.instance?.state === 'open') {
-        setConnectionStatus('CONNECTED');
-        setQrCode(null);
-      } else if (data.code === 'instance_not_found') {
-        throw new Error('Instância não encontrada. Tente novamente.');
       } else {
-        // If we get here and there's no QR, maybe it's already connected but the status field is different
-        const finalStatusCheck = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
-        if (finalStatusCheck && finalStatusCheck.ok) {
-          const finalData = await finalStatusCheck.json();
-          const finalState = finalData?.instance?.state || finalData?.state || finalData?.status;
-          if (finalState === 'open' || finalState === 'CONNECTED') {
-            setConnectionStatus('CONNECTED');
-            setQrCode(null);
-            return;
+        const state = data.instance?.status || data.status || data.state || data.instance?.state || 
+                      data.instância?.estado || data.estado;
+        
+        const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
+        
+        if (isConnected) {
+          setConnectionStatus('CONNECTED');
+          setQrCode(null);
+        } else if (data.code === 'instance_not_found') {
+          throw new Error('Instância não encontrada. Verifique o nome da instância.');
+        } else {
+          // If we get here and there's no QR, maybe it's already connected but the status field is different
+          const finalStatusCheck = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+          if (finalStatusCheck && finalStatusCheck.ok) {
+            const finalData = await finalStatusCheck.json();
+            const finalState = finalData?.instance?.state || finalData?.state || finalData?.status || 
+                               finalData?.instância?.estado || finalData?.estado;
+            
+            const isFinalConnected = finalState === 'open' || finalState === 'CONNECTED' || finalState === 'conectado' || finalState === 'aberto';
+            
+            if (isFinalConnected) {
+              setConnectionStatus('CONNECTED');
+              setQrCode(null);
+              return;
+            }
           }
+          throw new Error('Não foi possível obter o QR Code. Verifique se a instância já está conectada ou se o nome está correto.');
         }
-        throw new Error('Não foi possível obter o QR Code. Verifique se a instância já está conectada em outro lugar.');
       }
     } catch (error: any) {
       console.error('Error in Evolution API flow:', error);
       const message = error.message || 'Falha na conexão';
-      setApiError(`Erro: ${message}. Verifique a URL, API Key e se o CORS está habilitado no servidor.`);
+      setApiError(`Erro: ${message}. Verifique a URL, API Key e o Nome da Instância.`);
       setConnectionStatus('DISCONNECTED');
     } finally {
       setIsFetchingQR(false);
