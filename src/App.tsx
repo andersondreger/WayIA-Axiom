@@ -60,6 +60,7 @@ const ASSETS = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('analise');
+  const [showDashboard, setShowDashboard] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [isAssetDropdownOpen, setIsAssetDropdownOpen] = useState(false);
   
@@ -85,7 +86,6 @@ export default function App() {
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
   const [isFetchingQR, setIsFetchingQR] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [showQRModal, setShowQRModal] = useState(false);
 
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
@@ -235,7 +235,6 @@ export default function App() {
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
       console.log(`[Evolution] Starting connection flow for instance: ${instanceName}`);
-      setShowQRModal(true); // Open modal immediately when starting
       
       // 1. Check if instance already exists and its status
       try {
@@ -253,7 +252,6 @@ export default function App() {
             setConnectionStatus('CONNECTED');
             setQrCode(null);
             setIsFetchingQR(false);
-            setShowQRModal(false); // Close modal if already connected
             return;
           }
         }
@@ -345,7 +343,6 @@ export default function App() {
         if (isConnected) {
           setConnectionStatus('CONNECTED');
           setQrCode(null);
-          setShowQRModal(false); // Close modal on success
         } else if (data.code === 'instance_not_found') {
           throw new Error('Instância não encontrada. Verifique o nome da instância.');
         } else {
@@ -361,7 +358,6 @@ export default function App() {
             if (isFinalConnected) {
               setConnectionStatus('CONNECTED');
               setQrCode(null);
-              setShowQRModal(false); // Close modal on success
               return;
             }
           }
@@ -474,9 +470,81 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-24 bg-black">
-      {/* Purple Waves Background (Moved from welcome screen to main app) */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-30">
+    <div className="min-h-screen flex flex-col pb-24 bg-[#050505]">
+      {!showDashboard ? (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black overflow-hidden">
+          {/* Purple Waves Background */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
+            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g opacity="0.8">
+                {Array.from({ length: 120 }).map((_, i) => (
+                  <path
+                    key={`left-${i}`}
+                    d={`M -100 ${800 - i * 8} Q ${400} ${400}, 1600 ${400 + (i - 60) * 15}`}
+                    stroke="#8B5CF6"
+                    strokeWidth="0.4"
+                    strokeOpacity={0.05 + (i / 120) * 0.3}
+                  />
+                ))}
+                {Array.from({ length: 120 }).map((_, i) => (
+                  <path
+                    key={`right-${i}`}
+                    d={`M 1540 ${0 + i * 8} Q ${1040} ${400}, -200 ${400 - (i - 60) * 15}`}
+                    stroke="#A78BFA"
+                    strokeWidth="0.4"
+                    strokeOpacity={0.05 + (i / 120) * 0.3}
+                  />
+                ))}
+              </g>
+            </svg>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center text-center p-6 max-w-lg">
+            <div className="mb-12 animate-float">
+              <img 
+                src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png" 
+                alt="Logo" 
+                className="h-32 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              VISION AI
+            </h1>
+            
+            <p className="text-zinc-400 text-lg mb-12 leading-relaxed font-medium">
+              A inteligência artificial mais avançada para detecção de sinais em tempo real.
+            </p>
+
+            <button 
+              onClick={() => setShowDashboard(true)}
+              className="group relative px-12 py-5 bg-primary-purple rounded-2xl font-black text-lg tracking-widest uppercase overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(168,85,247,0.3)]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <span className="relative z-10">Acesse o Dashboard</span>
+            </button>
+
+            <div className="mt-12 flex items-center gap-6 opacity-40">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Seguro</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Rápido</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Preciso</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Purple Waves Background (Moved from welcome screen to main app) */}
+          <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
         <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g opacity="0.8">
             {Array.from({ length: 120 }).map((_, i) => (
@@ -665,6 +733,34 @@ export default function App() {
                     {apiError && (
                       <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
                         {apiError}
+                      </div>
+                    )}
+
+                    {qrCode && connectionStatus !== 'CONNECTED' && (
+                      <div className="mb-6 flex flex-col items-center p-6 bg-white/5 rounded-3xl border border-white/10">
+                        <p className="text-[10px] font-black mb-4 uppercase tracking-[0.2em] text-zinc-400">Escaneie com seu WhatsApp</p>
+                        <div className="bg-white p-3 rounded-2xl shadow-2xl">
+                          <img 
+                            src={qrCode} 
+                            alt="WhatsApp QR Code" 
+                            className="w-48 h-48 object-contain"
+                          />
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={fetchQRCode}
+                          className="mt-4 flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-primary-purple transition-colors uppercase"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          Atualizar QR Code
+                        </button>
+                      </div>
+                    )}
+
+                    {isFetchingQR && !qrCode && (
+                      <div className="mb-6 flex flex-col items-center p-12 bg-white/5 rounded-3xl border border-white/5">
+                        <Loader2 className="w-10 h-10 text-primary-purple animate-spin mb-4" />
+                        <p className="text-xs font-bold text-primary-purple animate-pulse uppercase tracking-widest">Solicitando QR Code...</p>
                       </div>
                     )}
 
@@ -1063,99 +1159,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* QR Code Modal Overlay */}
-      {showQRModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-primary-purple animate-pulse" />
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary-purple/10 flex items-center justify-center mb-6 relative">
-                <div className="absolute inset-0 bg-primary-purple/20 rounded-2xl animate-ping opacity-20" />
-                <Zap className="w-8 h-8 text-primary-purple relative z-10" />
-              </div>
-              
-              <h3 className="text-2xl font-bold mb-2">Conectar WhatsApp</h3>
-              <p className="text-zinc-500 text-sm mb-8">Siga as instruções para ativar sua instância</p>
-
-              <div className="w-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-white/5 p-6 mb-8">
-                {apiError ? (
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                      <Activity className="w-6 h-6 text-red-500" />
-                    </div>
-                    <p className="text-red-500 text-sm font-bold mb-2">Erro na Conexão</p>
-                    <p className="text-zinc-500 text-xs max-w-[250px] mb-6">{apiError}</p>
-                    <button 
-                      onClick={fetchQRCode}
-                      className="py-3 px-6 bg-primary-purple text-white rounded-xl text-xs font-bold uppercase transition-all"
-                    >
-                      Tentar Novamente
-                    </button>
-                  </div>
-                ) : isFetchingQR ? (
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="w-12 h-12 text-primary-purple animate-spin mb-4" />
-                    <p className="text-sm font-bold text-primary-purple animate-pulse uppercase tracking-widest">Solicitando QR Code...</p>
-                  </div>
-                ) : qrCode ? (
-                  <div className="flex flex-col items-center">
-                    <p className="text-[10px] font-black mb-6 uppercase tracking-[0.2em] text-zinc-400">Escaneie com seu WhatsApp</p>
-                    <div className="bg-white p-4 rounded-2xl shadow-2xl border-4 border-primary-purple/20">
-                      <img 
-                        src={qrCode} 
-                        alt="WhatsApp QR Code" 
-                        className="w-56 h-56 object-contain"
-                      />
-                    </div>
-                    <button 
-                      onClick={fetchQRCode}
-                      className="mt-6 flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-primary-purple transition-colors uppercase"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      Atualizar QR Code
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center text-zinc-500">
-                    <Activity className="w-12 h-12 mb-4 opacity-20" />
-                    <p className="text-sm">Iniciando conexão...</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="w-full space-y-3 mb-8">
-                <div className="flex items-start gap-3 text-left bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
-                  <Shield className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Segurança Total</p>
-                    <p className="text-[10px] text-zinc-400">Sua conexão é criptografada ponta-a-ponta através da Evolution API.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 text-left bg-amber-500/5 p-4 rounded-2xl border border-amber-500/10">
-                  <Zap className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Atenção</p>
-                    <p className="text-[10px] text-zinc-400">Não feche esta janela ou mude de aba até que a conexão seja confirmada.</p>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => {
-                  setShowQRModal(false);
-                  setQrCode(null);
-                  setIsFetchingQR(false);
-                }}
-                className="w-full py-4 bg-white/5 hover:bg-white/10 text-zinc-400 rounded-2xl text-sm font-bold transition-all"
-              >
-                Fechar e Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 h-24 bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-4 z-50">
         <button 
@@ -1201,6 +1204,8 @@ export default function App() {
           <span className="text-[9px] uppercase font-bold tracking-widest">VIP</span>
         </button>
       </nav>
+        </>
+      )}
     </div>
   );
 }
