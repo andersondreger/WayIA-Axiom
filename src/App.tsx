@@ -149,9 +149,14 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
     try {
       // ALWAYS use proxy to avoid Chrome Mixed Content and CORS blocks
       console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint}`);
-      const response = await fetch('/api/evo-proxy-v2', {
+      
+      const proxyUrl = '/api/evo-proxy-v2';
+      const response = await fetch(proxyUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           url: evolutionConfig.url,
           key: evolutionConfig.key,
@@ -161,10 +166,14 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
         })
       });
 
-      if (response && response.ok) return response;
-      
-      if (response && (response.status === 401 || response.status === 403)) {
-        console.error('[Evolution] Auth error via proxy');
+      if (!response) {
+        console.error('[Evolution] No response from proxy');
+        return null;
+      }
+
+      if (response.status === 405) {
+        console.error('[Evolution] Proxy returned 405. This usually means the backend server is not reachable or the route is missing.');
+        setApiError('Erro de Servidor (405): O proxy não está respondendo. Reiniciando servidor...');
         return response;
       }
 
