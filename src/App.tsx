@@ -67,6 +67,12 @@ export default function App() {
   // Dashboard States
   const [state, setState] = useState<SignalState>('IDLE');
   const [currentSignal, setCurrentSignal] = useState<Signal | null>(null);
+
+  // Force body background and handle potential stuck states
+  useEffect(() => {
+    document.body.style.backgroundColor = '#050505';
+    console.log("Vision AI: System Initialized");
+  }, []);
   const [usageCount, setUsageCount] = useState(0);
   const [history, setHistory] = useState<Signal[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -472,7 +478,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col pb-24 bg-[#050505]">
       {!showDashboard ? (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black overflow-hidden">
+        <div id="welcome-screen" className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
           {/* Purple Waves Background */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
