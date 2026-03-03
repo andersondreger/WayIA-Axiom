@@ -11,13 +11,17 @@ async function startServer() {
   app.use(cors());
 
   // Proxy for Evolution API to avoid CORS issues
-  app.post("/api/evolution-proxy", async (req, res) => {
-    const { url, key, method, data, endpoint } = req.body;
+  app.all("/api/evo-proxy-v2", async (req, res) => {
+    const { url, key, method, data, endpoint } = req.method === 'POST' ? req.body : req.query;
 
-    console.log(`[Proxy] Received request: ${method} ${endpoint} to ${url}`);
+    console.log(`[Proxy V2] Received request: ${req.method} ${endpoint} to ${url}`);
+
+    if (req.method === 'GET' && !url) {
+      return res.json({ status: "ok", message: "Proxy V2 is alive" });
+    }
 
     if (!url || !key || !endpoint) {
-      console.error("[Proxy] Missing required fields:", { url: !!url, key: !!key, endpoint: !!endpoint });
+      console.error("[Proxy V2] Missing required fields:", { url: !!url, key: !!key, endpoint: !!endpoint });
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -27,25 +31,25 @@ async function startServer() {
       
       const config: any = {
         url: fullUrl,
-        method: method || "GET",
+        method: method || req.method || "GET",
         headers: {
           "apikey": key,
           "Content-Type": "application/json"
         },
-        timeout: 20000 // Increased timeout
+        timeout: 30000 // Increased timeout
       };
 
-      if (method && method.toUpperCase() !== "GET" && data) {
+      if (config.method.toUpperCase() !== "GET" && data) {
         config.data = data;
       }
 
       const response = await axios(config);
-      console.log(`[Proxy] Success: ${response.status} from ${fullUrl}`);
+      console.log(`[Proxy V2] Success: ${response.status} from ${fullUrl}`);
       res.status(response.status).json(response.data);
     } catch (error: any) {
       const status = error.response?.status || 500;
       const errorData = error.response?.data || { error: error.message };
-      console.error(`[Proxy] Error ${status}:`, errorData);
+      console.error(`[Proxy V2] Error ${status}:`, errorData);
       res.status(status).json(errorData);
     }
   });

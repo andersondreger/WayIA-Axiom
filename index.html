@@ -7,6 +7,16 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Vision AI</title>
+    <style>
+      body { background-color: #050505; color: white; margin: 0; padding: 0; min-height: 100vh; }
+      #root { min-height: 100vh; display: flex; flex-direction: column; }
+    </style>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        console.log("Vision AI Error:", msg, "at", url, ":", line);
+        return false;
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

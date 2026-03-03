@@ -59,6 +59,38 @@ const ASSETS = [
 ];
 
 export default function App() {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    console.log("Vision AI: App Component Mounted");
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Ops! Algo deu errado.</h1>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-primary-purple rounded-xl font-bold"
+          >
+            Recarregar Aplicativo
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  try {
+    return <AppContent setHasError={setHasError} />;
+  } catch (e) {
+    console.error("Vision AI Render Error:", e);
+    setHasError(true);
+    return null;
+  }
+}
+
+function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<Tab>('analise');
   const [showDashboard, setShowDashboard] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
@@ -108,7 +140,8 @@ export default function App() {
 
     try {
       // Try proxy first
-      const response = await fetch('/api/evolution-proxy', {
+      console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint}`);
+      const response = await fetch('/api/evo-proxy-v2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -118,9 +151,9 @@ export default function App() {
           endpoint,
           data
         })
-      }).catch(() => {
-        console.warn('[Proxy] Proxy endpoint not available (405). Falling back to direct call.');
-        return { status: 405 } as Response;
+      }).catch((err) => {
+        console.warn('[Proxy] Proxy endpoint not available or failed:', err);
+        return { status: 405, ok: false } as Response;
       });
 
       if (response && response.ok) return response;
@@ -131,12 +164,14 @@ export default function App() {
       }
 
       // Fallback to direct call if proxy is unavailable (405/404) or other errors
+      console.log(`[Evolution] Falling back to direct call: ${baseUrl}${endpoint}`);
       return fetch(`${baseUrl}${endpoint}`, {
         method,
         headers,
         body: data ? JSON.stringify(data) : undefined
       });
     } catch (err) {
+      console.error('[Evolution] API call error:', err);
       // Final fallback to direct
       return fetch(`${baseUrl}${endpoint}`, {
         method,
@@ -154,7 +189,13 @@ export default function App() {
 
       try {
         const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-        const response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        // Try connectionStatus first, then connectionState as fallback
+        let response = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
+        
+        if (!response || !response.ok) {
+          console.log('[Evolution] connectionStatus failed, trying connectionState...');
+          response = await callApi('GET', `/instance/connectionState/${instanceName}`);
+        }
         
         if (!response) return;
 
@@ -273,10 +314,6 @@ export default function App() {
           integration: "WHATSAPP-BAILEYS"
         });
         
-        if (createResponse && (createResponse.status === 401 || createResponse.status === 403)) {
-          throw new Error('API Key inválida ou sem permissão para criar instâncias. Certifique-se de estar usando a Global API Key para criar novas instâncias.');
-        }
-
         if (createResponse && createResponse.ok) {
           const createData = await createResponse.json();
           console.log('[Evolution] Create response:', createData);
@@ -292,12 +329,13 @@ export default function App() {
             setIsFetchingQR(false);
             return;
           }
+        } else if (createResponse && (createResponse.status === 401 || createResponse.status === 403)) {
+          console.warn('[Evolution] API Key might not have permission to CREATE instances. Proceeding to CONNECT check.');
         }
         // Small delay to allow instance initialization if it was just created
         await new Promise(resolve => setTimeout(resolve, 1500));
       } catch (e: any) {
-        if (e.message.includes('API Key')) throw e;
-        console.log('Instance creation failed or already exists');
+        console.log('Instance creation failed or already exists, proceeding to connect...');
       }
       
       // 3. Now try to connect/get QR code
@@ -735,93 +773,106 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="mt-6 min-h-[100px] flex flex-col justify-center">
-                    {apiError && (
-                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
-                        {apiError}
-                      </div>
-                    )}
-
-                    {qrCode && connectionStatus !== 'CONNECTED' && (
-                      <div className="mb-6 flex flex-col items-center p-6 bg-white/5 rounded-3xl border border-white/10">
-                        <p className="text-[10px] font-black mb-4 uppercase tracking-[0.2em] text-zinc-400">Escaneie com seu WhatsApp</p>
-                        <div className="bg-white p-3 rounded-2xl shadow-2xl">
-                          <img 
-                            src={qrCode} 
-                            alt="WhatsApp QR Code" 
-                            className="w-48 h-48 object-contain"
-                          />
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={fetchQRCode}
-                          className="mt-4 flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-primary-purple transition-colors uppercase"
-                        >
-                          <RefreshCw className="w-3 h-3" />
-                          Atualizar QR Code
-                        </button>
-                      </div>
-                    )}
-
-                    {isFetchingQR && !qrCode && (
-                      <div className="mb-6 flex flex-col items-center p-12 bg-white/5 rounded-3xl border border-white/5">
-                        <Loader2 className="w-10 h-10 text-primary-purple animate-spin mb-4" />
-                        <p className="text-xs font-bold text-primary-purple animate-pulse uppercase tracking-widest">Solicitando QR Code...</p>
-                      </div>
-                    )}
-
-                    {connectionStatus === 'CONNECTED' ? (
-                      <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-                            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                  <div key="evolution-status-container" className="mt-6 min-h-[100px] flex flex-col justify-center">
+                    {(() => {
+                      if (apiError) {
+                        return (
+                          <div key="api-error" className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
+                            {apiError}
                           </div>
-                          <div>
-                            <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
-                            <p className="text-zinc-500 text-xs">Instância: <span className="text-zinc-300 font-mono">{evolutionConfig.instance}</span></p>
-                          </div>
-                        </div>
-                        
-                        {instanceInfo && (
-                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
-                            <div className="bg-white/5 p-3 rounded-xl">
-                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Status</p>
-                              <p className="text-xs text-emerald-400 font-medium">Online</p>
+                        );
+                      }
+
+                      if (connectionStatus === 'CONNECTED') {
+                        return (
+                          <div key="connected-card" className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                              </div>
+                              <div>
+                                <h4 className="text-emerald-500 font-bold text-sm">WhatsApp Conectado</h4>
+                                <p className="text-zinc-500 text-xs">Instância: <span className="text-zinc-300 font-mono">{evolutionConfig.instance}</span></p>
+                              </div>
                             </div>
-                            <div className="bg-white/5 p-3 rounded-xl">
-                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
-                              <p className="text-xs text-zinc-300 font-medium">
-                                {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
-                              </p>
-                            </div>
-                            <div className="bg-white/5 p-3 rounded-xl col-span-2">
-                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Versão API</p>
-                              <p className="text-xs text-zinc-400 font-mono">
-                                {instanceInfo?.version || 'v2.x'}
-                              </p>
+                            
+                            {instanceInfo && (
+                              <div key="instance-info" className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                                <div className="bg-white/5 p-3 rounded-xl">
+                                  <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Status</p>
+                                  <p className="text-xs text-emerald-400 font-medium">Online</p>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-xl">
+                                  <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Número</p>
+                                  <p className="text-xs text-zinc-300 font-medium">
+                                    {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
+                                  </p>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-xl col-span-2">
+                                  <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Versão API</p>
+                                  <p className="text-xs text-zinc-400 font-mono">
+                                    {instanceInfo?.version || 'v2.x'}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-2">
+                              <button 
+                                type="button"
+                                onClick={logoutInstance}
+                                className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
+                              >
+                                <LogOut className="w-3 h-3" />
+                                Desconectar WhatsApp
+                              </button>
                             </div>
                           </div>
-                        )}
+                        );
+                      }
 
-                        <div className="pt-2">
-                          <button 
-                            type="button"
-                            onClick={logoutInstance}
-                            className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-[10px] uppercase font-bold transition-all flex items-center justify-center gap-2"
-                          >
-                            <LogOut className="w-3 h-3" />
-                            Desconectar WhatsApp
-                          </button>
+                      if (isFetchingQR && !qrCode) {
+                        return (
+                          <div key="loading-qr" className="mb-6 flex flex-col items-center p-12 bg-white/5 rounded-3xl border border-white/5">
+                            <Loader2 className="w-10 h-10 text-primary-purple animate-spin mb-4" />
+                            <p className="text-xs font-bold text-primary-purple animate-pulse uppercase tracking-widest">Solicitando QR Code...</p>
+                          </div>
+                        );
+                      }
+
+                      if (qrCode) {
+                        return (
+                          <div key="qr-container" className="mb-6 flex flex-col items-center p-6 bg-white/5 rounded-3xl border border-white/10">
+                            <p className="text-[10px] font-black mb-4 uppercase tracking-[0.2em] text-zinc-400">Escaneie com seu WhatsApp</p>
+                            <div className="bg-white p-3 rounded-2xl shadow-2xl">
+                              <img 
+                                src={qrCode} 
+                                key={`qr-img-${qrCode.length}`}
+                                alt="WhatsApp QR Code" 
+                                className="w-48 h-48 object-contain"
+                              />
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={fetchQRCode}
+                              className="mt-4 flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-primary-purple transition-colors uppercase"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              Atualizar QR Code
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key="disconnected-placeholder" className="p-12 border-2 border-dashed border-white/5 rounded-[24px] flex flex-col items-center justify-center text-center">
+                          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                            <LinkIcon className="w-8 h-8 text-zinc-600" />
+                          </div>
+                          <p className="text-zinc-500 text-sm max-w-[200px]">Configure os dados acima e clique em conectar</p>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="p-12 border-2 border-dashed border-white/5 rounded-[24px] flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                          <LinkIcon className="w-8 h-8 text-zinc-600" />
-                        </div>
-                        <p className="text-zinc-500 text-sm max-w-[200px]">Configure os dados acima e clique em conectar</p>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
 
                   <button 
