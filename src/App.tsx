@@ -248,7 +248,11 @@ export default function App() {
 
         if (createResponse && createResponse.ok) {
           const createData = await createResponse.json();
-          const qrFromCreate = createData.base64 || createData.qrcode?.base64 || createData.code?.base64;
+          console.log('[Evolution] Create response:', createData);
+          const qrFromCreate = createData.base64 || 
+                               (typeof createData.qrcode === 'string' ? createData.qrcode : createData.qrcode?.base64) || 
+                               (typeof createData.code === 'string' ? createData.code : createData.code?.base64) ||
+                               createData.instance?.qrcode?.base64;
           if (qrFromCreate) {
             let qr = qrFromCreate;
             if (!qr.startsWith('data:image')) qr = `data:image/png;base64,${qr}`;
@@ -289,10 +293,14 @@ export default function App() {
       }
 
       const data = await connectResponse.json();
-      console.log('Connect response:', data);
+      console.log('[Evolution] Connect response:', data);
 
       // Check for QR code in various possible fields (Evolution API v1 and v2)
-      const qrBase64 = data.base64 || data.qrcode?.base64 || data.code?.base64;
+      const qrBase64 = data.base64 || 
+                       (typeof data.qrcode === 'string' ? data.qrcode : (data.qrcode?.base64 || data.qrcode?.code)) || 
+                       (typeof data.code === 'string' ? data.code : (data.code?.base64 || data.code?.code)) ||
+                       data.instance?.qrcode?.base64 ||
+                       data.instance?.qrcode?.code;
       
       if (qrBase64 && typeof qrBase64 === 'string') {
         let qr = qrBase64;
@@ -568,15 +576,9 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center p-6 max-w-5xl mx-auto w-full">
-        <AnimatePresence>
+        <div className="w-full flex flex-col items-center">
           {activeTab === 'planos' && (
-            <motion.div 
-              key="planos"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl"
-            >
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
               {/* Starter Plan */}
               <div className="glass-card p-6 rounded-[24px] border border-white/5 flex flex-col hover:border-white/10 transition-all">
                 <div className="mb-4">
@@ -643,17 +645,11 @@ export default function App() {
                   Assinar Pro
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'gestao' && (
-            <motion.div 
-              key="gestao"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-6"
-            >
+            <div className="w-full max-w-2xl space-y-6">
               <div className="glass-card p-8 rounded-[32px] border border-white/5">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
@@ -850,17 +846,11 @@ export default function App() {
                   <button className="w-full py-3 btn-secondary rounded-xl text-sm font-bold">Salvar Webhook</button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'historico' && (
-            <motion.div 
-              key="historico"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-4"
-            >
+            <div className="w-full max-w-2xl space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold">Histórico de Sinais</h3>
                 <span className="text-xs text-zinc-500">{history.length} sinais registrados</span>
@@ -890,17 +880,11 @@ export default function App() {
                   </div>
                 ))
               )}
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'analise' && (
-            <motion.div 
-              key="analise"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full flex flex-col items-center"
-            >
+            <div className="w-full flex flex-col items-center">
               {/* History Preview (Desktop) */}
               {history.length > 0 && (
                 <div className="hidden lg:block w-full max-w-4xl mb-8 glass-card rounded-2xl p-4 border border-white/5">
@@ -944,30 +928,23 @@ export default function App() {
                   <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform ${isAssetDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
-                <AnimatePresence>
-                  {isAssetDropdownOpen && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 right-0 mt-2 bg-[#151515] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-20 max-h-60 overflow-y-auto"
-                    >
-                      {ASSETS.map((asset) => (
-                        <button 
-                          key={asset}
-                          onClick={() => {
-                            setSelectedAsset(asset);
-                            setIsAssetDropdownOpen(false);
-                          }}
-                          className="w-full px-6 py-4 text-left hover:bg-primary-purple/10 transition-colors flex items-center justify-between group"
-                        >
-                          <span className={selectedAsset === asset ? 'text-primary-purple font-bold' : 'text-zinc-400'}>{asset}</span>
-                          {selectedAsset === asset && <CheckCircle2 className="w-4 h-4 text-primary-purple" />}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isAssetDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#151515] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-20 max-h-60 overflow-y-auto">
+                    {ASSETS.map((asset) => (
+                      <button 
+                        key={asset}
+                        onClick={() => {
+                          setSelectedAsset(asset);
+                          setIsAssetDropdownOpen(false);
+                        }}
+                        className="w-full px-6 py-4 text-left hover:bg-primary-purple/10 transition-colors flex items-center justify-between group"
+                      >
+                        <span className={selectedAsset === asset ? 'text-primary-purple font-bold' : 'text-zinc-400'}>{asset}</span>
+                        {selectedAsset === asset && <CheckCircle2 className="w-4 h-4 text-primary-purple" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Analysis Card */}
@@ -980,11 +957,7 @@ export default function App() {
                 )}
 
                 {state === 'SIGNAL_FOUND' ? (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full text-center"
-                  >
+                  <div className="w-full text-center">
                     <div className="mb-6">
                       <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-bold block mb-2">Sinal Detectado</span>
                       <h3 className="text-5xl font-black tracking-tighter mb-2">{currentSignal?.asset}</h3>
@@ -1019,7 +992,7 @@ export default function App() {
                       <RefreshCw className="w-5 h-5" />
                       Nova Análise
                     </button>
-                  </motion.div>
+                  </div>
                 ) : (
                   <>
                     <div className="w-20 h-20 rounded-3xl bg-primary-purple/10 border border-primary-purple/20 flex items-center justify-center mb-6">
@@ -1084,17 +1057,11 @@ export default function App() {
                   </>
                 )}
               </div>
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'calendario' && (
-            <motion.div 
-              key="calendario"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-4"
-            >
+            <div className="w-full max-w-2xl space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold">Calendário Econômico</h3>
                 <span className="text-xs text-zinc-500">Eventos de hoje</span>
@@ -1124,16 +1091,11 @@ export default function App() {
                   </div>
                 </div>
               ))}
-            </motion.div>
+            </div>
           )}
 
           {activeTab === 'ranking' && (
-            <motion.div 
-              key="ranking"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="w-full max-w-2xl"
-            >
+            <div className="w-full max-w-2xl">
               <div className="glass-card rounded-[32px] overflow-hidden">
                 <div className="p-8 border-b border-white/5">
                   <h3 className="text-xl font-bold">Top Traders Vision</h3>
@@ -1163,10 +1125,9 @@ export default function App() {
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-
-        </AnimatePresence>
+        </div>
       </main>
 
       {/* Bottom Navigation */}
