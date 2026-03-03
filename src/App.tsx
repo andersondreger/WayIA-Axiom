@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Activity, Shield, Zap, TrendingUp, TrendingDown, RefreshCw, 
   Crown, Trophy, LineChart, Wallet, History, ChevronDown, 
@@ -14,7 +13,14 @@ import {
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize Gemini with environment variable support for multiple platforms
-const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+const getApiKey = () => {
+  try {
+    return (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || import.meta.env.VITE_GEMINI_API_KEY || '';
+  } catch (e) {
+    return import.meta.env.VITE_GEMINI_API_KEY || '';
+  }
+};
+const apiKey = getApiKey();
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 type SignalState = 'IDLE' | 'SCANNING' | 'SIGNAL_FOUND';
@@ -61,6 +67,7 @@ export default function App() {
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
   const [isFetchingQR, setIsFetchingQR] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
@@ -210,6 +217,7 @@ export default function App() {
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
       console.log(`[Evolution] Starting connection flow for instance: ${instanceName}`);
+      setShowQRModal(true); // Open modal immediately when starting
       
       // 1. Check if instance already exists and its status
       try {
@@ -227,6 +235,7 @@ export default function App() {
             setConnectionStatus('CONNECTED');
             setQrCode(null);
             setIsFetchingQR(false);
+            setShowQRModal(false); // Close modal if already connected
             return;
           }
         }
@@ -243,7 +252,7 @@ export default function App() {
         });
         
         if (createResponse && (createResponse.status === 401 || createResponse.status === 403)) {
-          throw new Error('API Key inválida ou sem permissão para criar instâncias.');
+          throw new Error('API Key inválida ou sem permissão para criar instâncias. Certifique-se de estar usando a Global API Key para criar novas instâncias.');
         }
 
         if (createResponse && createResponse.ok) {
@@ -274,7 +283,7 @@ export default function App() {
       
       if (!connectResponse || !connectResponse.ok) {
         if (connectResponse && (connectResponse.status === 401 || connectResponse.status === 403)) {
-          throw new Error('API Key inválida ou expirada.');
+          throw new Error('API Key inválida ou sem permissão para acessar esta instância.');
         }
         if (connectResponse && connectResponse.status === 404) {
           throw new Error('Instância não encontrada (404). Verifique se o Nome da Instância no painel da Evolution é exatamente igual ao digitado.');
@@ -318,6 +327,7 @@ export default function App() {
         if (isConnected) {
           setConnectionStatus('CONNECTED');
           setQrCode(null);
+          setShowQRModal(false); // Close modal on success
         } else if (data.code === 'instance_not_found') {
           throw new Error('Instância não encontrada. Verifique o nome da instância.');
         } else {
@@ -333,6 +343,7 @@ export default function App() {
             if (isFinalConnected) {
               setConnectionStatus('CONNECTED');
               setQrCode(null);
+              setShowQRModal(false); // Close modal on success
               return;
             }
           }
@@ -490,11 +501,7 @@ export default function App() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary-purple/5 rounded-full blur-[120px]" />
         
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col items-center lg:items-start text-center lg:text-left"
-          >
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-primary-purple/20 blur-3xl rounded-full" />
               <div className="w-[500px] h-[250px] flex items-center justify-center relative group">
@@ -507,13 +514,9 @@ export default function App() {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex justify-center lg:justify-end"
-          >
+          <div className="flex justify-center lg:justify-end">
             <div className="glass-card w-full max-w-md p-10 rounded-3xl text-center">
               <h3 className="text-3xl font-bold mb-6 text-white">Bem-vindo</h3>
               <p className="text-zinc-400 mb-10 leading-relaxed">
@@ -526,7 +529,7 @@ export default function App() {
                 Acessar Dashboard
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     );
@@ -697,57 +700,12 @@ export default function App() {
 
                   <div className="mt-6 min-h-[100px] flex flex-col justify-center">
                     {apiError && (
-                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500 animate-in fade-in slide-in-from-top-2">
+                      <div className="p-4 mb-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-500">
                         {apiError}
                       </div>
                     )}
 
-                    {connectionStatus === 'CONNECTING' && (
-                      <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-[24px] border border-white/10">
-                        <Loader2 className="w-8 h-8 text-primary-purple animate-spin mb-4" />
-                        <p className="text-zinc-400 text-sm font-medium">Conectando à Evolution API...</p>
-                        <p className="text-zinc-500 text-[10px] uppercase mt-2">Aguarde um momento</p>
-                      </div>
-                    )}
-
-                    {qrCode && connectionStatus === 'DISCONNECTED' && !isFetchingQR && (
-                      <div className="flex flex-col items-center justify-center p-8 bg-zinc-50 rounded-[24px] border border-white/10 shadow-inner">
-                        <p className="text-zinc-900 text-[10px] font-black mb-6 uppercase tracking-[0.2em]">Escaneie para Conectar</p>
-                        <div className="bg-white p-4 rounded-2xl shadow-sm border border-zinc-200">
-                          <img 
-                            src={qrCode} 
-                            alt="WhatsApp QR Code" 
-                            className="w-48 h-48 object-contain"
-                            onError={() => {
-                              console.error('Failed to load QR code image');
-                              setQrCode(null);
-                            }}
-                          />
-                        </div>
-                        <div className="flex gap-4 mt-6">
-                          <button 
-                            type="button"
-                            onClick={fetchQRCode}
-                            className="text-[10px] text-zinc-500 hover:text-primary-purple transition-colors uppercase font-bold flex items-center gap-2"
-                          >
-                            <RefreshCw className="w-3 h-3" />
-                            Atualizar
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => {
-                              setQrCode(null);
-                              setConnectionStatus('DISCONNECTED');
-                            }}
-                            className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase font-bold"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {connectionStatus === 'CONNECTED' && (
+                    {connectionStatus === 'CONNECTED' ? (
                       <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[24px] space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
@@ -771,6 +729,12 @@ export default function App() {
                                 {instanceInfo?.owner || instanceInfo?.number || instanceInfo?.instance?.owner || '---'}
                               </p>
                             </div>
+                            <div className="bg-white/5 p-3 rounded-xl col-span-2">
+                              <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Versão API</p>
+                              <p className="text-xs text-zinc-400 font-mono">
+                                {instanceInfo?.version || 'v2.x'}
+                              </p>
+                            </div>
                           </div>
                         )}
 
@@ -785,9 +749,7 @@ export default function App() {
                           </button>
                         </div>
                       </div>
-                    )}
-
-                    {connectionStatus === 'DISCONNECTED' && !qrCode && !isFetchingQR && !apiError && (
+                    ) : (
                       <div className="p-12 border-2 border-dashed border-white/5 rounded-[24px] flex flex-col items-center justify-center text-center">
                         <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                           <LinkIcon className="w-8 h-8 text-zinc-600" />
@@ -823,28 +785,36 @@ export default function App() {
               </div>
 
               <div className="glass-card p-8 rounded-[32px] border border-white/5">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-primary-purple/10 flex items-center justify-center">
-                    <LinkIcon className="w-6 h-6 text-primary-purple" />
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-2xl bg-primary-purple/10 flex items-center justify-center">
+                      <Zap className="w-6 h-6 text-primary-purple" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Integração n8n</h3>
+                      <p className="text-zinc-500 text-sm">Automatize seus sinais com workflows</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Integração n8n</h3>
-                    <p className="text-zinc-500 text-sm">Automatize seus sinais com workflows</p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">Webhook URL</label>
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="https://n8n.seu-servidor.com/webhook/..."
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors pr-12"
+                          value={n8nConfig.webhook}
+                          onChange={(e) => setN8nConfig({webhook: e.target.value})}
+                        />
+                        <button className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors">
+                          <LayoutGrid className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <button className="w-full py-3 btn-secondary rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Salvar Webhook
+                    </button>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">Webhook URL</label>
-                    <input 
-                      type="text" 
-                      placeholder="https://n8n.seu-servidor.com/webhook/..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
-                      value={n8nConfig.webhook}
-                      onChange={(e) => setN8nConfig({webhook: e.target.value})}
-                    />
-                  </div>
-                  <button className="w-full py-3 btn-secondary rounded-xl text-sm font-bold">Salvar Webhook</button>
-                </div>
               </div>
             </div>
           )}
@@ -1129,6 +1099,99 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {/* QR Code Modal Overlay */}
+      {showQRModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary-purple animate-pulse" />
+            
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary-purple/10 flex items-center justify-center mb-6 relative">
+                <div className="absolute inset-0 bg-primary-purple/20 rounded-2xl animate-ping opacity-20" />
+                <Zap className="w-8 h-8 text-primary-purple relative z-10" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-2">Conectar WhatsApp</h3>
+              <p className="text-zinc-500 text-sm mb-8">Siga as instruções para ativar sua instância</p>
+
+              <div className="w-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-white/5 p-6 mb-8">
+                {apiError ? (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+                      <Activity className="w-6 h-6 text-red-500" />
+                    </div>
+                    <p className="text-red-500 text-sm font-bold mb-2">Erro na Conexão</p>
+                    <p className="text-zinc-500 text-xs max-w-[250px] mb-6">{apiError}</p>
+                    <button 
+                      onClick={fetchQRCode}
+                      className="py-3 px-6 bg-primary-purple text-white rounded-xl text-xs font-bold uppercase transition-all"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                ) : isFetchingQR ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-12 h-12 text-primary-purple animate-spin mb-4" />
+                    <p className="text-sm font-bold text-primary-purple animate-pulse uppercase tracking-widest">Solicitando QR Code...</p>
+                  </div>
+                ) : qrCode ? (
+                  <div className="flex flex-col items-center">
+                    <p className="text-[10px] font-black mb-6 uppercase tracking-[0.2em] text-zinc-400">Escaneie com seu WhatsApp</p>
+                    <div className="bg-white p-4 rounded-2xl shadow-2xl border-4 border-primary-purple/20">
+                      <img 
+                        src={qrCode} 
+                        alt="WhatsApp QR Code" 
+                        className="w-56 h-56 object-contain"
+                      />
+                    </div>
+                    <button 
+                      onClick={fetchQRCode}
+                      className="mt-6 flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-primary-purple transition-colors uppercase"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Atualizar QR Code
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-zinc-500">
+                    <Activity className="w-12 h-12 mb-4 opacity-20" />
+                    <p className="text-sm">Iniciando conexão...</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="w-full space-y-3 mb-8">
+                <div className="flex items-start gap-3 text-left bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
+                  <Shield className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Segurança Total</p>
+                    <p className="text-[10px] text-zinc-400">Sua conexão é criptografada ponta-a-ponta através da Evolution API.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 text-left bg-amber-500/5 p-4 rounded-2xl border border-amber-500/10">
+                  <Zap className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Atenção</p>
+                    <p className="text-[10px] text-zinc-400">Não feche esta janela ou mude de aba até que a conexão seja confirmada.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setShowQRModal(false);
+                  setQrCode(null);
+                  setIsFetchingQR(false);
+                }}
+                className="w-full py-4 bg-white/5 hover:bg-white/10 text-zinc-400 rounded-2xl text-sm font-bold transition-all"
+              >
+                Fechar e Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 h-24 bg-black/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-4 z-50">
