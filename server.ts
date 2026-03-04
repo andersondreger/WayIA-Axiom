@@ -15,11 +15,20 @@ async function startServer() {
     res.json({ status: "ok", environment: process.env.NODE_ENV || 'development' });
   });
 
+  // Global logger to debug requests
+  app.use((req, res, next) => {
+    console.log(`[Server] ${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+  });
+
   // Proxy for Evolution API to avoid CORS issues
-  app.all("/api/evo-proxy-v2", async (req, res) => {
-    // If it's a GET request without body, just return status
-    if (req.method === 'GET' && Object.keys(req.query).length === 0) {
-      return res.json({ status: "ok", message: "Proxy V2 is active and waiting for POST requests" });
+  app.use("/api/evo-proxy-v2", async (req, res) => {
+    // Add a header to identify that the response came through our proxy
+    res.setHeader('X-Proxy-Source', 'WayAxiom-Proxy-V2');
+
+    // If it's a GET request to the proxy root without body, just return status
+    if (req.method === 'GET' && (!req.body || Object.keys(req.body).length === 0) && (!req.query || Object.keys(req.query).length === 0)) {
+      return res.json({ status: "ok", message: "Proxy V2 is active and waiting for requests" });
     }
 
     const { url, key, method, data, endpoint } = req.body || {};

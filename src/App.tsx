@@ -8,7 +8,7 @@ import {
   Activity, Shield, Zap, TrendingUp, TrendingDown, RefreshCw, 
   Crown, Trophy, LineChart, Wallet, History, ChevronDown, 
   CheckCircle2, Loader2, Camera, Image as ImageIcon, Eye, User, LogOut, LayoutGrid,
-  MessageSquare, Settings, Link as LinkIcon, Calendar, Target
+  MessageSquare, Settings, Link as LinkIcon, Calendar, Target, AlertCircle
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -191,8 +191,15 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
       }
 
       if (response.status === 405) {
-        console.error('[Evolution] Proxy still returning 405 after retries.');
-        setApiError('Erro de Servidor (405): O servidor está demorando para iniciar. Por favor, aguarde 10 segundos e tente novamente.');
+        const isFromProxy = response.headers.get('X-Proxy-Source') === 'WayAxiom-Proxy-V2';
+        
+        if (isFromProxy) {
+          console.error('[Evolution] Proxy itself returned 405.');
+          setApiError('Erro de Configuração (405): O proxy interno rejeitou a requisição. Por favor, recarregue a página.');
+        } else {
+          console.error('[Evolution] Target API (Evolution) returned 405.');
+          setApiError('Erro na API Evolution (405): O servidor Evolution não aceitou este comando. Verifique se a URL da instância está correta (ex: deve terminar em /v2 ou similar se necessário).');
+        }
         return response;
       }
 
@@ -993,6 +1000,48 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                       Salvar Webhook
                     </button>
                   </div>
+              </div>
+
+              {/* Debug Section */}
+              <div className="glass-card p-6 rounded-[32px] border border-white/5 bg-red-500/5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 text-red-500" />
+                  </div>
+                  <h3 className="text-sm font-bold text-red-500 uppercase tracking-wider">Diagnóstico de Conexão</h3>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Se você está recebendo erro 405, isso geralmente significa que o endereço da API Evolution está incorreto ou o servidor não aceitou o comando.
+                  </p>
+                  
+                  <div className="p-3 bg-black/20 rounded-xl border border-white/5 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold">Status do Proxy</span>
+                      <span className="text-[10px] text-emerald-500 font-bold uppercase">Ativo (v2)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold">Último Erro</span>
+                      <span className="text-[10px] text-red-400 font-bold truncate max-w-[150px]">{apiError || 'Nenhum'}</span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/evo-proxy-v2');
+                        const data = await res.json();
+                        alert(`Proxy OK: ${data.message}\n\nSe o erro 405 persistir, verifique se a URL da Evolution termina em /v2 ou se a instância existe.`);
+                      } catch (e) {
+                        alert('Erro ao testar proxy. O servidor pode estar reiniciando.');
+                      }
+                    }}
+                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                  >
+                    Testar Conexão Interna
+                  </button>
+                </div>
               </div>
             </div>
           )}
