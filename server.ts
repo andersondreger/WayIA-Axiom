@@ -30,16 +30,17 @@ async function startServer() {
   });
 
   // Proxy for Evolution API to avoid CORS issues
-  app.all(["/api/evo-proxy-v2", "/api/evo-proxy-v2/"], async (req, res) => {
+  app.all("/api/evo-proxy-v2*", async (req, res) => {
+    console.log(`[Proxy V2] 📥 Request: ${req.method} ${req.url}`);
+    
     // Add a header to identify that the response came through our proxy
     res.setHeader('X-Proxy-Source', 'WayAxiom-Proxy-V2');
 
     // If it's a GET request to the proxy root without a URL query, just return status
     if (req.method === 'GET' && !req.query.url && !req.body?.url) {
-      console.log(`[Proxy V2] Status check from ${req.ip}`);
       return res.json({ 
         status: "ok", 
-        message: "Proxy V2 is active and waiting for requests",
+        message: "Proxy V2 is active",
         timestamp: new Date().toISOString()
       });
     }

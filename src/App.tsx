@@ -126,7 +126,11 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   
   // Integrations State
-  const [evolutionConfig, setEvolutionConfig] = useState({ url: '', key: '', instance: 'WayAxiom' });
+  const [evolutionConfig, setEvolutionConfig] = useState({ 
+    url: 'https://evo2.wayiaflow.com.br', 
+    key: 'd86920ba398e31464c46401214779885', 
+    instance: 'WayAxiom' 
+  });
   const [n8nConfig, setN8nConfig] = useState({ webhook: '' });
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
@@ -835,12 +839,12 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     <input 
                       type="text" 
                       placeholder="https://sua-api.com"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors"
+                      className={`w-full bg-white/5 border ${evolutionConfig.url && !evolutionConfig.url.includes('.') ? 'border-red-500/50' : 'border-white/10'} rounded-xl px-4 py-3 text-sm focus:border-primary-purple outline-none transition-colors`}
                       value={evolutionConfig.url}
                       onChange={(e) => setEvolutionConfig({...evolutionConfig, url: e.target.value})}
                     />
                     {evolutionConfig.url && !evolutionConfig.url.includes('.') && evolutionConfig.url.length > 5 && (
-                      <p className="text-[9px] text-amber-500 mt-1">⚠️ Isso não parece uma URL válida. Use o endereço completo (ex: https://api.exemplo.com)</p>
+                      <p className="text-[9px] text-red-400 mt-1 font-medium">⚠️ Isso não parece uma URL válida. Use o endereço completo (ex: https://api.exemplo.com)</p>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
