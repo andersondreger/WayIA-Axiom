@@ -10,6 +10,14 @@ async function startServer() {
   app.use(express.json());
   app.use(cors());
 
+  // Global logger to debug requests
+  app.use((req, res, next) => {
+    if (req.url.startsWith('/api')) {
+      console.log(`[API Request] ${new Date().toISOString()} - ${req.method} ${req.url}`);
+    }
+    next();
+  });
+
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", environment: process.env.NODE_ENV || 'development' });
@@ -17,17 +25,12 @@ async function startServer() {
 
   // Simple test route
   app.get("/api/test-proxy", (req, res) => {
+    console.log("[Proxy V2] Test route hit");
     res.json({ status: "ok", message: "Proxy endpoint is reachable" });
   });
 
-  // Global logger to debug requests
-  app.use((req, res, next) => {
-    console.log(`[Server] ${new Date().toISOString()} - ${req.method} ${req.url}`);
-    next();
-  });
-
   // Proxy for Evolution API to avoid CORS issues
-  app.all("/api/evo-proxy-v2", async (req, res) => {
+  app.all(["/api/evo-proxy-v2", "/api/evo-proxy-v2/"], async (req, res) => {
     // Add a header to identify that the response came through our proxy
     res.setHeader('X-Proxy-Source', 'WayAxiom-Proxy-V2');
 
@@ -146,6 +149,16 @@ async function startServer() {
 
       res.status(status).json(errorData);
     }
+  });
+
+  // Catch-all for API routes to prevent falling through to SPA fallback
+  app.all("/api/*", (req, res) => {
+    console.warn(`[Server] 404 Not Found: ${req.method} ${req.url}`);
+    res.status(404).json({ 
+      error: "Rota da API não encontrada", 
+      path: req.url,
+      hint: "Verifique se a URL da API está correta." 
+    });
   });
 
   // Vite middleware for development

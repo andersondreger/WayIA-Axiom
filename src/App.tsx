@@ -1053,25 +1053,34 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     </div>
                   </div>
 
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const res = await fetch('/api/test-proxy?v=' + Date.now());
-                        if (!res.ok) {
-                          const text = await res.text();
-                          alert(`Erro no Proxy (${res.status}): ${text.substring(0, 100)}`);
-                          return;
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/test-proxy?v=' + Date.now());
+                          const contentType = res.headers.get('content-type');
+                          
+                          if (!res.ok) {
+                            const text = await res.text();
+                            alert(`Erro no Servidor (${res.status}): ${text.substring(0, 100)}...`);
+                            return;
+                          }
+
+                          if (contentType && contentType.includes('application/json')) {
+                            const data = await res.json();
+                            alert(`Conexão Interna OK: ${data.message}\n\nO servidor está respondendo corretamente.`);
+                          } else {
+                            const text = await res.text();
+                            console.error('[Proxy Test] Non-JSON response:', text.substring(0, 200));
+                            alert(`Aviso: O servidor respondeu, mas não enviou JSON. \n\nIsso geralmente acontece se você estiver acessando por uma URL que não suporta o backend (como Cloudflare Pages direto). \n\nUse a URL oficial do App fornecida no chat.`);
+                          }
+                        } catch (e: any) {
+                          alert(`Erro de Rede: ${e.message}\n\nVerifique se você está usando a URL correta do App.`);
                         }
-                        const data = await res.json();
-                        alert(`Conexão Interna OK: ${data.message}\n\nIsso confirma que o servidor está pronto para processar requisições.`);
-                      } catch (e: any) {
-                        alert(`Erro ao testar conexão: ${e.message}\n\nO servidor pode estar reiniciando. Aguarde 10 segundos e tente novamente.`);
-                      }
-                    }}
-                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
-                  >
-                    Testar Conexão Interna
-                  </button>
+                      }}
+                      className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                      Testar Conexão Interna
+                    </button>
                 </div>
               </div>
             </div>
