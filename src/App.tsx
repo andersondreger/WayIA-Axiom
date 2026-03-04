@@ -190,16 +190,30 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
         return null;
       }
 
-      if (response.status === 405) {
-        const isFromProxy = response.headers.get('X-Proxy-Source') === 'WayAxiom-Proxy-V2';
-        
-        if (isFromProxy) {
-          console.error('[Evolution] Proxy itself returned 405.');
-          setApiError('Erro de Configuração (405): O proxy interno rejeitou a requisição. Por favor, recarregue a página.');
-        } else {
-          console.error('[Evolution] Target API (Evolution) returned 405.');
-          setApiError('Erro na API Evolution (405): O servidor Evolution não aceitou este comando. Verifique se a URL da instância está correta (ex: deve terminar em /v2 ou similar se necessário).');
+      if (!response.ok) {
+        let errorData: any = {};
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          console.error('[Evolution] Could not parse error response as JSON');
         }
+
+        if (response.status === 405) {
+          const isFromProxy = response.headers.get('X-Proxy-Source') === 'WayAxiom-Proxy-V2';
+          const hint = errorData.hint || '';
+          
+          if (isFromProxy) {
+            console.error('[Evolution] Proxy itself returned 405.');
+            setApiError('Erro de Configuração (405): O proxy interno rejeitou a requisição. Por favor, recarregue a página.');
+          } else {
+            console.error('[Evolution] Target API (Evolution) returned 405.');
+            setApiError(`Erro na API Evolution (405): O servidor Evolution não aceitou este comando. ${hint || 'Verifique se a URL da instância está correta (ex: deve terminar em /v2 ou similar se necessário).'}`);
+          }
+          return response;
+        }
+        
+        // Handle other errors...
+        console.error(`[Evolution] API Error ${response.status}:`, errorData);
         return response;
       }
 
@@ -1031,7 +1045,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                   <div className="p-3 bg-black/20 rounded-xl border border-white/5 space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-zinc-500 uppercase font-bold">Status do Proxy</span>
-                      <span className="text-[10px] text-emerald-500 font-bold uppercase">Ativo (v2)</span>
+                      <span className="text-[10px] text-emerald-500 font-bold uppercase">Ativo (v2.1)</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-zinc-500 uppercase font-bold">Último Erro</span>
@@ -1042,16 +1056,16 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                   <button 
                     onClick={async () => {
                       try {
-                        const res = await fetch('/api/evo-proxy-v2');
+                        const res = await fetch('/api/test-proxy?v=' + Date.now());
                         if (!res.ok) {
                           const text = await res.text();
                           alert(`Erro no Proxy (${res.status}): ${text.substring(0, 100)}`);
                           return;
                         }
                         const data = await res.json();
-                        alert(`Proxy OK: ${data.message}\n\nSe o erro 405 ou 428 persistir na Evolution, verifique se a instância está aberta no painel da Evolution.`);
+                        alert(`Conexão Interna OK: ${data.message}\n\nIsso confirma que o servidor está pronto para processar requisições.`);
                       } catch (e: any) {
-                        alert(`Erro ao testar proxy: ${e.message}\n\nO servidor pode estar reiniciando ou houve um erro de rede.`);
+                        alert(`Erro ao testar conexão: ${e.message}\n\nO servidor pode estar reiniciando. Aguarde 10 segundos e tente novamente.`);
                       }
                     }}
                     className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"

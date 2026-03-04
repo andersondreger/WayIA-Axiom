@@ -15,6 +15,11 @@ async function startServer() {
     res.json({ status: "ok", environment: process.env.NODE_ENV || 'development' });
   });
 
+  // Simple test route
+  app.get("/api/test-proxy", (req, res) => {
+    res.json({ status: "ok", message: "Proxy endpoint is reachable" });
+  });
+
   // Global logger to debug requests
   app.use((req, res, next) => {
     console.log(`[Server] ${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -22,12 +27,12 @@ async function startServer() {
   });
 
   // Proxy for Evolution API to avoid CORS issues
-  app.use("/api/evo-proxy-v2", async (req, res) => {
+  app.all("/api/evo-proxy-v2", async (req, res) => {
     // Add a header to identify that the response came through our proxy
     res.setHeader('X-Proxy-Source', 'WayAxiom-Proxy-V2');
 
-    // If it's a GET request to the proxy root, just return status
-    if (req.method === 'GET' && !req.query.url) {
+    // If it's a GET request to the proxy root without a URL query, just return status
+    if (req.method === 'GET' && !req.query.url && !req.body?.url) {
       console.log(`[Proxy V2] Status check from ${req.ip}`);
       return res.json({ 
         status: "ok", 
@@ -66,21 +71,39 @@ async function startServer() {
       
       const config: any = {
         url: fullUrl,
-        method: method || req.method || "GET",
+        method: (method || "GET").toUpperCase(),
         headers: {
           "apikey": key,
-          "Content-Type": "application/json",
+          "api-key": key,
+          "Authorization": `Bearer ${key}`,
           "Accept": "application/json"
         },
-        timeout: 30000
+        timeout: 30000,
+        maxRedirects: 5,
+        validateStatus: (status: number) => status < 500 // Allow 4xx to be handled in the success block if needed, but catch will still get them if we want
       };
 
-      if (config.method.toUpperCase() !== "GET" && data) {
+      // Only add Content-Type if there is a body
+      if (config.method !== "GET" && data) {
+        config.headers["Content-Type"] = "application/json";
         config.data = data;
       }
 
       const response = await axios(config);
-      console.log(`[Proxy V2] Success: ${response.status} from ${fullUrl}`);
+      console.log(`[Proxy V2] Response: ${response.status} from ${fullUrl}`);
+      
+      if (response.status === 405) {
+        console.error(`[Proxy V2] ❌ 405 Method Not Allowed from target!`);
+        console.error(`[Proxy V2] Method used: ${config.method}`);
+        console.error(`[Proxy V2] URL: ${fullUrl}`);
+        console.error(`[Proxy V2] Response data:`, JSON.stringify(response.data));
+        
+        // Add a hint if it's a 405
+        if (typeof response.data === 'object') {
+          response.data.hint = "O servidor Evolution retornou 405 (Método não permitido). Isso geralmente significa que a URL está incompleta (falta o /v2) ou o endpoint mudou nesta versão da API.";
+        }
+      }
+      
       res.status(response.status).json(response.data);
     } catch (error: any) {
       const status = error.response?.status || 500;
@@ -115,6 +138,8 @@ async function startServer() {
       // Add helpful hints for common errors
       if (status === 404 && !errorData.hint) {
         errorData.hint = "Verifique se a URL da API está correta (incluindo /v2 se necessário) e se o nome da instância existe.";
+      } else if (status === 405 && !errorData.hint) {
+        errorData.hint = "O método HTTP usado não é permitido para este endpoint. Verifique se a URL da instância precisa do sufixo /v2 (ex: https://api.seu-servidor.com/v2).";
       } else if ((status === 403 || status === 401) && !errorData.hint) {
         errorData.hint = "Verifique se a API Key (Global ou da Instância) está correta e tem permissões.";
       }
