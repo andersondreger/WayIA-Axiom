@@ -151,35 +151,62 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
       console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint}`);
       
       const proxyUrl = '/api/evo-proxy-v2';
-      const response = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          url: evolutionConfig.url,
-          key: evolutionConfig.key,
-          method,
-          endpoint,
-          data
-        })
-      });
+      let response;
+      let retries = 0;
+      const maxRetries = 3;
+
+      while (retries < maxRetries) {
+        try {
+          response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              url: evolutionConfig.url,
+              key: evolutionConfig.key,
+              method,
+              endpoint,
+              data
+            })
+          });
+
+          if (response.status !== 405) break;
+          
+          console.warn(`[Evolution] Proxy returned 405. Retry ${retries + 1}/${maxRetries}...`);
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+        } catch (err) {
+          console.error('[Evolution] Fetch error:', err);
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
 
       if (!response) {
-        console.error('[Evolution] No response from proxy');
+        console.error('[Evolution] No response from proxy after retries');
+        setApiError('Não foi possível conectar ao servidor. Verifique sua conexão.');
         return null;
       }
 
       if (response.status === 405) {
-        console.error('[Evolution] Proxy returned 405. This usually means the backend server is not reachable or the route is missing.');
-        setApiError('Erro de Servidor (405): O proxy não está respondendo. Reiniciando servidor...');
+        console.error('[Evolution] Proxy still returning 405 after retries.');
+        setApiError('Erro de Servidor (405): O servidor está demorando para iniciar. Por favor, aguarde 10 segundos e tente novamente.');
         return response;
       }
 
-      // If proxy fails, don't fallback to direct if it's not HTTPS or has CORS issues
-      // Chrome will block it anyway. We'll return the failed response.
-      console.warn('[Evolution] Proxy call failed with status:', response?.status);
+      if (!response.ok) {
+        console.warn(`[Evolution] Proxy call failed with status: ${response.status}`);
+        try {
+          const errorData = await response.clone().json();
+          console.error('[Evolution] Error response data:', errorData);
+        } catch (e) {
+          const text = await response.clone().text();
+          console.error('[Evolution] Error response text (non-JSON):', text.substring(0, 200));
+        }
+      }
+
       return response;
     } catch (err) {
       console.error('[Evolution] API call error:', err);
@@ -270,7 +297,13 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
 
     try {
       const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_');
-      await callApi('DELETE', `/instance/logout/${instanceName}`);
+      console.log(`[Evolution] Logging out instance: ${instanceName}`);
+      const response = await callApi('DELETE', `/instance/logout/${instanceName}`);
+      
+      if (response && response.status === 404) {
+        console.warn('[Evolution] Instance not found during logout, cleaning up local state anyway.');
+      }
+      
       setConnectionStatus('DISCONNECTED');
       setQrCode(null);
       setInstanceInfo(null);
@@ -361,15 +394,17 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
         }
         
         let errorMsg = connectResponse ? `Erro ${connectResponse.status}` : 'Falha na conexão';
+        let hint = '';
         try {
           if (connectResponse) {
             const errorData = await connectResponse.json();
             errorMsg = errorData.message || errorData.error || errorMsg;
+            hint = errorData.hint || '';
           }
         } catch (e) {
           errorMsg = (connectResponse && connectResponse.statusText) || errorMsg;
         }
-        throw new Error(errorMsg);
+        throw new Error(hint ? `${errorMsg}. Dica: ${hint}` : errorMsg);
       }
 
       const data = await connectResponse.json();
@@ -771,6 +806,9 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                       value={evolutionConfig.url}
                       onChange={(e) => setEvolutionConfig({...evolutionConfig, url: e.target.value})}
                     />
+                    {evolutionConfig.url && !evolutionConfig.url.includes('.') && evolutionConfig.url.length > 5 && (
+                      <p className="text-[9px] text-amber-500 mt-1">⚠️ Isso não parece uma URL válida. Use o endereço completo (ex: https://api.exemplo.com)</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -793,6 +831,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                         value={evolutionConfig.instance}
                         onChange={(e) => setEvolutionConfig({...evolutionConfig, instance: e.target.value})}
                       />
+                      <p className="text-[9px] text-zinc-600 mt-1">Dica: Use o nome exato do painel Evolution (espaços serão convertidos em _)</p>
                     </div>
                   </div>
 
