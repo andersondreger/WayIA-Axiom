@@ -136,15 +136,17 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
   const [connectionStatus, setConnectionStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
   const [isFetchingQR, setIsFetchingQR] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
 
-  const callApi = useCallback(async (method: string, endpoint: string, data?: any) => {
-    if (!evolutionConfig.url || !evolutionConfig.key) return null;
+  const callApi = useCallback(async (method: string, endpoint: string, data?: any, urlOverride?: string) => {
+    const targetUrl = urlOverride || evolutionConfig.url;
+    if (!targetUrl || !evolutionConfig.key) return null;
     
     const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
-    let url = evolutionConfig.url.trim();
+    let url = targetUrl.trim();
     if (!url.startsWith('http')) url = `https://${url}`;
     const baseUrl = url.replace(/\/$/, '');
     const headers: any = { 'apikey': evolutionConfig.key };
@@ -152,7 +154,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
 
     try {
       // ALWAYS use proxy to avoid Chrome Mixed Content and CORS blocks
-      console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint}`);
+      console.log(`[Evolution] Calling API via proxy: ${method} ${endpoint} (URL: ${baseUrl})`);
       
       const proxyUrl = '/api/evo-proxy-v2';
       let response;
@@ -168,7 +170,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
               'Accept': 'application/json'
             },
             body: JSON.stringify({
-              url: evolutionConfig.url,
+              url: baseUrl,
               key: evolutionConfig.key,
               method,
               endpoint,
@@ -360,141 +362,97 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
     setQrCode(null);
     setApiError(null);
     
+    const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
+    let currentUrl = evolutionConfig.url.trim();
+    if (!currentUrl.startsWith('http')) currentUrl = `https://${currentUrl}`;
+    
+    // Helper to try a specific URL variation
+    const tryConnection = async (baseUrl: string, name: string) => {
+      console.log(`[Evolution] Testing connection to ${baseUrl} for instance ${name}`);
+      // 1. Check status
+      const statusRes = await callApi('GET', `/instance/connectionStatus/${name}`, null, baseUrl);
+      if (statusRes && statusRes.ok) {
+        const data = await statusRes.json();
+        const state = data?.instance?.state || data?.state || data?.status || data?.instância?.estado || data?.estado;
+        if (state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto') {
+          return { success: true, connected: true };
+        }
+      }
+
+      // 2. Try to connect/get QR
+      const connectRes = await callApi('GET', `/instance/connect/${name}`, null, baseUrl);
+      if (connectRes && connectRes.ok) {
+        const data = await connectRes.json();
+        const qr = data.base64 || (typeof data.qrcode === 'string' ? data.qrcode : (data.qrcode?.base64 || data.qrcode?.code)) || 
+                   (typeof data.code === 'string' ? data.code : (data.code?.base64 || data.code?.code)) ||
+                   data.instance?.qrcode?.base64;
+        if (qr) return { success: true, qr };
+        
+        const state = data.instance?.status || data.status || data.state || data.instance?.state || data.instância?.estado || data.estado;
+        if (state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto') {
+          return { success: true, connected: true };
+        }
+      }
+      
+      return { success: false, status: connectRes?.status };
+    };
+
     try {
-      const instanceName = evolutionConfig.instance.trim().replace(/\s+/g, '_') || 'WayAxiom';
       console.log(`[Evolution] Starting connection flow for instance: ${instanceName}`);
       
-      // 1. Check if instance already exists and its status
-      try {
-        const statusResponse = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
-        console.log(`[Evolution] Status check for ${instanceName}:`, statusResponse?.status);
-        
-        if (statusResponse && statusResponse.ok) {
-          const statusData = await statusResponse.json();
-          const state = statusData?.instance?.state || statusData?.state || statusData?.status || 
-                        statusData?.instância?.estado || statusData?.estado;
-          
-          const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
-          
-          if (isConnected) {
-            setConnectionStatus('CONNECTED');
-            setQrCode(null);
-            setIsFetchingQR(false);
-            return;
-          }
-        }
-      } catch (e) {
-        console.log('Status check failed, proceeding to create/connect');
-      }
-
-      // 2. Try to create the instance (it might already exist, which is fine)
-      try {
-        const createResponse = await callApi('POST', '/instance/create', {
-          instanceName: instanceName,
-          qrcode: true,
-          integration: "WHATSAPP-BAILEYS"
-        });
-        
-        if (createResponse && createResponse.ok) {
-          const createData = await createResponse.json();
-          console.log('[Evolution] Create response:', createData);
-          const qrFromCreate = createData.base64 || 
-                               (typeof createData.qrcode === 'string' ? createData.qrcode : createData.qrcode?.base64) || 
-                               (typeof createData.code === 'string' ? createData.code : createData.code?.base64) ||
-                               createData.instance?.qrcode?.base64;
-          if (qrFromCreate) {
-            let qr = qrFromCreate;
-            if (!qr.startsWith('data:image')) qr = `data:image/png;base64,${qr}`;
-            setQrCode(qr);
-            setConnectionStatus('DISCONNECTED');
-            setIsFetchingQR(false);
-            return;
-          }
-        } else if (createResponse && (createResponse.status === 401 || createResponse.status === 403)) {
-          console.warn('[Evolution] API Key might not have permission to CREATE instances. Proceeding to CONNECT check.');
-        }
-        // Small delay to allow instance initialization if it was just created
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      } catch (e: any) {
-        console.log('Instance creation failed or already exists, proceeding to connect...');
-      }
+      // Try 1: Standard URL
+      let result = await tryConnection(currentUrl, instanceName);
       
-      // 3. Now try to connect/get QR code
-      const connectResponse = await callApi('GET', `/instance/connect/${instanceName}`);
-      
-      if (!connectResponse || !connectResponse.ok) {
-        if (connectResponse && (connectResponse.status === 401 || connectResponse.status === 403)) {
-          throw new Error('API Key inválida ou sem permissão para acessar esta instância.');
-        }
-        if (connectResponse && connectResponse.status === 404) {
-          throw new Error('Instância não encontrada (404). Verifique se o Nome da Instância no painel da Evolution é exatamente igual ao digitado.');
-        }
+      // Try 2: If 404/405, try appending /v2
+      if (!result.success && (result.status === 404 || result.status === 405) && !currentUrl.includes('/v2')) {
+        console.log('[Evolution] 404/405 detected, trying with /v2 suffix...');
+        const v2Url = currentUrl.replace(/\/$/, '') + '/v2';
         
-        let errorMsg = connectResponse ? `Erro ${connectResponse.status}` : 'Falha na conexão';
-        let hint = '';
-        try {
-          if (connectResponse) {
-            const errorData = await connectResponse.json();
-            errorMsg = errorData.message || errorData.error || errorMsg;
-            hint = errorData.hint || '';
-          }
-        } catch (e) {
-          errorMsg = (connectResponse && connectResponse.statusText) || errorMsg;
-        }
-        throw new Error(hint ? `${errorMsg}. Dica: ${hint}` : errorMsg);
-      }
-
-      const data = await connectResponse.json();
-      console.log('[Evolution] Connect response:', data);
-
-      // Check for QR code in various possible fields (Evolution API v1 and v2)
-      const qrBase64 = data.base64 || 
-                       (typeof data.qrcode === 'string' ? data.qrcode : (data.qrcode?.base64 || data.qrcode?.code)) || 
-                       (typeof data.code === 'string' ? data.code : (data.code?.base64 || data.code?.code)) ||
-                       data.instance?.qrcode?.base64 ||
-                       data.instance?.qrcode?.code;
-      
-      if (qrBase64 && typeof qrBase64 === 'string') {
-        let qr = qrBase64;
-        if (!qr.startsWith('data:image')) {
-          qr = `data:image/png;base64,${qr}`;
-        }
-        setQrCode(qr);
-        setConnectionStatus('DISCONNECTED');
-      } else {
-        const state = data.instance?.status || data.status || data.state || data.instance?.state || 
-                      data.instância?.estado || data.estado;
+        result = await tryConnection(v2Url, instanceName);
         
-        const isConnected = state === 'open' || state === 'CONNECTED' || state === 'conectado' || state === 'aberto';
-        
-        if (isConnected) {
-          setConnectionStatus('CONNECTED');
-          setQrCode(null);
-        } else if (data.code === 'instance_not_found') {
-          throw new Error('Instância não encontrada. Verifique o nome da instância.');
+        if (result.success) {
+          console.log('[Evolution] Connection successful with /v2 suffix! Updating config.');
+          setEvolutionConfig(prev => ({ ...prev, url: v2Url }));
         } else {
-          // If we get here and there's no QR, maybe it's already connected but the status field is different
-          const finalStatusCheck = await callApi('GET', `/instance/connectionStatus/${instanceName}`);
-          if (finalStatusCheck && finalStatusCheck.ok) {
-            const finalData = await finalStatusCheck.json();
-            const finalState = finalData?.instance?.state || finalData?.state || finalData?.status || 
-                               finalData?.instância?.estado || finalData?.estado;
+          // Try 3: List instances to find correct name/url
+          console.log('[Evolution] Still failing, trying to list instances for discovery...');
+          const listRes = await callApi('GET', '/instance/fetchInstances', null, v2Url);
+          const listResStandard = !listRes?.ok ? await callApi('GET', '/instance/fetchInstances', null, currentUrl) : listRes;
+          
+          if (listResStandard && listResStandard.ok) {
+            const instances = await listResStandard.json();
+            const match = Array.isArray(instances) ? instances.find((i: any) => 
+              (i.instanceName || i.nomeInstância || '').toLowerCase() === instanceName.toLowerCase() ||
+              (i.instanceName || i.nomeInstância || '').toLowerCase() === evolutionConfig.instance.toLowerCase()
+            ) : null;
             
-            const isFinalConnected = finalState === 'open' || finalState === 'CONNECTED' || finalState === 'conectado' || finalState === 'aberto';
-            
-            if (isFinalConnected) {
-              setConnectionStatus('CONNECTED');
-              setQrCode(null);
-              return;
+            if (match) {
+              const realName = match.instanceName || match.nomeInstância;
+              console.log(`[Evolution] Found matching instance via discovery: ${realName}`);
+              setEvolutionConfig(prev => ({ ...prev, instance: realName }));
+              result = await tryConnection(v2Url, realName);
+              if (!result.success) result = await tryConnection(currentUrl, realName);
             }
           }
-          throw new Error('Não foi possível obter o QR Code. Verifique se a instância já está conectada ou se o nome está correto.');
         }
+      }
+
+      if (result.success) {
+        if (result.connected) {
+          setConnectionStatus('CONNECTED');
+          setQrCode(null);
+        } else if (result.qr) {
+          let qr = result.qr;
+          if (!qr.startsWith('data:image')) qr = `data:image/png;base64,${qr}`;
+          setQrCode(qr);
+          setConnectionStatus('DISCONNECTED');
+        }
+      } else {
+        throw new Error(result.status === 404 ? 'Instância não encontrada (404). Verifique se o nome está correto ou se a URL precisa de /v2.' : `Erro ${result.status}`);
       }
     } catch (error: any) {
       console.error('Error in Evolution API flow:', error);
-      const message = error.message || 'Falha na conexão';
-      setApiError(`Erro: ${message}. Verifique a URL, API Key e o Nome da Instância.`);
+      setApiError(`Erro: ${error.message}. Verifique a URL (tente adicionar /v2 se for v2) e o Nome da Instância.`);
       setConnectionStatus('DISCONNECTED');
     } finally {
       setIsFetchingQR(false);
@@ -835,7 +793,17 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); fetchQRCode(); }} className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-zinc-500 mb-2 block">URL da Instância</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-[10px] uppercase font-bold text-zinc-500 block">URL da Instância</label>
+                      <button 
+                        type="button"
+                        onClick={() => setShowHelp(!showHelp)}
+                        className="text-[9px] font-bold text-primary-purple hover:underline flex items-center gap-1"
+                      >
+                        <AlertCircle className="w-3 h-3" />
+                        Precisa de ajuda?
+                      </button>
+                    </div>
                     <input 
                       type="text" 
                       placeholder="https://sua-api.com"
@@ -997,6 +965,69 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     )}
                   </button>
                 </form>
+
+                {showHelp && (
+                  <div className="mt-8 p-6 bg-primary-purple/5 border border-primary-purple/20 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="w-5 h-5 text-primary-purple" />
+                      <h4 className="text-sm font-bold text-primary-purple uppercase tracking-wider">Guia de Solução de Problemas</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex gap-3">
+                        <div className="w-5 h-5 rounded-full bg-primary-purple/20 flex items-center justify-center text-[10px] font-bold text-primary-purple flex-shrink-0">1</div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-300 mb-1">Verifique a URL</p>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
+                            A URL deve ser o endereço base do seu servidor Evolution. 
+                            Exemplo: <code className="bg-black/40 px-1 rounded text-primary-purple">https://api.seuservidor.com.br</code>. 
+                            Se estiver usando a v2, tente adicionar <code className="bg-black/40 px-1 rounded text-primary-purple">/v2</code> no final se a conexão falhar.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <div className="w-5 h-5 rounded-full bg-primary-purple/20 flex items-center justify-center text-[10px] font-bold text-primary-purple flex-shrink-0">2</div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-300 mb-1">Nome da Instância</p>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
+                            O nome deve ser <strong>exatamente igual</strong> ao que aparece no seu painel da Evolution. 
+                            O Axiom converte espaços em <code className="bg-black/40 px-1 rounded text-primary-purple">_</code> automaticamente.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <div className="w-5 h-5 rounded-full bg-primary-purple/20 flex items-center justify-center text-[10px] font-bold text-primary-purple flex-shrink-0">3</div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-300 mb-1">API Key (Global vs Instância)</p>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
+                            Recomendamos usar a <strong>Global API Key</strong> para evitar erros de permissão (403). 
+                            Ela é encontrada nas configurações gerais do seu servidor Evolution.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <div className="w-5 h-5 rounded-full bg-primary-purple/20 flex items-center justify-center text-[10px] font-bold text-primary-purple flex-shrink-0">4</div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-300 mb-1">Erro 404 (Not Found)</p>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
+                            Isso significa que o servidor não encontrou o caminho solicitado. 
+                            Verifique se a URL não tem barras extras no final e se o servidor está online.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => setShowHelp(false)}
+                      className="w-full mt-6 py-2 text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"
+                    >
+                      Fechar Guia
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="glass-card p-8 rounded-[32px] border border-white/5">
