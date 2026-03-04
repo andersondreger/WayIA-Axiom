@@ -26,9 +26,14 @@ async function startServer() {
     // Add a header to identify that the response came through our proxy
     res.setHeader('X-Proxy-Source', 'WayAxiom-Proxy-V2');
 
-    // If it's a GET request to the proxy root without body, just return status
-    if (req.method === 'GET' && (!req.body || Object.keys(req.body).length === 0) && (!req.query || Object.keys(req.query).length === 0)) {
-      return res.json({ status: "ok", message: "Proxy V2 is active and waiting for requests" });
+    // If it's a GET request to the proxy root, just return status
+    if (req.method === 'GET' && !req.query.url) {
+      console.log(`[Proxy V2] Status check from ${req.ip}`);
+      return res.json({ 
+        status: "ok", 
+        message: "Proxy V2 is active and waiting for requests",
+        timestamp: new Date().toISOString()
+      });
     }
 
     const { url, key, method, data, endpoint } = req.body || {};
@@ -80,6 +85,14 @@ async function startServer() {
     } catch (error: any) {
       const status = error.response?.status || 500;
       let errorData = error.response?.data || { error: error.message };
+      
+      // Handle 428 Precondition Required (Common in Evolution v2 when instance is not ready)
+      if (status === 428) {
+        console.warn(`[Proxy V2] ⚠️ Evolution returned 428: Instance not ready or connection closed.`);
+        if (typeof errorData === 'object') {
+          errorData.hint = "A instância está em estado de transição (reconectando ou inicializando). Aguarde alguns segundos.";
+        }
+      }
       
       // Handle DNS errors specifically
       if (error.code === 'EAI_AGAIN' || error.code === 'ENOTFOUND') {

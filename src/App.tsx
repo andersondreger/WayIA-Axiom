@@ -203,6 +203,12 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
         return response;
       }
 
+      if (response.status === 428) {
+        console.warn('[Evolution] Instance returned 428 (Precondition Required)');
+        // Don't set a blocking error, just log it as it's often transient
+        return response;
+      }
+
       if (!response.ok) {
         console.warn(`[Evolution] Proxy call failed with status: ${response.status}`);
         try {
@@ -242,6 +248,12 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
 
         if (response.status === 401 || response.status === 403) {
           console.error('API Key inválida detectada no polling');
+          return;
+        }
+
+        if (response.status === 428) {
+          console.warn('[Evolution] Polling returned 428: Instance not ready.');
+          setConnectionStatus('DISCONNECTED');
           return;
         }
 
@@ -1031,10 +1043,15 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     onClick={async () => {
                       try {
                         const res = await fetch('/api/evo-proxy-v2');
+                        if (!res.ok) {
+                          const text = await res.text();
+                          alert(`Erro no Proxy (${res.status}): ${text.substring(0, 100)}`);
+                          return;
+                        }
                         const data = await res.json();
-                        alert(`Proxy OK: ${data.message}\n\nSe o erro 405 persistir, verifique se a URL da Evolution termina em /v2 ou se a instância existe.`);
-                      } catch (e) {
-                        alert('Erro ao testar proxy. O servidor pode estar reiniciando.');
+                        alert(`Proxy OK: ${data.message}\n\nSe o erro 405 ou 428 persistir na Evolution, verifique se a instância está aberta no painel da Evolution.`);
+                      } catch (e: any) {
+                        alert(`Erro ao testar proxy: ${e.message}\n\nO servidor pode estar reiniciando ou houve um erro de rede.`);
                       }
                     }}
                     className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
