@@ -138,6 +138,38 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
   const [apiError, setApiError] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
+  // Integração Axiom N8N - Terminal States
+  const [n8nStatus, setN8nStatus] = useState("AGUARDANDO...");
+  const [n8nStatusColor, setN8nStatusColor] = useState("#888");
+  const [n8nResult, setN8nResult] = useState({ direcao: '---', confianca: '---', taxa: '---' });
+
+  const executarAnaliseN8N = async () => {
+    setN8nStatus("PROCESSANDO FLUXO...");
+    setN8nStatusColor("#fff");
+    
+    try {
+      const res = await fetch('https://n8n.wayiaflow.com.br/webhook/analise-axiom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol: 'NEAR/USD' })
+      });
+      const data = await res.json();
+      
+      const result = Array.isArray(data) ? data[0].json : data;
+
+      setN8nResult({
+        direcao: result.direcao || '---',
+        confianca: result.confianca || '---',
+        taxa: result.taxa || '---'
+      });
+      setN8nStatus("CONCLUÍDO");
+      setN8nStatusColor("#00ff00");
+    } catch (e) {
+      setN8nStatus("ERRO DE CONEXÃO");
+      setN8nStatusColor("red");
+    }
+  };
+
   // Poll for connection status
   const [instanceInfo, setInstanceInfo] = useState<any>(null);
 
@@ -1220,7 +1252,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
               </div>
 
               {/* Analysis Card */}
-              <div className="w-full max-w-md glass-card rounded-[32px] p-8 flex flex-col items-center relative overflow-hidden">
+              <div className="w-full max-w-5xl glass-card rounded-[32px] p-4 md:p-8 flex flex-col items-center relative overflow-hidden">
                 {state === 'SCANNING' && (
                   <div className="absolute inset-0 bg-primary-purple/5 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
                     <Loader2 className="w-12 h-12 text-primary-purple animate-spin mb-4" />
@@ -1266,67 +1298,30 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     </button>
                   </div>
                 ) : (
-                  <>
-                    <div className="w-20 h-20 rounded-3xl bg-primary-purple/10 border border-primary-purple/20 flex items-center justify-center mb-6">
-                      <Camera className="w-10 h-10 text-primary-purple" />
-                    </div>
-                    
-                    <h3 className="text-2xl font-bold mb-2">Enviar Gráfico</h3>
-                    <p className="text-zinc-500 text-sm mb-10">Escolha como deseja enviar</p>
-
-                    <div className="w-full space-y-4 mb-10">
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-4 btn-primary rounded-2xl flex items-center justify-center gap-3"
-                      >
-                        <Camera className="w-5 h-5" />
-                        Tirar Foto
-                      </button>
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-4 btn-secondary rounded-2xl flex items-center justify-center gap-3"
-                      >
-                        <ImageIcon className="w-5 h-5" />
-                        Escolher da Galeria
-                      </button>
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        className="hidden" 
-                        accept="image/*" 
-                        onChange={handleFileUpload}
-                      />
-                    </div>
-
-                    {uploadedFile && (
-                      <div className="w-full mb-8 flex flex-col items-center">
-                        <div className="relative w-full max-h-[400px] aspect-[3/4] rounded-2xl overflow-hidden border border-emerald-500/30 mb-3 bg-black/40">
-                          <img src={uploadedFile} alt="Preview" className="w-full h-full object-contain" />
-                          <div className="absolute top-3 right-3 bg-emerald-500/20 backdrop-blur-md p-1.5 rounded-full">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                          </div>
-                        </div>
-                        <span className="text-xs text-emerald-400 font-medium tracking-tight">Gráfico carregado com sucesso!</span>
+                  <div id="axiom-terminal" className="flex flex-col md:flex-row gap-5 p-4 bg-black/80 rounded-2xl border border-white/10 w-full backdrop-blur-md">
+                      <div className="flex-grow h-[450px] rounded-xl overflow-hidden border border-white/5 bg-black/50">
+                          <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:NEARUSDT&interval=1&theme=dark" 
+                                  className="w-full h-full border-none"></iframe>
                       </div>
-                    )}
 
-                    <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] mb-8">
-                      Ou arraste e solte o arquivo aqui
-                    </p>
+                      <div className="w-full md:w-[320px] bg-[#0c0c0c] p-6 rounded-xl border-l-4 border-l-[#00ff00] flex flex-col shrink-0 shadow-lg justify-center">
+                          <h3 className="text-[#00ff00] text-lg font-black tracking-widest mb-6 font-sans">⚡ AXIOM SKILL 79%</h3>
+                          
+                          <button 
+                              onClick={executarAnaliseN8N}
+                              className="w-full py-4 bg-[#00ff00] hover:bg-[#00dd00] hover:scale-[1.02] active:scale-95 text-black border-none rounded-lg font-black cursor-pointer transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(0,255,0,0.3)]">
+                              [ EXECUTAR ANÁLISE ]
+                          </button>
 
-                    <button 
-                      onClick={startAnalysis}
-                      disabled={!uploadedFile || state === 'SCANNING'}
-                      className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-                        uploadedFile 
-                        ? 'bg-primary-purple text-white shadow-[0_0_20px_rgba(168,85,247,0.2)]' 
-                        : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
-                      }`}
-                    >
-                      <Zap className="w-4 h-4" />
-                      Analisar Gráfico
-                    </button>
-                  </>
+                          <div className="font-mono text-sm mt-8 space-y-3">
+                              <p className="text-white/80">{'>'} STATUS: <span className="font-bold animate-pulse" style={{ color: n8nStatusColor }}>{n8nStatus}</span></p>
+                              <div className="h-px w-full bg-white/5 my-3"></div>
+                              <p className="text-white/80">{'>'} VEREDITO: <span className="text-[#00ff00] font-black">{n8nResult.direcao}</span></p>
+                              <p className="text-white/80">{'>'} CONFIANÇA: <span className="text-white font-bold">{n8nResult.confianca}</span></p>
+                              <p className="text-white/80">{'>'} TAXA ATUAL: <span className="text-white font-bold">{n8nResult.taxa}</span></p>
+                          </div>
+                      </div>
+                  </div>
                 )}
               </div>
             </div>
