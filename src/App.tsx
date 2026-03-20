@@ -11,6 +11,7 @@ import {
   MessageSquare, Settings, Link as LinkIcon, Calendar, Target, AlertCircle
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { supabase } from './lib/supabase';
 
 // Initialize Gemini with environment variable support for multiple platforms
 const getApiKey = () => {
@@ -107,6 +108,54 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
   // Dashboard States
   const [state, setState] = useState<SignalState>('IDLE');
   const [currentSignal, setCurrentSignal] = useState<Signal | null>(null);
+
+  // Axiom Sniper - Supabase Realtime State
+  const [liveSignal, setLiveSignal] = useState<any>(null);
+  const [liveHistory, setLiveHistory] = useState<any[]>([]);
+  const [gatekeeperClicks, setGatekeeperClicks] = useState(0);
+  const [userPlan, setUserPlan] = useState<'LITE' | 'PRO'>('LITE');
+  
+  useEffect(() => {
+    const fetchSignals = async () => {
+      const { data, error } = await supabase
+        .from('historico_sinais')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (data && data.length > 0) {
+        setLiveSignal(data[0]);
+        setLiveHistory(data);
+      }
+    };
+    
+    fetchSignals();
+
+    const channel = supabase
+      .channel('historico_sinais_changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'historico_sinais' },
+        (payload) => {
+          console.log('Novo sinal recebido em tempo real:', payload.new);
+          const newSignal = payload.new;
+          setLiveSignal(newSignal);
+          setLiveHistory(prev => [newSignal, ...prev].slice(0, 5));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const getTVSymbol = (par: string) => {
+    if (!par) return 'FX:EURUSD';
+    const clean = par.replace('/', '');
+    if (clean.includes('USDT') || clean.includes('BTC') || clean.includes('ETH')) return `BINANCE:${clean}`;
+    return `FX:${clean}`;
+  };
 
   // Force body background and handle potential stuck states
   useEffect(() => {
@@ -616,7 +665,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
             </svg>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center text-center p-6 max-w-lg">
+          <div className="relative z-10 flex flex-col items-center text-center p-6 max-w-lg w-full md:w-1/2 md:mr-auto md:ml-24">
             <div className="mb-12 animate-float">
               <img 
                 src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png" 
@@ -656,6 +705,33 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                 <span className="text-[10px] font-bold uppercase tracking-widest">Preciso</span>
               </div>
             </div>
+          </div>
+
+          {/* Social Proof Feed */}
+          <div className="hidden md:flex absolute right-24 top-1/2 -translate-y-1/2 w-80 flex-col gap-4 z-10 pointer-events-none">
+            <h3 className="text-zinc-500 font-bold tracking-widest text-xs uppercase mb-2 flex items-center gap-2 drop-shadow-md">
+              <Activity className="w-4 h-4 text-primary-purple" /> Sinais Recentes Ao Vivo
+            </h3>
+            {liveHistory.map((sig, i) => (
+               <div key={`sp-${i}`} className={`glass-card p-5 rounded-2xl border shadow-lg transition-all duration-1000 transform ${i === 0 ? 'border-primary-purple/40 bg-primary-purple/10 scale-105' : 'border-white/10 opacity-70'}`}>
+                 <div className="flex justify-between items-center mb-3">
+                   <div className="flex items-center gap-2">
+                     <span className="font-black text-white text-lg drop-shadow-sm">{sig.par}</span>
+                     {sig.confianca > 90 && <Crown className="w-3 h-3 text-emerald-500" />}
+                   </div>
+                   <span className="text-[10px] text-zinc-400 font-medium px-2 py-1 bg-black/40 rounded border border-white/5">Agora</span>
+                 </div>
+                 <div className="flex justify-between items-center text-sm">
+                   <span className={`px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest ${sig.acao?.includes('COMPRA') || sig.acao?.includes('CALL') ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : sig.acao?.includes('VENDA') || sig.acao?.includes('PUT') ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.2)]' : 'bg-zinc-500/20 text-zinc-400'}`}>
+                     {sig.acao}
+                   </span>
+                   <span className="text-zinc-300 font-mono text-xs text-right bg-white/5 px-3 py-1.5 rounded-lg border border-white/5 flex flex-col items-end">
+                     <span className="block text-[8px] uppercase text-zinc-500 font-bold mb-0.5 tracking-widest">Taxa de Entrada</span>
+                     <span className="drop-shadow-sm">{sig.taxa}</span>
+                   </span>
+                 </div>
+               </div>
+            ))}
           </div>
         </div>
       ) : (
@@ -733,9 +809,9 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
               {/* Starter Plan */}
               <div className="glass-card p-6 rounded-[24px] border border-white/5 flex flex-col hover:border-white/10 transition-all">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-zinc-400 mb-1">Vision Starter</h3>
+                  <h3 className="text-lg font-bold text-zinc-400 mb-1">Vision LITE</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black">R$ 77</span>
+                    <span className="text-3xl font-black">R$ 39,69</span>
                     <span className="text-zinc-500 text-xs">/mês</span>
                   </div>
                 </div>
@@ -754,7 +830,7 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                   </li>
                 </ul>
                 <button className="w-full py-3 btn-secondary rounded-xl font-bold text-sm">
-                  Assinar Starter
+                  Assinar LITE
                 </button>
               </div>
 
@@ -764,9 +840,9 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                   Mais Popular
                 </div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-primary-purple mb-1">Vision Pro</h3>
+                  <h3 className="text-lg font-bold text-primary-purple mb-1">Vision PRO</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black">R$ 249</span>
+                    <span className="text-3xl font-black">R$ 147,93</span>
                     <span className="text-zinc-500 text-xs">/mês</span>
                   </div>
                 </div>
@@ -1298,27 +1374,101 @@ function AppContent({ setHasError }: { setHasError: (v: boolean) => void }) {
                     </button>
                   </div>
                 ) : (
-                  <div id="axiom-terminal" className="flex flex-col md:flex-row gap-5 p-4 bg-black/80 rounded-2xl border border-white/10 w-full backdrop-blur-md">
-                      <div className="flex-grow h-[450px] rounded-xl overflow-hidden border border-white/5 bg-black/50">
-                          <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:NEARUSDT&interval=1&theme=dark" 
+                  <div id="axiom-terminal" className="flex flex-col md:flex-row gap-5 p-4 bg-black/80 rounded-2xl border border-white/10 w-full backdrop-blur-md relative overflow-hidden">
+                      {/* Gatekeeper block layer full terminal */}
+                      {userPlan === 'LITE' && gatekeeperClicks >= 6 && (
+                        <div className="absolute inset-0 z-30 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center border-2 border-primary-purple/30 rounded-2xl">
+                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-purple to-transparent opacity-50"></div>
+                          <Crown className="w-16 h-16 text-primary-purple mb-6 animate-pulse drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+                          <h3 className="text-3xl font-black mb-3 text-white tracking-tight">Limite LITE Atingido</h3>
+                          <p className="text-sm text-zinc-400 mb-8 max-w-md leading-relaxed font-medium">Você clicou em 6 sinais do plano LITE. Faça upgrade para o plano <strong className="text-primary-purple">PRO</strong> para continuar recebendo oportunidades de entrada e sinais em tempo real 24 horas por dia.</p>
+                          <div className="w-full max-w-sm">
+                            <button onClick={() => setActiveTab('planos')} className="w-full py-5 bg-gradient-to-r from-primary-purple to-purple-600 rounded-2xl font-black text-white text-sm shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:scale-105 transition-transform uppercase tracking-[0.2em] relative overflow-hidden group">
+                              <span className="relative z-10 flex items-center justify-center gap-2">FAZER UPGRADE AGORA <Zap className="w-4 h-4" /></span>
+                              <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex-grow h-[550px] rounded-xl overflow-hidden border border-white/5 bg-black/50">
+                          <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${getTVSymbol(liveSignal?.par)}&interval=1&theme=dark`} 
                                   className="w-full h-full border-none"></iframe>
                       </div>
 
-                      <div className="w-full md:w-[320px] bg-[#0c0c0c] p-6 rounded-xl border-l-4 border-l-[#00ff00] flex flex-col shrink-0 shadow-lg justify-center">
-                          <h3 className="text-[#00ff00] text-lg font-black tracking-widest mb-6 font-sans">⚡ AXIOM SKILL 79%</h3>
+                      <div className="w-full md:w-[320px] bg-[#0c0c0c] p-6 rounded-xl border-l-4 border-l-primary-purple flex flex-col shrink-0 shadow-2xl relative">
+                          <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-zinc-400 tracking-widest text-xs uppercase font-bold flex items-center gap-2 drop-shadow-md">
+                              <Target className="w-4 h-4 text-primary-purple" /> Axiom Sniper
+                            </h3>
+                            {liveSignal?.confianca > 90 && (
+                              <div className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[9px] font-black rounded animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.3)] border border-emerald-500/20 tracking-wider">
+                                ALTA CONFIANÇA
+                              </div>
+                            )}
+                          </div>
                           
-                          <button 
-                              onClick={executarAnaliseN8N}
-                              className="w-full py-4 bg-[#00ff00] hover:bg-[#00dd00] hover:scale-[1.02] active:scale-95 text-black border-none rounded-lg font-black cursor-pointer transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(0,255,0,0.3)]">
-                              [ EXECUTAR ANÁLISE ]
-                          </button>
+                          <h2 className="text-5xl font-black text-white mb-1 tracking-tighter drop-shadow-lg">{liveSignal?.par || '---'}</h2>
+                          
+                          <div className="my-6">
+                            {liveSignal?.status_mercado === 'AGUARDAR' ? (
+                              <button disabled className="w-full py-6 bg-zinc-900/90 text-zinc-500 rounded-2xl font-black text-lg uppercase tracking-[0.15em] shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] cursor-not-allowed border border-zinc-800 flex flex-col items-center justify-center gap-1">
+                                <AlertCircle className="w-6 h-6 mb-1 opacity-50" />
+                                <span>Aguardar</span>
+                                <span className="text-[9px] text-zinc-600 mt-1 font-bold">BAIXA LIQUIDEZ / GUERRA</span>
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => setGatekeeperClicks(prev => prev + 1)}
+                                className={`w-full py-6 rounded-2xl font-black text-xl uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-white flex items-center justify-center gap-3 relative overflow-hidden group border border-white/10
+                                  ${liveSignal?.acao?.includes('COMPRA') || liveSignal?.acao?.includes('CALL') ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 
+                                    liveSignal?.acao?.includes('VENDA') || liveSignal?.acao?.includes('PUT') ? 'bg-gradient-to-br from-rose-500 to-rose-700 shadow-[0_0_30px_rgba(244,63,94,0.3)]' : 'bg-gradient-to-br from-zinc-700 to-zinc-900 border-zinc-700'}`
+                                }
+                              >
+                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <span className="relative z-10 drop-shadow-md">{liveSignal?.acao || 'AGUARDANDO'}</span>
+                                <Zap className="w-5 h-5 flex-shrink-0 relative z-10 text-white/80" />
+                              </button>
+                            )}
+                          </div>
 
-                          <div className="font-mono text-sm mt-8 space-y-3">
-                              <p className="text-white/80">{'>'} STATUS: <span className="font-bold animate-pulse" style={{ color: n8nStatusColor }}>{n8nStatus}</span></p>
-                              <div className="h-px w-full bg-white/5 my-3"></div>
-                              <p className="text-white/80">{'>'} VEREDITO: <span className="text-[#00ff00] font-black">{n8nResult.direcao}</span></p>
-                              <p className="text-white/80">{'>'} CONFIANÇA: <span className="text-white font-bold">{n8nResult.confianca}</span></p>
-                              <p className="text-white/80">{'>'} TAXA ATUAL: <span className="text-white font-bold">{n8nResult.taxa}</span></p>
+                          <div className="font-mono text-sm mb-8 bg-[#111] p-5 rounded-2xl border border-white/5 shadow-inner">
+                              <div className="flex justify-between items-center mb-3">
+                                <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Taxa de Entrada</span>
+                                <span className="text-white font-black text-base bg-white/5 px-2 py-1 rounded border border-white/5 drop-shadow-sm">{liveSignal?.taxa || '---'}</span>
+                              </div>
+                              <div className="h-px bg-white/5 w-full"></div>
+                              <div className="flex justify-between items-center mt-3 mb-3">
+                                <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Assertividade IA</span>
+                                <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/10 drop-shadow-sm">{liveSignal?.confianca ? `${liveSignal.confianca}%` : '---'}</span>
+                              </div>
+                              <div className="h-px bg-white/5 w-full"></div>
+                              <div className="flex justify-between items-center mt-3">
+                                <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Status Mercado</span>
+                                <span className="text-white font-bold bg-white/5 px-2 py-1 rounded border border-white/5 text-[10px] uppercase tracking-wider">{liveSignal?.status_mercado || '---'}</span>
+                              </div>
+                          </div>
+
+                          <div className="mt-auto">
+                            <h4 className="text-[10px] uppercase text-zinc-500 font-bold mb-3 flex items-center gap-2 tracking-widest">
+                              <History className="w-3 h-3" /> Entradas Recentes
+                            </h4>
+                            <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+                              {liveHistory.slice(1).map((hist, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-xs bg-white/5 hover:bg-white/10 transition-colors p-3 rounded-xl border border-white/5 group">
+                                  <div className="flex flex-col">
+                                    <span className="font-bold text-white/90 drop-shadow-sm">{hist.par}</span>
+                                    <span className="text-[9px] text-zinc-500 font-mono mt-0.5">{hist.taxa}</span>
+                                  </div>
+                                  <span className={`px-2 py-1 rounded font-black text-[9px] tracking-widest ${hist.acao?.includes('COMPRA') || hist.acao?.includes('CALL') ? 'bg-emerald-500/10 text-emerald-400' : hist.acao?.includes('VENDA') || hist.acao?.includes('PUT') ? 'bg-rose-500/10 text-rose-400' : 'bg-zinc-500/10 text-zinc-400'}`}>{hist.acao}</span>
+                                </div>
+                              ))}
+                              {liveHistory.length <= 1 && (
+                                <div className="p-4 text-center border border-dashed border-white/10 rounded-xl bg-white/5">
+                                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Aguardando sinais...</p>
+                                </div>
+                              )}
+                            </div>
                           </div>
                       </div>
                   </div>
