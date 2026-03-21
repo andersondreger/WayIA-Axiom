@@ -1,73 +1,20 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+const fs = require('fs');
+const path = require('path');
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  Activity, Shield, Zap, TrendingUp, TrendingDown, RefreshCw, 
-  Crown, Trophy, LineChart, Wallet, History, ChevronDown, 
-  CheckCircle2, Loader2, Camera, Image as ImageIcon, Eye, User, LogOut, LayoutGrid,
-  MessageSquare, Settings, Link as LinkIcon, Calendar, Target, AlertCircle
-} from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
-import { supabase } from './lib/supabase';
+const appPath = path.join(__dirname, 'src', 'App.tsx');
+const code = fs.readFileSync(appPath, 'utf-8');
 
-// Initialize Gemini with environment variable support for multiple platforms
-const getApiKey = () => {
-  try {
-    // Safely check for process.env
-    if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
-      return process.env.GEMINI_API_KEY;
-    }
-  } catch (e) {}
-  
-  try {
-    // Safely check for import.meta.env
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
-      return import.meta.env.VITE_GEMINI_API_KEY;
-    }
-  } catch (e) {}
-  
-  return '';
-};
+// Find the exact return statement where the JSX starts
+const returnIndex = code.indexOf('  return (');
 
-const apiKey = getApiKey();
-
-// Lazy initialization of Gemini to prevent startup crashes
-let aiInstance: GoogleGenAI | null = null;
-const getAi = () => {
-  if (!aiInstance) {
-    aiInstance = new GoogleGenAI({ apiKey: apiKey || 'dummy_key' });
-  }
-  return aiInstance;
-};
-
-type SignalState = 'IDLE' | 'SCANNING' | 'SIGNAL_FOUND';
-type Tab = 'planos' | 'ranking' | 'analise' | 'gestao' | 'historico' | 'calendario';
-
-interface Signal {
-  asset: string;
-  action: 'COMPRA (CALL)' | 'VENDA (PUT)';
-  color: string;
-  confidence: number;
-  timeframe: string;
+if (returnIndex === -1) {
+    console.error("Could not find the return statement to replace. Make sure the file hasn't been modified unexpectedly.");
+    process.exit(1);
 }
 
-const ASSETS = [
-  'EUR/USD', 'GBP/JPY', 'BTC/USDT', 'ETH/USD', 'AUD/CAD', 
-  'USD/JPY', 'EUR/GBP', 'SOL/USDT', 'XRP/USDT', 'GOLD'
-];
+const head = code.substring(0, returnIndex);
 
-export default function App() {
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    console.log("Vision AI: App Component Mounted");
-  }, []);
-
-  if (hasError) {
-    return (
+const newTail = `  return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex">
       {!showDashboard ? (
         <div id="welcome-screen" className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
@@ -77,8 +24,8 @@ export default function App() {
               <g opacity="0.8">
                 {Array.from({ length: 120 }).map((_, i) => (
                   <path
-                    key={`left-${i}`}
-                    d={`M -100 ${800 - i * 8} Q ${400} ${400}, 1600 ${400 + (i - 60) * 15}`}
+                    key={\`left-\${i}\`}
+                    d={\`M -100 \${800 - i * 8} Q \${400} \${400}, 1600 \${400 + (i - 60) * 15}\`}
                     stroke="#8B5CF6"
                     strokeWidth="0.4"
                     strokeOpacity={0.05 + (i / 120) * 0.3}
@@ -127,7 +74,7 @@ export default function App() {
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex flex-col items-center gap-1 transition-all ${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={\`flex flex-col items-center gap-1 transition-all \${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}\`}
               >
                 <tab.icon className="w-5 h-5" />
                 <span className="text-[9px] uppercase font-bold tracking-widest">{tab.label}</span>
@@ -152,17 +99,17 @@ export default function App() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-3 block px-2">Main Menu</span>
                 <ul className="space-y-1">
                   <li>
-                    <button onClick={() => setActiveTab('analise')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analise' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                    <button onClick={() => setActiveTab('analise')} className={\`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors \${activeTab === 'analise' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}\`}>
                       <LineChart className="w-4 h-4" /> Dashboard
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => setActiveTab('historico')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'historico' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                    <button onClick={() => setActiveTab('historico')} className={\`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors \${activeTab === 'historico' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}\`}>
                       <History className="w-4 h-4" /> Live History
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => setActiveTab('calendario')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'calendario' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                    <button onClick={() => setActiveTab('calendario')} className={\`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors \${activeTab === 'calendario' ? 'bg-indigo-600 text-white' : 'hover:bg-white/5 text-slate-300'}\`}>
                       <Calendar className="w-4 h-4" /> Calendário
                     </button>
                   </li>
@@ -173,12 +120,12 @@ export default function App() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-3 block px-2">Management</span>
                 <ul className="space-y-1">
                   <li>
-                    <button onClick={() => setActiveTab('gestao')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'gestao' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                    <button onClick={() => setActiveTab('gestao')} className={\`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors \${activeTab === 'gestao' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-slate-300'}\`}>
                       <Wallet className="w-4 h-4" /> Integrações (n8n)
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => setActiveTab('ranking')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'ranking' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-slate-300'}`}>
+                    <button onClick={() => setActiveTab('ranking')} className={\`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors \${activeTab === 'ranking' ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-slate-300'}\`}>
                       <Trophy className="w-4 h-4" /> Team Ranking
                     </button>
                   </li>
@@ -280,7 +227,7 @@ export default function App() {
                         </div>
                       </div>
                       <div className="flex-1 rounded-2xl overflow-hidden border border-slate-100 bg-[#f8f9fa]">
-                        <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${getTVSymbol(liveSignal?.par)}&interval=1&theme=light`} 
+                        <iframe src={\`https://s.tradingview.com/widgetembed/?symbol=\${getTVSymbol(liveSignal?.par)}&interval=1&theme=light\`} 
                                 className="w-full h-full border-none pointer-events-auto"></iframe>
                       </div>
                     </div>
@@ -323,9 +270,9 @@ export default function App() {
                           <span className="text-xs font-semibold text-slate-500">AI Confidence</span>
                           <div className="flex items-center gap-2">
                             <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-indigo-500 transition-all duration-1000" style={{width: `${liveSignal?.confianca || 0}%`}}></div>
+                              <div className="h-full bg-indigo-500 transition-all duration-1000" style={{width: \`\${liveSignal?.confianca || 0}%\`}}></div>
                             </div>
-                            <span className="text-xs font-bold text-indigo-600">{liveSignal?.confianca ? `${liveSignal.confianca}%` : '--'}</span>
+                            <span className="text-xs font-bold text-indigo-600">{liveSignal?.confianca ? \`\${liveSignal.confianca}%\` : '--'}</span>
                           </div>
                         </div>
                         <div className="flex justify-between py-3">
@@ -349,9 +296,9 @@ export default function App() {
                         ) : (
                            <button 
                              onClick={() => setGatekeeperClicks(prev => prev + 1)}
-                             className={`w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg transition-transform hover:-translate-y-0.5 active:translate-y-0.5 text-white flex items-center justify-center gap-2
-                               ${liveSignal?.acao?.includes('COMPRA') || liveSignal?.acao?.includes('CALL') ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 
-                                 liveSignal?.acao?.includes('VENDA') || liveSignal?.acao?.includes('PUT') ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/30' : 'bg-slate-800'}`
+                             className={\`w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg transition-transform hover:-translate-y-0.5 active:translate-y-0.5 text-white flex items-center justify-center gap-2
+                               \${liveSignal?.acao?.includes('COMPRA') || liveSignal?.acao?.includes('CALL') ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 
+                                 liveSignal?.acao?.includes('VENDA') || liveSignal?.acao?.includes('PUT') ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/30' : 'bg-slate-800'}\`
                              }
                            >
                              Execute {liveSignal?.acao || 'ANALYSIS'}
@@ -398,13 +345,13 @@ export default function App() {
                                   <span className="font-mono text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded">{item.taxa}</span>
                                 </td>
                                 <td className="px-6 py-4">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
-                                    ${item.acao?.includes('COMPRA') || item.acao?.includes('CALL') ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                  <span className={\`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
+                                    \${item.acao?.includes('COMPRA') || item.acao?.includes('CALL') ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}\`}>
                                     {item.acao}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                  <span className="text-sm font-bold text-slate-700">{item.confianca ? `${item.confianca}%` : '---'}</span>
+                                  <span className="text-sm font-bold text-slate-700">{item.confianca ? \`\${item.confianca}%\` : '---'}</span>
                                 </td>
                               </tr>
                             ))}
@@ -509,3 +456,7 @@ export default function App() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync(appPath, head + newTail);
+console.log("App.tsx successfully updated with new Layout!");
