@@ -3,173 +3,580 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AXIOM PRIME | Acesso Deluxe</title>
+    <title>AXIOM PRIME | O Futuro da Execução Multimercado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["Fira Code", "monospace"],
+            },
+            colors: {
+              brand: {
+                400: "#10b981", // emerald-500
+                500: "#059669", // emerald-600
+                glow: "#00dc82",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      :root {
-        --cyan: #00ffff;
-        --magenta: #ff00ff;
-        --gold: #ffd700;
-        --bg: #030303;
-      }
       body {
-        background-color: var(--bg);
-        font-family: "Fira Code", monospace;
-        color: #e2e8f0;
-        overflow: hidden;
+        background-color: #030303;
+        color: #fff;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
       }
-      .waves {
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .glow-bg {
         position: absolute;
-        width: 100%;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300ffff10" d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
-          repeat-x;
-        background-size: 1440px 320px;
-        animation: wave 20s linear infinite;
-        opacity: 0.3;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(16, 185, 129, 0.15) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        top: -200px;
+        left: -200px;
+        z-index: -1;
+        border-radius: 50%;
+        filter: blur(60px);
       }
-      @keyframes wave {
-        0% {
-          background-position-x: 0;
-        }
-        100% {
-          background-position-x: -1440px;
-        }
+      .glow-bg-2 {
+        position: absolute;
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(
+          circle,
+          rgba(6, 182, 212, 0.1) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        bottom: 0;
+        right: -200px;
+        z-index: -1;
+        border-radius: 50%;
+        filter: blur(80px);
       }
-      .glass {
-        background: rgba(10, 10, 10, 0.5);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      .card-hover {
+        transition: all 0.3s ease;
       }
-      .neon-text-cyan {
-        color: var(--cyan);
-        text-shadow: 0 0 10px var(--cyan);
+      .card-hover:hover {
+        transform: translateY(-5px);
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.2);
       }
-      .neon-text-gold {
-        color: var(--gold);
-        text-shadow: 0 0 10px var(--gold);
-      }
-      .input-deluxe {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(0, 255, 255, 0.1);
-        color: white;
-      }
-      .btn-deluxe {
-        background: linear-gradient(90deg, #00ffff50, #ff00ff50);
+      .input-premium {
+        background: rgba(0, 0, 0, 0.5);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: 0.3s;
-        cursor: pointer;
+        transition: all 0.3s ease;
       }
-      .btn-deluxe:hover {
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+      .input-premium:focus {
+        border-color: #10b981;
+        outline: none;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
         transform: scale(1.02);
+      }
+      .text-gradient {
+        background: linear-gradient(to right, #ffffff, #a7f3d0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
     </style>
   </head>
-  <body class="flex items-center justify-center min-h-screen relative">
-    <div class="waves"></div>
-    <main
-      class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto p-10 z-10 w-full"
+  <body class="antialiased selection:bg-brand-500 selection:text-white">
+    <!-- Background Glows -->
+    <div class="glow-bg"></div>
+    <div class="glow-bg-2"></div>
+
+    <!-- Navbar -->
+    <nav
+      class="fixed w-full z-50 glass-panel border-b border-white/5 border-x-0 border-t-0 bg-black/50 backdrop-blur-xl"
     >
-      <div class="flex flex-col justify-center gap-8 glass p-12 rounded-3xl">
-        <div class="flex items-center gap-4">
+      <div
+        class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between"
+      >
+        <div
+          class="flex items-center gap-2 cursor-pointer"
+          onclick="window.scrollTo(0, 0)"
+        >
           <div
-            class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black italic text-xl"
+            class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-500 flex items-center justify-center font-bold text-black text-lg"
           >
             A
           </div>
-          <h1 class="text-2xl font-bold tracking-widest uppercase">
-            AXIOM<span class="neon-text-gold">PRIME</span>
-          </h1>
-        </div>
-        <p class="text-4xl md:text-5xl font-extrabold text-white leading-tight">
-          Antecipar. Executar. <span class="neon-text-cyan">Replicar.</span>
-        </p>
-        <p class="text-sm text-gray-400 max-w-md">
-          Fusão de Inteligência Quântica e Execução Modal Industrial. A
-          assimetria de mercado que você buscava.
-        </p>
-        <a
-          href="https://SEU_LINK_DE_CHECKOUT.com/promo7"
-          class="btn-deluxe px-8 py-4 rounded-xl text-center text-white font-bold tracking-wider text-sm uppercase"
-          >ATIVAR TESTE 7 DIAS (R$ 0,00)</a
-        >
-        <p class="text-[10px] text-gray-600 text-center">
-          R$ 197,00/mês após o teste. Cancele quando quiser.
-        </p>
-      </div>
-      <div class="glass p-12 rounded-3xl flex flex-col justify-center">
-        <h2
-          class="text-xs text-gray-500 uppercase tracking-[0.3em] mb-10 text-center"
-        >
-          Acesso Autorizado
-        </h2>
-        <form id="login-form" class="space-y-6">
-          <div>
-            <label class="text-[10px] text-cyan-400 uppercase"
-              >E-mail Quantum</label
-            >
-            <input
-              type="email"
-              id="email"
-              class="w-full p-4 rounded-lg input-deluxe mt-1 text-sm FiraCode"
-              required
-            />
-          </div>
-          <div>
-            <label class="text-[10px] text-cyan-400 uppercase"
-              >Chave Mestra</label
-            >
-            <input
-              type="password"
-              id="password"
-              class="w-full p-4 rounded-lg input-deluxe mt-1 text-sm FiraCode"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full btn-deluxe py-4 rounded-lg text-white font-bold text-sm tracking-widest uppercase"
+          <span class="font-bold text-xl tracking-wide font-mono"
+            >AXIOM<span class="text-brand-400">PRIME</span></span
           >
-            ENTRAR NO NEXUS
-          </button>
-        </form>
-        <p
-          id="msg-erro"
-          class="text-xs text-red-500 mt-4 text-center hidden"
-        ></p>
+        </div>
+        <div
+          class="hidden md:flex items-center gap-8 text-sm text-gray-400 font-medium"
+        >
+          <a href="#hero" class="hover:text-white transition">Home</a>
+          <a href="#features" class="hover:text-white transition">Features</a>
+          <a href="#trusted" class="hover:text-white transition">Partners</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a
+            href="#login"
+            class="px-5 py-2.5 rounded-full text-sm font-semibold btn-primary shadow-lg shadow-brand-500/20"
+            >Acessar Nexus</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main
+      id="hero"
+      class="pt-36 pb-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[90vh]"
+    >
+      <!-- Hero Text (Inspirado na 2ª imagem "Manage your finances") -->
+      <div class="flex flex-col gap-6 z-10">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border border-brand-400/30 w-fit text-xs font-semibold text-brand-400"
+        >
+          <span
+            class="flex h-2 w-2 rounded-full bg-brand-400 animate-pulse"
+          ></span>
+          Nexus V2 Active
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
+          Manage your <br />
+          <span class="text-gradient">finances easily</span> <br />
+          and with confidence
+        </h1>
+
+        <p class="text-gray-400 text-lg max-w-lg mt-2 leading-relaxed">
+          Axiom empodera você para gerenciar de forma segura, monitorar ativos
+          em tempo real e crescer com nossa inteligência algorítmica.
+        </p>
+
+        <div class="flex items-center gap-4 mt-6">
+          <a
+            href="#login"
+            class="btn-primary px-8 py-4 rounded-xl font-semibold outline-none focus:ring-2 focus:ring-brand-400 transition flex items-center gap-2"
+          >
+            Get Started
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              ></path>
+            </svg>
+          </a>
+          <a
+            href="#features"
+            class="px-8 py-4 rounded-xl font-semibold glass-panel hover:bg-white/5 transition flex items-center gap-2"
+          >
+            Learn More
+          </a>
+        </div>
+      </div>
+
+      <!-- Login Form / Dashboard Mockup Combo -->
+      <div
+        id="login"
+        class="relative z-10 lg:ml-auto w-full max-w-md pt-10 lg:pt-0"
+      >
+        <div
+          class="absolute -inset-1 bg-gradient-to-r from-brand-400 to-cyan-500 rounded-2xl blur opacity-20"
+        ></div>
+        <div class="glass-panel p-10 rounded-2xl relative shadow-2xl">
+          <h3 class="text-2xl font-bold mb-1">Acesso ao Nexus</h3>
+          <p class="text-sm text-gray-400 mb-8">
+            Insira sua Chave Mestra para continuar.
+          </p>
+
+          <form id="login-form" class="space-y-5">
+            <div>
+              <label
+                class="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider"
+                >E-mail Quantum</label
+              >
+              <input
+                type="email"
+                id="email"
+                class="w-full px-4 py-3 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600"
+                placeholder="nome@quantum.com"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="password"
+                class="w-full px-4 py-3 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full btn-primary py-3.5 rounded-xl font-bold text-sm mt-4 tracking-wider uppercase shadow-lg shadow-emerald-500/20"
+            >
+              ENTRAR
+            </button>
+          </form>
+          <p
+            id="msg-erro"
+            class="text-xs text-red-400 mt-4 text-center font-mono hidden"
+          ></p>
+        </div>
+
+        <!-- Floating Stats Widget (Like the card floating in image) -->
+        <div
+          class="absolute -bottom-6 -left-8 md:-left-12 glass-panel p-4 rounded-xl shadow-2xl flex items-center gap-4 animate-bounce"
+          style="animation-duration: 3s"
+        >
+          <div
+            class="w-10 h-10 rounded-full bg-brand-400/20 flex items-center justify-center text-brand-400"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+              ></path>
+            </svg>
+          </div>
+          <div>
+            <p
+              class="text-[10px] text-gray-400 uppercase tracking-widest font-mono"
+            >
+              Real-time Income
+            </p>
+            <p class="font-bold text-lg font-mono text-white">$22,760.23</p>
+          </div>
+        </div>
       </div>
     </main>
+
+    <!-- Trusted By Section -->
+    <section
+      id="trusted"
+      class="max-w-7xl mx-auto px-6 py-12 border-t border-white/5 border-b border-white/5 mb-24"
+    >
+      <p class="text-center text-sm text-gray-500 font-medium mb-10">
+        Trusted by the leaders
+      </p>
+      <div
+        class="flex flex-wrap justify-center md:justify-between items-center gap-10 opacity-60 grayscale hover:grayscale-0 transition duration-500"
+      >
+        <h4 class="text-xl font-bold font-serif italic">BeReal.</h4>
+        <h4 class="text-xl font-bold flex items-center gap-2">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-1 15h-2v-6h2v6m-1-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m5 7h-2v-4c0-.55-.45-1-1-1s-1 .45-1 1v4h-2v-6h2v1.1c.36-.67 1.2-1.2 2-1.2 1.66 0 3 1.34 3 3v4z"
+            />
+          </svg>
+          SOUNDCLOUD
+        </h4>
+        <h4 class="text-xl font-bold tracking-tighter">flickr</h4>
+        <h4 class="text-xl font-bold font-serif">Medium</h4>
+        <h4 class="text-xl font-bold uppercase tracking-widest">Pinterest</h4>
+      </div>
+    </section>
+
+    <!-- Features Grid (Bento Box - Inspirado na 2ª Imagem) -->
+    <section id="features" class="max-w-7xl mx-auto px-6 py-10 mb-20">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-bold mb-4">
+          Streamline finances with <br /><span
+            class="font-serif italic text-brand-400"
+            >smart features</span
+          >
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Feature 1: Real-Time Analytics -->
+        <div
+          class="md:col-span-2 glass-panel p-8 rounded-[2rem] card-hover relative overflow-hidden bg-white/5"
+        >
+          <h3 class="text-xl font-bold mb-2">Real-Time Analytics</h3>
+          <p class="text-sm text-gray-400 mb-8 max-w-sm">
+            Monitor your finances live with clear, intuitive dashboards.
+          </p>
+
+          <!-- Fake Bar Chart -->
+          <div class="mt-12 flex items-end gap-3 h-32 opacity-80 px-4">
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[30%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[40%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[50%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[60%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[20%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-cyan-400 rounded-t-md h-[40%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[60%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[80%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[100%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[90%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[80%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[70%]"
+              ></div>
+            </div>
+            <div class="w-full bg-brand-400/20 rounded-t-md h-[40%] relative">
+              <div
+                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[50%]"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 2: Smart Budgeting -->
+        <div
+          class="glass-panel p-8 rounded-[2rem] card-hover flex flex-col justify-between overflow-hidden relative"
+        >
+          <div
+            class="absolute -right-10 -top-10 w-40 h-40 bg-brand-400/10 rounded-full blur-2xl"
+          ></div>
+          <div>
+            <h3 class="text-xl font-bold mb-2 relative z-10">
+              Smart Budgeting
+            </h3>
+            <p class="text-sm text-gray-400 max-w-sm relative z-10">
+              Plan and adjust with AI-powered budget suggestions.
+            </p>
+          </div>
+          <div class="mt-8 flex justify-center relative z-10">
+            <!-- Circular fake chart (Donut) -->
+            <div
+              class="w-32 h-32 rounded-full border-[12px] border-[#1a1a1a] border-t-brand-400 border-r-brand-400 border-b-cyan-500 transform rotate-12 relative shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+            >
+              <div
+                class="absolute inset-0 flex items-center justify-center -rotate-12"
+              >
+                <span class="text-xs text-gray-400 font-bold">Distrib.</span>
+              </div>
+              <!-- Little node circles attached -->
+              <div
+                class="absolute top-0 right-0 w-3 h-3 bg-white rounded-full translate-x-1 -translate-y-1 shadow-[0_0_10px_#fff]"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3: Growth Score -->
+        <div
+          class="glass-panel p-8 rounded-[2rem] card-hover flex flex-col items-center justify-center gap-4 text-center"
+        >
+          <!-- Gauge mockup -->
+          <div class="relative w-40 h-20 overflow-hidden mt-4">
+            <div
+              class="w-40 h-40 rounded-full border-[10px] border-[#1a1a1a] border-t-brand-400 border-l-brand-400 rotate-45"
+            ></div>
+            <div
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-3xl font-bold font-mono"
+            >
+              75
+            </div>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold">Growth Score</h3>
+            <p class="text-xs text-gray-400 mt-1">Based on global analytics</p>
+          </div>
+        </div>
+
+        <!-- Feature 4: Secure Syncing -->
+        <div
+          class="md:col-span-2 glass-panel p-8 rounded-[2rem] card-hover bg-gradient-to-r from-brand-900/10 to-transparent flex items-center justify-between overflow-hidden relative"
+        >
+          <div
+            class="absolute left-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl"
+          ></div>
+          <div class="relative z-10">
+            <h3 class="text-3xl font-bold mb-2">Secure Syncing</h3>
+            <p class="text-sm text-gray-400 max-w-sm">
+              Monitor your finances live with automated secure connections
+              globally.
+            </p>
+          </div>
+          <!-- Mockup line chart waves -->
+          <div class="relative z-10 flex gap-1 h-16 w-32 items-end opacity-50">
+            <div class="w-1 bg-brand-400 h-2"></div>
+            <div class="w-1 bg-brand-400 h-6"></div>
+            <div class="w-1 bg-brand-400 h-4"></div>
+            <div class="w-1 bg-brand-400 h-10"></div>
+            <div class="w-1 bg-brand-400 h-8"></div>
+            <div class="w-1 bg-brand-400 h-14"></div>
+            <div class="w-1 bg-brand-400 h-12"></div>
+            <div class="w-1 bg-brand-400 h-16"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Large Bottom CTA / Branding -->
+    <section
+      class="max-w-7xl mx-auto px-6 py-20 text-center relative overflow-hidden flex flex-col items-center"
+    >
+      <h1
+        class="text-[12vw] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-brand-900 via-brand-500 to-white opacity-40 select-none"
+      >
+        AXIOM PRIME
+      </h1>
+      <div class="absolute inset-0 flex items-center justify-center flex-col">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">
+          Ready to scale your precision?
+        </h2>
+        <a
+          href="#login"
+          class="btn-primary px-10 py-4 rounded-full font-bold shadow-lg shadow-brand-500/30 text-lg"
+          >Entrar no Sistema</a
+        >
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-10 mt-10 bg-black/50">
+      <div
+        class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6"
+      >
+        <div class="flex items-center gap-2 text-gray-400">
+          <div
+            class="w-6 h-6 rounded bg-brand-500 flex items-center justify-center font-bold text-black text-xs"
+          >
+            A
+          </div>
+          <span class="font-bold text-white">AXIOM</span> © 2026 Dreger
+        </div>
+        <div class="flex gap-6 text-sm text-gray-500">
+          <a href="#" class="hover:text-white transition">Features</a>
+          <a href="#" class="hover:text-white transition">Pricing</a>
+          <a href="#" class="hover:text-white transition">Contact</a>
+          <a href="#" class="hover:text-white transition">Privacy</a>
+        </div>
+      </div>
+    </footer>
+
     <script>
       const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
       const SB_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
       const supabase = supabase.createClient(SB_URL, SB_KEY);
+
+      // Smooth scroll para links da navbar
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth" });
+          }
+        });
+      });
+
+      // Controlador do formulário
       const loginForm = document.getElementById("login-form");
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
         const msgErro = document.getElementById("msg-erro");
+
+        // Animação do botão
+        const btn = loginForm.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = "VERIFICANDO...";
+        btn.classList.add("opacity-70");
+
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
         if (error) {
-          msgErro.innerText = "Acesso Negado: Chave Inválida.";
+          msgErro.innerText = "Acesso Negado: Credenciais Inválidas.";
           msgErro.classList.remove("hidden");
+          btn.innerText = originalText;
+          btn.classList.remove("opacity-70");
         } else {
-          window.location.href = "dashboard.html";
+          msgErro.classList.add("hidden");
+          btn.innerText = "AUTORIZADO!";
+          btn.classList.replace("bg-gradient-to-r", "bg-brand-400"); // Fica verde sólido
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 800);
         }
       });
+
+      // Se já estiver logado, muda o texto do botão para não precisar fazer login de novo
+      async function checkAutoLogin() {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          const btn = loginForm.querySelector('button[type="submit"]');
+          btn.innerText = "ACESSAR DASHBOARD";
+          document.getElementById("email").value = session.user.email;
+          document.getElementById("email").disabled = true;
+          document.getElementById("password").value = "********";
+          document.getElementById("password").disabled = true;
+
+          loginForm.onsubmit = (e) => {
+            e.preventDefault();
+            window.location.href = "dashboard.html";
+          };
+        }
+      }
+      checkAutoLogin();
     </script>
   </body>
 </html>
