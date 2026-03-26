@@ -1,85 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXIOM PRIME | THE NEXUS</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AXIOM PRIME | Acesso Deluxe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root { --cyan: #00ffff; --magenta: #ff00ff; --gold: #ffd700; --bg: #050505; }
-        body { background-color: var(--bg); font-family: 'Fira Code', monospace; color: #e2e8f0; }
-        .glass { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .neon-cyan { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .gold-glow { color: var(--gold); text-shadow: 0 0 15px var(--gold); }
-        .pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-    </style>
-</head>
-<body class="p-4 md:p-10">
-    <div class="max-w-6xl mx-auto">
-        <nav class="flex justify-between items-center mb-8 glass p-6 rounded-2xl">
-            <h1 class="text-xl font-bold tracking-widest">AXIOM<span class="gold-glow">PRIME</span></h1>
-            <div class="text-[10px] text-right">
-                <span class="block text-gray-500">ENGINE STATUS</span>
-                <span class="neon-cyan pulse">● SYNCED WITH SUPABASE</span>
-            </div>
-        </nav>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="glass rounded-3xl p-10 flex flex-col items-center justify-center text-center">
-                <div class="w-40 h-40 border-2 border-dashed border-yellow-500/30 rounded-full flex items-center justify-center mb-6 animate-spin-slow">
-                    <div id="status-circle" class="w-32 h-32 rounded-full border border-cyan-500/20 flex items-center justify-center">
-                        <span id="current-asset" class="text-xs gold-glow">BUSCANDO</span>
-                    </div>
-                </div>
-                <p id="status-msg" class="text-[10px] tracking-[0.3em] uppercase">Monitoramento Ativo</p>
-            </div>
-
-            <div class="lg:col-span-2 glass rounded-3xl p-8">
-                <h2 class="text-xs mb-6 text-gray-500 tracking-widest uppercase">The Nexus Live Feed</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
-                        <thead>
-                            <tr class="text-gray-600 border-b border-gray-800 text-left">
-                                <th class="pb-4">HORA</th>
-                                <th class="pb-4">ATIVO</th>
-                                <th class="pb-4">AÇÃO</th>
-                                <th class="pb-4">CONF.</th>
-                                <th class="pb-4 text-right">STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="signal-rows">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
-
-        async function loadSignals() {
-            const { data } = await supabase.from('live_signals').select('*').order('created_at', { ascending: false }).limit(6);
-            if (data) {
-                document.getElementById('current-asset').innerText = data[0]?.par || "BUSCANDO";
-                document.getElementById('signal-rows').innerHTML = data.map(s => `
-                    <tr class="border-b border-gray-900/50 hover:bg-white/5 transition">
-                        <td class="py-4 text-gray-500">${new Date(s.created_at).toLocaleTimeString('pt-BR')}</td>
-                        <td class="py-4 font-bold neon-cyan">${s.par}</td>
-                        <td class="py-4 ${s.acao.includes('COMPRAR') ? 'text-green-400' : 'text-red-400'}">${s.acao}</td>
-                        <td class="py-4">${s.confianca}</td>
-                        <td class="py-4 text-right gold-glow font-bold italic">${s.status}</td>
-                    </tr>
-                `).join('');
-            }
+      :root {
+        --cyan: #00ffff;
+        --magenta: #ff00ff;
+        --gold: #ffd700;
+        --bg: #030303;
+      }
+      body {
+        background-color: var(--bg);
+        font-family: "Fira Code", monospace;
+        color: #e2e8f0;
+        overflow: hidden;
+      }
+      .waves {
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300ffff10" d="M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+          repeat-x;
+        background-size: 1440px 320px;
+        animation: wave 20s linear infinite;
+        opacity: 0.3;
+      }
+      @keyframes wave {
+        0% {
+          background-position-x: 0;
         }
-        setInterval(loadSignals, 2000);
-        loadSignals();
+        100% {
+          background-position-x: -1440px;
+        }
+      }
+      .glass {
+        background: rgba(10, 10, 10, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      }
+      .neon-text-cyan {
+        color: var(--cyan);
+        text-shadow: 0 0 10px var(--cyan);
+      }
+      .neon-text-gold {
+        color: var(--gold);
+        text-shadow: 0 0 10px var(--gold);
+      }
+      .input-deluxe {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 255, 255, 0.1);
+        color: white;
+      }
+      .btn-deluxe {
+        background: linear-gradient(90deg, #00ffff50, #ff00ff50);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: 0.3s;
+        cursor: pointer;
+      }
+      .btn-deluxe:hover {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        transform: scale(1.02);
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen relative">
+    <div class="waves"></div>
+    <main
+      class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto p-10 z-10 w-full"
+    >
+      <div class="flex flex-col justify-center gap-8 glass p-12 rounded-3xl">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black italic text-xl"
+          >
+            A
+          </div>
+          <h1 class="text-2xl font-bold tracking-widest uppercase">
+            AXIOM<span class="neon-text-gold">PRIME</span>
+          </h1>
+        </div>
+        <p class="text-4xl md:text-5xl font-extrabold text-white leading-tight">
+          Antecipar. Executar. <span class="neon-text-cyan">Replicar.</span>
+        </p>
+        <p class="text-sm text-gray-400 max-w-md">
+          Fusão de Inteligência Quântica e Execução Modal Industrial. A
+          assimetria de mercado que você buscava.
+        </p>
+        <a
+          href="https://SEU_LINK_DE_CHECKOUT.com/promo7"
+          class="btn-deluxe px-8 py-4 rounded-xl text-center text-white font-bold tracking-wider text-sm uppercase"
+          >ATIVAR TESTE 7 DIAS (R$ 0,00)</a
+        >
+        <p class="text-[10px] text-gray-600 text-center">
+          R$ 197,00/mês após o teste. Cancele quando quiser.
+        </p>
+      </div>
+      <div class="glass p-12 rounded-3xl flex flex-col justify-center">
+        <h2
+          class="text-xs text-gray-500 uppercase tracking-[0.3em] mb-10 text-center"
+        >
+          Acesso Autorizado
+        </h2>
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label class="text-[10px] text-cyan-400 uppercase"
+              >E-mail Quantum</label
+            >
+            <input
+              type="email"
+              id="email"
+              class="w-full p-4 rounded-lg input-deluxe mt-1 text-sm FiraCode"
+              required
+            />
+          </div>
+          <div>
+            <label class="text-[10px] text-cyan-400 uppercase"
+              >Chave Mestra</label
+            >
+            <input
+              type="password"
+              id="password"
+              class="w-full p-4 rounded-lg input-deluxe mt-1 text-sm FiraCode"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full btn-deluxe py-4 rounded-lg text-white font-bold text-sm tracking-widest uppercase"
+          >
+            ENTRAR NO NEXUS
+          </button>
+        </form>
+        <p
+          id="msg-erro"
+          class="text-xs text-red-500 mt-4 text-center hidden"
+        ></p>
+      </div>
+    </main>
+    <script>
+      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
+      const SB_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
+      const supabase = supabase.createClient(SB_URL, SB_KEY);
+      const loginForm = document.getElementById("login-form");
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const msgErro = document.getElementById("msg-erro");
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          msgErro.innerText = "Acesso Negado: Chave Inválida.";
+          msgErro.classList.remove("hidden");
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
