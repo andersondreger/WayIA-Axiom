@@ -183,9 +183,9 @@
           COMEÇAR AGORA
         </p>
 
-        <button
-          onclick="toggleLoginModal()"
-          class="relative group cursor-pointer border-none bg-transparent outline-none"
+        <a
+          href="login.html"
+          class="relative group cursor-pointer border-none bg-transparent outline-none flex"
         >
           <div
             class="w-24 h-24 rounded-full border border-brand-500 flex items-center justify-center relative shadow-[0_0_40px_rgba(255,107,0,0.3)] transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(255,107,0,0.6)]"
@@ -207,7 +207,7 @@
               </div>
             </div>
           </div>
-        </button>
+        </a>
       </div>
 
       <!-- Top Right: Float Card -->
@@ -309,9 +309,9 @@
         class="hidden md:flex absolute bottom-8 right-10 z-50 flex-col items-center gap-2"
       >
         <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">ACESSAR</span>
-        <button
-          onclick="toggleLoginModal()"
-          class="relative group cursor-pointer border-none bg-transparent outline-none mt-1"
+        <a
+          href="login.html"
+          class="relative group cursor-pointer border-none bg-transparent outline-none mt-1 flex"
         >
           <div
             class="w-14 h-14 rounded-full border border-brand-500 flex items-center justify-center relative shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(255,107,0,0.6)]"
@@ -333,7 +333,7 @@
               </div>
             </div>
           </div>
-        </button>
+        </a>
       </div>
 
       <!-- Bottom Center: Cookie Banner -->
@@ -383,184 +383,5 @@
       </div>
     </main>
 
-    <!-- Login Modal (Hidden by default) -->
-    <div
-      id="login-modal"
-      class="hidden fixed inset-0 z-[100] items-center justify-center px-4 bg-black/60 backdrop-blur-md"
-    >
-      <div
-        class="relative w-full max-w-md glass-panel p-10 rounded-[2rem] border border-white/10 shadow-2xl"
-      >
-        <!-- Glow effect behind form -->
-        <div
-          class="absolute inset-0 bg-gradient-to-tr from-brand-500/20 to-transparent rounded-[2rem] opacity-50 pointer-events-none"
-        ></div>
-
-        <button
-          onclick="toggleLoginModal()"
-          class="absolute top-6 right-6 text-gray-400 hover:text-white transition bg-white/5 rounded-full p-2"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-        </button>
-
-        <div class="relative z-10">
-          <div class="flex items-center gap-3 mb-8">
-            <div
-              class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-500 flex items-center justify-center font-bold text-black border border-white/20"
-            >
-              A
-            </div>
-            <div>
-              <h3 class="text-xl font-bold tracking-tight">O Nexus</h3>
-              <p
-                class="text-[10px] text-brand-400 uppercase tracking-widest font-mono"
-              >
-                Acesso Autorizado
-              </p>
-            </div>
-          </div>
-
-          <form id="login-form" class="space-y-6">
-            <div>
-              <label
-                class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest"
-                >E-mail Quantum</label
-              >
-              <input
-                type="email"
-                id="email"
-                class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50"
-                placeholder="agente@quantum.com"
-                required
-              />
-            </div>
-            <div>
-              <label
-                class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest"
-                >Chave Mestra</label
-              >
-              <input
-                type="password"
-                id="password"
-                class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              class="w-full btn-primary py-4 rounded-xl font-bold text-sm mt-4 tracking-widest uppercase shadow-lg shadow-brand-500/20 active:scale-95 flex justify-center items-center gap-2"
-            >
-              Autenticar
-              <svg
-                class="w-4 h-4 opacity-70"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                ></path>
-              </svg>
-            </button>
-          </form>
-          <p
-            id="msg-erro"
-            class="text-xs text-red-500 mt-5 text-center font-mono font-medium hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20"
-          ></p>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-      const SB_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-      const supabase = supabase.createClient(SB_URL, SB_KEY);
-
-      // Modal Control
-      const modal = document.getElementById("login-modal");
-      function toggleLoginModal() {
-        if (modal.classList.contains("hidden")) {
-          modal.classList.remove("hidden");
-          modal.classList.add("flex");
-          modal.classList.add("modal-enter-active");
-        } else {
-          modal.classList.add("hidden");
-          modal.classList.remove("flex");
-          modal.classList.remove("modal-enter-active");
-        }
-      }
-
-      // Login Form Control
-      const loginForm = document.getElementById("login-form");
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const msgErro = document.getElementById("msg-erro");
-
-        const btn = loginForm.querySelector('button[type="submit"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> CONECTANDO...`;
-        btn.classList.add("opacity-80", "cursor-not-allowed");
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          msgErro.innerText = "Acesso Negado: Chave Inválida.";
-          msgErro.classList.remove("hidden");
-          btn.innerHTML = originalText;
-          btn.classList.remove("opacity-80", "cursor-not-allowed");
-        } else {
-          msgErro.classList.add("hidden");
-          btn.innerHTML = "SISTEMA DESBLOQUEADO!";
-          btn.classList.remove("opacity-80", "cursor-not-allowed");
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 600);
-        }
-      });
-
-      // Check Auto Login
-      async function checkAutoLogin() {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) {
-          const btn = loginForm.querySelector('button[type="submit"]');
-          btn.innerHTML = "ACESSAR DASHBOARD";
-          document.getElementById("email").value = session.user.email;
-          document.getElementById("email").disabled = true;
-          document.getElementById("password").value = "********";
-          document.getElementById("password").disabled = true;
-
-          loginForm.onsubmit = (e) => {
-            e.preventDefault();
-            window.location.href = "dashboard.html";
-          };
-        }
-      }
-      checkAutoLogin();
-    </script>
   </body>
 </html>

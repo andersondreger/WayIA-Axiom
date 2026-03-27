@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AXIOM PRIME | Acesso ao Nexus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Fira Code', 'monospace'] },
+          colors: { brand: { 400: '#ff8a00', 500: '#ff6b00', glow: '#ff5500' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #050505; color: #fff; overflow: hidden; }
+    .glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .input-premium { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; transition: all 0.3s ease; }
+    .input-premium:focus { border-color: #ff6b00; outline: none; box-shadow: 0 0 15px rgba(255, 107, 0, 0.2); }
+    .btn-primary { background: linear-gradient(135deg, #ff8a00 0%, #ff5500 100%); color: white; transition: all 0.3s ease; }
+    .btn-primary:hover { box-shadow: 0 0 25px rgba(255, 107, 0, 0.4); transform: scale(1.02); }
+    .stars-bg { position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)); background-size: 200px 200px; opacity: 0.15; z-index: -2; }
+  </style>
+</head>
+<body class="flex items-center justify-center h-screen relative antialiased px-4">
+  <div class="stars-bg"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,107,0,0.1)_0%,rgba(0,0,0,0)_60%)] z-[-1]"></div>
+
+  <div class="w-full max-w-md relative">
+    <!-- Back Button -->
+    <a href="index.html" class="absolute -top-12 left-0 text-xs text-gray-400 hover:text-white flex items-center gap-2 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Voltar
+    </a>
+
+    <div class="glass-panel p-10 rounded-[2rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      <!-- Glow effect behind form -->
+      <div class="absolute -inset-10 bg-gradient-to-tr from-brand-500/20 to-transparent rounded-[2rem] opacity-50 blur-xl pointer-events-none"></div>
+      
+      <div class="relative z-10">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-500 flex items-center justify-center font-bold text-black border border-white/20">A</div>
+            <div>
+              <h3 class="text-xl font-bold tracking-tight">O Nexus</h3>
+              <p class="text-[10px] text-brand-400 uppercase tracking-widest font-mono">Acesso Autorizado</p>
+            </div>
+        </div>
+        
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest">E-mail Quantum</label>
+            <input type="email" id="email" class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50" placeholder="agente@quantum.com" required>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest">Chave Mestra</label>
+            <input type="password" id="password" class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="w-full btn-primary py-4 rounded-xl font-bold text-sm mt-4 tracking-widest uppercase shadow-lg shadow-brand-500/20 active:scale-95 flex justify-center items-center gap-2">
+            Autenticar <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+        </form>
+        <p id="msg-erro" class="text-xs text-red-500 mt-5 text-center font-mono font-medium hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
+    const supabase = supabase.createClient(SB_URL, SB_KEY);
+    
+    // Login Form Control
+    const loginForm = document.getElementById("login-form");
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const msgErro = document.getElementById("msg-erro");
+      const btn = loginForm.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      
+      btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mr-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> CONECTANDO...`;
+      btn.classList.add("opacity-80", "cursor-not-allowed");
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msgErro.innerText = "Acesso Negado: Chave Inválida.";
+        msgErro.classList.remove("hidden");
+        btn.innerHTML = originalText;
+        btn.classList.remove("opacity-80", "cursor-not-allowed");
+      } else {
+        msgErro.classList.add("hidden");
+        btn.innerHTML = "SISTEMA DESBLOQUEADO!";
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 600);
+      }
+    });
+
+    // Check Auto Login
+    async function checkAutoLogin() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        window.location.href = "dashboard.html"; // Redirect immediately if already logged in!
+      }
+    }
+    checkAutoLogin();
+  </script>
+</body>
+</html>
