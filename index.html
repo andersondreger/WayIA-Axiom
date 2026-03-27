@@ -20,9 +20,9 @@
             },
             colors: {
               brand: {
-                400: "#10b981", // emerald-500
-                500: "#059669", // emerald-600
-                glow: "#00dc82",
+                400: "#ff8a00",
+                500: "#ff6b00",
+                glow: "#ff5500",
               },
             },
           },
@@ -31,158 +31,307 @@
     </script>
     <style>
       body {
-        background-color: #030303;
+        background-color: #050505;
         color: #fff;
         overflow-x: hidden;
         scroll-behavior: smooth;
       }
+
       .glass-panel {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
       }
-      .glow-bg {
-        position: absolute;
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(
-          circle,
-          rgba(16, 185, 129, 0.15) 0%,
-          rgba(0, 0, 0, 0) 70%
-        );
-        top: -200px;
-        left: -200px;
-        z-index: -1;
-        border-radius: 50%;
-        filter: blur(60px);
-      }
-      .glow-bg-2 {
-        position: absolute;
-        width: 800px;
-        height: 800px;
-        background: radial-gradient(
-          circle,
-          rgba(6, 182, 212, 0.1) 0%,
-          rgba(0, 0, 0, 0) 70%
-        );
-        bottom: 0;
-        right: -200px;
-        z-index: -1;
-        border-radius: 50%;
-        filter: blur(80px);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        border-color: rgba(16, 185, 129, 0.3);
-        box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.2);
-      }
+
       .input-premium {
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
+        color: white;
       }
       .input-premium:focus {
-        border-color: #10b981;
+        border-color: #ff6b00;
         outline: none;
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
       }
       .btn-primary {
-        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(135deg, #ff8a00 0%, #ff5500 100%);
         color: white;
         transition: all 0.3s ease;
       }
       .btn-primary:hover {
-        box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
         transform: scale(1.02);
       }
-      .text-gradient {
-        background: linear-gradient(to right, #ffffff, #a7f3d0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+
+      .stars-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)),
+          radial-gradient(
+            2px 2px at 40px 70px,
+            rgba(255, 255, 255, 0.8),
+            rgba(0, 0, 0, 0)
+          ),
+          radial-gradient(
+            2px 2px at 50px 160px,
+            rgba(255, 255, 255, 0.6),
+            rgba(0, 0, 0, 0)
+          ),
+          radial-gradient(
+            2px 2px at 90px 40px,
+            rgba(255, 255, 255, 0.9),
+            rgba(0, 0, 0, 0)
+          ),
+          radial-gradient(2px 2px at 130px 80px, #ffffff, rgba(0, 0, 0, 0)),
+          radial-gradient(
+            2px 2px at 160px 120px,
+            rgba(255, 255, 255, 0.7),
+            rgba(0, 0, 0, 0)
+          );
+        background-size: 200px 200px;
+        opacity: 0.15;
+        z-index: -2;
+      }
+
+      .bg-gradient-radial {
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 107, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0) 60%
+        );
+      }
+
+      /* Animação suave para exibir o modal */
+      .modal-enter {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+        transition: all 0.4s ease;
+      }
+      .modal-enter-active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
       }
     </style>
   </head>
-  <body class="antialiased selection:bg-brand-500 selection:text-white">
-    <!-- Background Glows -->
-    <div class="glow-bg"></div>
-    <div class="glow-bg-2"></div>
+  <body
+    class="antialiased selection:bg-brand-500 selection:text-white h-screen relative overflow-hidden flex flex-col items-center justify-center"
+  >
+    <!-- Background Stars & Glow -->
+    <div class="stars-bg"></div>
+    <div class="absolute inset-0 bg-gradient-radial z-[-1]"></div>
 
-    <!-- Navbar -->
-    <nav
-      class="fixed w-full z-50 glass-panel border-b border-white/5 border-x-0 border-t-0 bg-black/50 backdrop-blur-xl"
+    <!-- SVG Tunnel Illusion -->
+    <div
+      class="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden"
     >
-      <div
-        class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between"
+      <svg
+        class="w-full h-full min-w-[1200px] opacity-60"
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid slice"
       >
-        <div
-          class="flex items-center gap-2 cursor-pointer"
-          onclick="window.scrollTo(0, 0)"
-        >
-          <div
-            class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-500 flex items-center justify-center font-bold text-black text-lg"
-          >
-            A
-          </div>
-          <span class="font-bold text-xl tracking-wide font-mono"
-            >AXIOM<span class="text-brand-400">PRIME</span></span
-          >
-        </div>
-        <div
-          class="hidden md:flex items-center gap-8 text-sm text-gray-400 font-medium"
-        >
-          <a href="#hero" class="hover:text-white transition">Home</a>
-          <a href="#features" class="hover:text-white transition">Features</a>
-          <a href="#trusted" class="hover:text-white transition">Partners</a>
-        </div>
-        <div class="flex items-center gap-4">
-          <a
-            href="#login"
-            class="px-5 py-2.5 rounded-full text-sm font-semibold btn-primary shadow-lg shadow-brand-500/20"
-            >Acessar Nexus</a
-          >
-        </div>
-      </div>
-    </nav>
+        <g stroke="#ff6b00" fill="none" stroke-width="1.5">
+          <!-- Esquerda -->
+          <ellipse cx="150" cy="540" rx="120" ry="450" opacity="0.1" />
+          <ellipse cx="350" cy="540" rx="90" ry="380" opacity="0.2" />
+          <ellipse cx="550" cy="540" rx="70" ry="300" opacity="0.3" />
+          <ellipse cx="720" cy="540" rx="55" ry="220" opacity="0.5" />
+          <ellipse cx="850" cy="540" rx="40" ry="140" opacity="0.7" />
+          <ellipse cx="920" cy="540" rx="20" ry="70" opacity="0.9" />
 
-    <!-- Hero Section -->
+          <!-- Direita -->
+          <ellipse cx="1770" cy="540" rx="120" ry="450" opacity="0.1" />
+          <ellipse cx="1570" cy="540" rx="90" ry="380" opacity="0.2" />
+          <ellipse cx="1370" cy="540" rx="70" ry="300" opacity="0.3" />
+          <ellipse cx="1200" cy="540" rx="55" ry="220" opacity="0.5" />
+          <ellipse cx="1070" cy="540" rx="40" ry="140" opacity="0.7" />
+          <ellipse cx="1000" cy="540" rx="20" ry="70" opacity="0.9" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- Main Content (Hero) -->
     <main
-      id="hero"
-      class="pt-36 pb-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[90vh]"
+      class="relative z-10 w-full max-w-7xl mx-auto px-6 h-full flex flex-col items-center justify-center"
     >
-      <!-- Hero Text (Inspirado na 2ª imagem "Manage your finances") -->
-      <div class="flex flex-col gap-6 z-10">
-        <div
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border border-brand-400/30 w-fit text-xs font-semibold text-brand-400"
+      <!-- Title Section -->
+      <div
+        class="absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center w-full max-w-3xl"
+      >
+        <h1
+          class="text-[2.5rem] md:text-5xl lg:text-[3.5rem] font-medium tracking-tight text-white leading-[1.2]"
         >
-          <span
-            class="flex h-2 w-2 rounded-full bg-brand-400 animate-pulse"
-          ></span>
-          Nexus V2 Active
-        </div>
-
-        <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-          Manage your <br />
-          <span class="text-gradient">finances easily</span> <br />
-          and with confidence
+          Revolucionando o <br />
+          <span class="text-brand-400 font-light">{</span> Futuro das Finanças
+          Digitais <span class="text-brand-400 font-light">}</span>
         </h1>
 
-        <p class="text-gray-400 text-lg max-w-lg mt-2 leading-relaxed">
-          Axiom empodera você para gerenciar de forma segura, monitorar ativos
-          em tempo real e crescer com nossa inteligência algorítmica.
+        <p
+          class="text-gray-400 text-sm md:text-base mt-6 font-light leading-relaxed max-w-2xl mx-auto px-4"
+        >
+          Explore análises em tempo real, inovações revolucionárias e as últimas
+          tendências no mercado global — tudo em uma plataforma poderosa.
+        </p>
+      </div>
+
+      <!-- Center Button (Get Started) -->
+      <div
+        class="absolute top-[58%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+      >
+        <p
+          class="text-[10px] uppercase tracking-[0.2em] text-white mb-5 font-semibold"
+        >
+          COMEÇAR AGORA
         </p>
 
-        <div class="flex items-center gap-4 mt-6">
-          <a
-            href="#login"
-            class="btn-primary px-8 py-4 rounded-xl font-semibold outline-none focus:ring-2 focus:ring-brand-400 transition flex items-center gap-2"
+        <button
+          onclick="toggleLoginModal()"
+          class="relative group cursor-pointer border-none bg-transparent outline-none"
+        >
+          <div
+            class="w-24 h-24 rounded-full border border-brand-500 flex items-center justify-center relative shadow-[0_0_40px_rgba(255,107,0,0.3)] transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(255,107,0,0.6)]"
           >
-            Get Started
+            <div
+              class="absolute inset-0 rounded-full border border-brand-400 animate-ping opacity-20"
+              style="animation-duration: 3s"
+            ></div>
+            <div
+              class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-500 to-yellow-500 flex items-center justify-center p-[2px] shadow-[inset_0_0_15px_rgba(0,0,0,0.8)]"
+            >
+              <div
+                class="w-full h-full bg-[#111] rounded-full flex items-center justify-center"
+              >
+                <!-- Inner core icon -->
+                <div
+                  class="w-5 h-5 border-[3px] border-brand-400 rounded-full border-t-transparent origin-center -rotate-45 transition duration-500 group-hover:rotate-180"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Top Right: Float Card -->
+      <div
+        class="hidden md:block absolute top-10 right-10 z-10 glass-panel p-5 rounded-2xl w-64 border border-white/5 shadow-2xl transition hover:border-white/10 hover:-translate-y-1 duration-300"
+      >
+        <div class="flex items-center gap-3 mb-4">
+          <div
+            class="w-8 h-8 rounded-full bg-[#26A17B]/20 text-[#26A17B] flex items-center justify-center font-bold text-sm"
+          >
+            T
+          </div>
+          <span class="font-medium text-white tracking-wide">USDT</span>
+        </div>
+        <div
+          class="text-3xl font-bold text-white mb-2 font-mono tracking-tight"
+        >
+          $13,852.93
+        </div>
+        <div class="text-[10px] text-gray-500 font-medium tracking-wide">
+          Limite é $30k mensal
+        </div>
+        <div
+          class="mt-5 text-[10px] text-[#26A17B] bg-[#26A17B]/10 px-3 py-1 rounded w-fit uppercase font-bold tracking-widest border border-[#26A17B]/20"
+        >
+          Ativo
+        </div>
+      </div>
+
+      <!-- Top Left: Mini Float Elements -->
+      <div
+        class="hidden lg:flex absolute top-16 left-10 z-10 flex-col gap-4 opacity-70"
+      >
+        <div
+          class="glass-panel px-4 py-2 rounded-xl border border-white/5 flex items-center gap-3 w-48"
+        >
+          <div
+            class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold"
+          >
+            ETH
+          </div>
+          <div class="h-1 bg-white/20 rounded-full flex-1">
+            <div class="h-full bg-blue-400 rounded-full w-[70%]"></div>
+          </div>
+        </div>
+        <div
+          class="glass-panel px-4 py-2 rounded-xl border border-white/5 flex items-center gap-3 w-40 ml-8"
+        >
+          <div
+            class="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold"
+          >
+            BTC
+          </div>
+          <div class="h-1 bg-white/20 rounded-full flex-1">
+            <div class="h-full bg-orange-400 rounded-full w-[40%]"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Left: Socials -->
+      <div
+        class="absolute bottom-10 left-6 md:left-10 z-10 flex flex-col gap-4"
+      >
+        <span class="text-xs font-semibold text-white tracking-widest uppercase"
+          >Siga-nos</span
+        >
+        <div class="flex gap-3">
+          <a
+            href="#"
+            class="w-10 h-10 rounded-xl glass-panel border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition hover:bg-white/10 hover:border-white/30"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm3.98-10.181a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"
+              />
+            </svg>
+          </a>
+          <a
+            href="#"
+            class="w-10 h-10 rounded-xl glass-panel border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition hover:bg-white/10 hover:border-white/30"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+              />
+            </svg>
+          </a>
+          <a
+            href="#"
+            class="w-10 h-10 rounded-xl glass-panel border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition hover:bg-white/10 hover:border-white/30 text-lg font-bold"
+          >
+            𝕏
+          </a>
+        </div>
+      </div>
+
+      <!-- Bottom Right: Explore -->
+      <div
+        class="hidden md:flex absolute bottom-10 right-10 z-10 items-center gap-4"
+      >
+        <span class="text-xs text-gray-400 font-medium"
+          >Role para explorar</span
+        >
+        <div
+          class="w-8 h-8 rounded-full glass-panel border border-white/10 flex items-center justify-center text-gray-400 animate-bounce cursor-pointer hover:bg-white/10 hover:text-white transition"
+        >
+          ↓
+        </div>
+      </div>
+
+      <!-- Bottom Center: Cookie Banner -->
+      <div
+        class="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 z-20 glass-panel border border-white/10 rounded-2xl md:rounded-full px-5 py-4 w-[90%] md:max-w-3xl shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 opacity-90"
+      >
+        <div class="flex items-center gap-4 w-full">
+          <div
+            class="w-10 h-10 shrink-0 rounded-full border border-white/5 bg-black/50 shadow-[inset_0_0_10px_rgba(255,107,0,0.2)] flex items-center justify-center text-lg text-brand-400"
+          >
             <svg
-              class="w-4 h-4"
+              class="w-5 h-5 opacity-80"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -191,319 +340,135 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
               ></path>
             </svg>
-          </a>
-          <a
-            href="#features"
-            class="px-8 py-4 rounded-xl font-semibold glass-panel hover:bg-white/5 transition flex items-center gap-2"
+          </div>
+          <p
+            class="text-[11px] md:text-xs text-gray-300 leading-relaxed font-light"
           >
-            Learn More
-          </a>
+            Este site utiliza cookies de sessão para aprimorar sua experiência
+            de navegação, garantir o acesso blindado e melhorar nossos serviços.
+          </p>
+        </div>
+        <div class="flex gap-3 shrink-0 w-full md:w-auto mt-2 md:mt-0">
+          <button
+            class="flex-1 md:flex-none px-6 py-2.5 rounded-full text-xs font-semibold text-gray-300 hover:text-white border border-transparent hover:border-white/10 hover:bg-white/5 transition"
+          >
+            Recusar
+          </button>
+          <button
+            class="flex-1 md:flex-none px-6 py-2.5 rounded-full text-xs font-bold text-black bg-white hover:bg-brand-500 hover:text-white hover:shadow-[0_0_15px_rgba(255,107,0,0.5)] transition duration-300"
+          >
+            Aceitar
+          </button>
         </div>
       </div>
+    </main>
 
-      <!-- Login Form / Dashboard Mockup Combo -->
+    <!-- Login Modal (Hidden by default) -->
+    <div
+      id="login-modal"
+      class="modal-enter fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md"
+    >
       <div
-        id="login"
-        class="relative z-10 lg:ml-auto w-full max-w-md pt-10 lg:pt-0"
+        class="relative w-full max-w-md glass-panel p-10 rounded-[2rem] border border-white/10 shadow-2xl"
       >
+        <!-- Glow effect behind form -->
         <div
-          class="absolute -inset-1 bg-gradient-to-r from-brand-400 to-cyan-500 rounded-2xl blur opacity-20"
+          class="absolute inset-0 bg-gradient-to-tr from-brand-500/20 to-transparent rounded-[2rem] opacity-50 pointer-events-none"
         ></div>
-        <div class="glass-panel p-10 rounded-2xl relative shadow-2xl">
-          <h3 class="text-2xl font-bold mb-1">Acesso ao Nexus</h3>
-          <p class="text-sm text-gray-400 mb-8">
-            Insira sua Chave Mestra para continuar.
-          </p>
 
-          <form id="login-form" class="space-y-5">
+        <button
+          onclick="toggleLoginModal()"
+          class="absolute top-6 right-6 text-gray-400 hover:text-white transition bg-white/5 rounded-full p-2"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-8">
+            <div
+              class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-500 flex items-center justify-center font-bold text-black border border-white/20"
+            >
+              A
+            </div>
+            <div>
+              <h3 class="text-xl font-bold tracking-tight">O Nexus</h3>
+              <p
+                class="text-[10px] text-brand-400 uppercase tracking-widest font-mono"
+              >
+                Acesso Autorizado
+              </p>
+            </div>
+          </div>
+
+          <form id="login-form" class="space-y-6">
             <div>
               <label
-                class="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider"
+                class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest"
                 >E-mail Quantum</label
               >
               <input
                 type="email"
                 id="email"
-                class="w-full px-4 py-3 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600"
-                placeholder="nome@quantum.com"
+                class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50"
+                placeholder="agente@quantum.com"
                 required
               />
             </div>
             <div>
               <label
-                class="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider"
-                >Password</label
+                class="block text-[10px] font-semibold text-gray-400 mb-2 ml-1 uppercase tracking-widest"
+                >Chave Mestra</label
               >
               <input
                 type="password"
                 id="password"
-                class="w-full px-4 py-3 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600"
+                class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-600 focus:bg-black/50"
                 placeholder="••••••••"
                 required
               />
             </div>
             <button
               type="submit"
-              class="w-full btn-primary py-3.5 rounded-xl font-bold text-sm mt-4 tracking-wider uppercase shadow-lg shadow-emerald-500/20"
+              class="w-full btn-primary py-4 rounded-xl font-bold text-sm mt-4 tracking-widest uppercase shadow-lg shadow-brand-500/20 active:scale-95 flex justify-center items-center gap-2"
             >
-              ENTRAR
+              Autenticar
+              <svg
+                class="w-4 h-4 opacity-70"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                ></path>
+              </svg>
             </button>
           </form>
           <p
             id="msg-erro"
-            class="text-xs text-red-400 mt-4 text-center font-mono hidden"
+            class="text-xs text-red-500 mt-5 text-center font-mono font-medium hidden bg-red-500/10 py-2 rounded-lg border border-red-500/20"
           ></p>
         </div>
-
-        <!-- Floating Stats Widget (Like the card floating in image) -->
-        <div
-          class="absolute -bottom-6 -left-8 md:-left-12 glass-panel p-4 rounded-xl shadow-2xl flex items-center gap-4 animate-bounce"
-          style="animation-duration: 3s"
-        >
-          <div
-            class="w-10 h-10 rounded-full bg-brand-400/20 flex items-center justify-center text-brand-400"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              ></path>
-            </svg>
-          </div>
-          <div>
-            <p
-              class="text-[10px] text-gray-400 uppercase tracking-widest font-mono"
-            >
-              Real-time Income
-            </p>
-            <p class="font-bold text-lg font-mono text-white">$22,760.23</p>
-          </div>
-        </div>
       </div>
-    </main>
-
-    <!-- Trusted By Section -->
-    <section
-      id="trusted"
-      class="max-w-7xl mx-auto px-6 py-12 border-t border-white/5 border-b border-white/5 mb-24"
-    >
-      <p class="text-center text-sm text-gray-500 font-medium mb-10">
-        Trusted by the leaders
-      </p>
-      <div
-        class="flex flex-wrap justify-center md:justify-between items-center gap-10 opacity-60 grayscale hover:grayscale-0 transition duration-500"
-      >
-        <h4 class="text-xl font-bold font-serif italic">BeReal.</h4>
-        <h4 class="text-xl font-bold flex items-center gap-2">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-1 15h-2v-6h2v6m-1-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m5 7h-2v-4c0-.55-.45-1-1-1s-1 .45-1 1v4h-2v-6h2v1.1c.36-.67 1.2-1.2 2-1.2 1.66 0 3 1.34 3 3v4z"
-            />
-          </svg>
-          SOUNDCLOUD
-        </h4>
-        <h4 class="text-xl font-bold tracking-tighter">flickr</h4>
-        <h4 class="text-xl font-bold font-serif">Medium</h4>
-        <h4 class="text-xl font-bold uppercase tracking-widest">Pinterest</h4>
-      </div>
-    </section>
-
-    <!-- Features Grid (Bento Box - Inspirado na 2ª Imagem) -->
-    <section id="features" class="max-w-7xl mx-auto px-6 py-10 mb-20">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl md:text-5xl font-bold mb-4">
-          Streamline finances with <br /><span
-            class="font-serif italic text-brand-400"
-            >smart features</span
-          >
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Feature 1: Real-Time Analytics -->
-        <div
-          class="md:col-span-2 glass-panel p-8 rounded-[2rem] card-hover relative overflow-hidden bg-white/5"
-        >
-          <h3 class="text-xl font-bold mb-2">Real-Time Analytics</h3>
-          <p class="text-sm text-gray-400 mb-8 max-w-sm">
-            Monitor your finances live with clear, intuitive dashboards.
-          </p>
-
-          <!-- Fake Bar Chart -->
-          <div class="mt-12 flex items-end gap-3 h-32 opacity-80 px-4">
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[30%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[40%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[50%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[60%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[20%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-cyan-400 rounded-t-md h-[40%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[60%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[80%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[100%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[90%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[80%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[70%]"
-              ></div>
-            </div>
-            <div class="w-full bg-brand-400/20 rounded-t-md h-[40%] relative">
-              <div
-                class="absolute inset-x-0 bottom-0 bg-brand-400 rounded-t-md h-[50%]"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 2: Smart Budgeting -->
-        <div
-          class="glass-panel p-8 rounded-[2rem] card-hover flex flex-col justify-between overflow-hidden relative"
-        >
-          <div
-            class="absolute -right-10 -top-10 w-40 h-40 bg-brand-400/10 rounded-full blur-2xl"
-          ></div>
-          <div>
-            <h3 class="text-xl font-bold mb-2 relative z-10">
-              Smart Budgeting
-            </h3>
-            <p class="text-sm text-gray-400 max-w-sm relative z-10">
-              Plan and adjust with AI-powered budget suggestions.
-            </p>
-          </div>
-          <div class="mt-8 flex justify-center relative z-10">
-            <!-- Circular fake chart (Donut) -->
-            <div
-              class="w-32 h-32 rounded-full border-[12px] border-[#1a1a1a] border-t-brand-400 border-r-brand-400 border-b-cyan-500 transform rotate-12 relative shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-            >
-              <div
-                class="absolute inset-0 flex items-center justify-center -rotate-12"
-              >
-                <span class="text-xs text-gray-400 font-bold">Distrib.</span>
-              </div>
-              <!-- Little node circles attached -->
-              <div
-                class="absolute top-0 right-0 w-3 h-3 bg-white rounded-full translate-x-1 -translate-y-1 shadow-[0_0_10px_#fff]"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 3: Growth Score -->
-        <div
-          class="glass-panel p-8 rounded-[2rem] card-hover flex flex-col items-center justify-center gap-4 text-center"
-        >
-          <!-- Gauge mockup -->
-          <div class="relative w-40 h-20 overflow-hidden mt-4">
-            <div
-              class="w-40 h-40 rounded-full border-[10px] border-[#1a1a1a] border-t-brand-400 border-l-brand-400 rotate-45"
-            ></div>
-            <div
-              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-3xl font-bold font-mono"
-            >
-              75
-            </div>
-          </div>
-          <div>
-            <h3 class="text-xl font-bold">Growth Score</h3>
-            <p class="text-xs text-gray-400 mt-1">Based on global analytics</p>
-          </div>
-        </div>
-
-        <!-- Feature 4: Secure Syncing -->
-        <div
-          class="md:col-span-2 glass-panel p-8 rounded-[2rem] card-hover bg-gradient-to-r from-brand-900/10 to-transparent flex items-center justify-between overflow-hidden relative"
-        >
-          <div
-            class="absolute left-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl"
-          ></div>
-          <div class="relative z-10">
-            <h3 class="text-3xl font-bold mb-2">Secure Syncing</h3>
-            <p class="text-sm text-gray-400 max-w-sm">
-              Monitor your finances live with automated secure connections
-              globally.
-            </p>
-          </div>
-          <!-- Mockup line chart waves -->
-          <div class="relative z-10 flex gap-1 h-16 w-32 items-end opacity-50">
-            <div class="w-1 bg-brand-400 h-2"></div>
-            <div class="w-1 bg-brand-400 h-6"></div>
-            <div class="w-1 bg-brand-400 h-4"></div>
-            <div class="w-1 bg-brand-400 h-10"></div>
-            <div class="w-1 bg-brand-400 h-8"></div>
-            <div class="w-1 bg-brand-400 h-14"></div>
-            <div class="w-1 bg-brand-400 h-12"></div>
-            <div class="w-1 bg-brand-400 h-16"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Large Bottom CTA / Branding -->
-    <section
-      class="max-w-7xl mx-auto px-6 py-20 text-center relative overflow-hidden flex flex-col items-center"
-    >
-      <h1
-        class="text-[12vw] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-brand-900 via-brand-500 to-white opacity-40 select-none"
-      >
-        AXIOM PRIME
-      </h1>
-      <div class="absolute inset-0 flex items-center justify-center flex-col">
-        <h2 class="text-3xl md:text-4xl font-bold mb-6">
-          Ready to scale your precision?
-        </h2>
-        <a
-          href="#login"
-          class="btn-primary px-10 py-4 rounded-full font-bold shadow-lg shadow-brand-500/30 text-lg"
-          >Entrar no Sistema</a
-        >
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="border-t border-white/5 py-10 mt-10 bg-black/50">
-      <div
-        class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6"
-      >
-        <div class="flex items-center gap-2 text-gray-400">
-          <div
-            class="w-6 h-6 rounded bg-brand-500 flex items-center justify-center font-bold text-black text-xs"
-          >
-            A
-          </div>
-          <span class="font-bold text-white">AXIOM</span> © 2026 Dreger
-        </div>
-        <div class="flex gap-6 text-sm text-gray-500">
-          <a href="#" class="hover:text-white transition">Features</a>
-          <a href="#" class="hover:text-white transition">Pricing</a>
-          <a href="#" class="hover:text-white transition">Contact</a>
-          <a href="#" class="hover:text-white transition">Privacy</a>
-        </div>
-      </div>
-    </footer>
+    </div>
 
     <script>
       const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
@@ -511,18 +476,17 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
       const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-      // Smooth scroll para links da navbar
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute("href"));
-          if (target) {
-            target.scrollIntoView({ behavior: "smooth" });
-          }
-        });
-      });
+      // Modal Control
+      const modal = document.getElementById("login-modal");
+      function toggleLoginModal() {
+        if (modal.classList.contains("modal-enter-active")) {
+          modal.classList.remove("modal-enter-active");
+        } else {
+          modal.classList.add("modal-enter-active");
+        }
+      }
 
-      // Controlador do formulário
+      // Login Form Control
       const loginForm = document.getElementById("login-form");
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -531,11 +495,10 @@
         const password = document.getElementById("password").value;
         const msgErro = document.getElementById("msg-erro");
 
-        // Animação do botão
         const btn = loginForm.querySelector('button[type="submit"]');
-        const originalText = btn.innerText;
-        btn.innerText = "VERIFICANDO...";
-        btn.classList.add("opacity-70");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> CONECTANDO...`;
+        btn.classList.add("opacity-80", "cursor-not-allowed");
 
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -543,28 +506,28 @@
         });
 
         if (error) {
-          msgErro.innerText = "Acesso Negado: Credenciais Inválidas.";
+          msgErro.innerText = "Acesso Negado: Chave Inválida.";
           msgErro.classList.remove("hidden");
-          btn.innerText = originalText;
-          btn.classList.remove("opacity-70");
+          btn.innerHTML = originalText;
+          btn.classList.remove("opacity-80", "cursor-not-allowed");
         } else {
           msgErro.classList.add("hidden");
-          btn.innerText = "AUTORIZADO!";
-          btn.classList.replace("bg-gradient-to-r", "bg-brand-400"); // Fica verde sólido
+          btn.innerHTML = "SISTEMA DESBLOQUEADO!";
+          btn.classList.remove("opacity-80", "cursor-not-allowed");
           setTimeout(() => {
             window.location.href = "dashboard.html";
-          }, 800);
+          }, 600);
         }
       });
 
-      // Se já estiver logado, muda o texto do botão para não precisar fazer login de novo
+      // Check Auto Login
       async function checkAutoLogin() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
         if (session) {
           const btn = loginForm.querySelector('button[type="submit"]');
-          btn.innerText = "ACESSAR DASHBOARD";
+          btn.innerHTML = "ACESSAR DASHBOARD";
           document.getElementById("email").value = session.user.email;
           document.getElementById("email").disabled = true;
           document.getElementById("password").value = "********";
