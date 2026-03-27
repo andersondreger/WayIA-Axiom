@@ -103,17 +103,13 @@
         );
       }
 
-      /* Animação suave para exibir o modal */
-      .modal-enter {
-        opacity: 0;
-        transform: scale(0.95);
-        pointer-events: none;
-        transition: all 0.4s ease;
-      }
+      /* Animação suave para exibir o modal (quando não possuir hidden) */
       .modal-enter-active {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
+        animation: fadeIn 0.3s ease forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
       }
     </style>
   </head>
@@ -179,7 +175,7 @@
 
       <!-- Center Button (Get Started) -->
       <div
-        class="absolute top-[58%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+        class="absolute top-[58%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-50"
       >
         <p
           class="text-[10px] uppercase tracking-[0.2em] text-white mb-5 font-semibold"
@@ -310,7 +306,7 @@
 
       <!-- Bottom Right: Explore -->
       <div
-        class="hidden md:flex absolute bottom-8 right-10 z-10 flex-col items-center gap-2"
+        class="hidden md:flex absolute bottom-8 right-10 z-50 flex-col items-center gap-2"
       >
         <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">ACESSAR</span>
         <button
@@ -390,7 +386,7 @@
     <!-- Login Modal (Hidden by default) -->
     <div
       id="login-modal"
-      class="modal-enter fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md"
+      class="hidden fixed inset-0 z-[100] items-center justify-center px-4 bg-black/60 backdrop-blur-md"
     >
       <div
         class="relative w-full max-w-md glass-panel p-10 rounded-[2rem] border border-white/10 shadow-2xl"
@@ -500,10 +496,14 @@
       // Modal Control
       const modal = document.getElementById("login-modal");
       function toggleLoginModal() {
-        if (modal.classList.contains("modal-enter-active")) {
-          modal.classList.remove("modal-enter-active");
-        } else {
+        if (modal.classList.contains("hidden")) {
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
           modal.classList.add("modal-enter-active");
+        } else {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          modal.classList.remove("modal-enter-active");
         }
       }
 
