@@ -1,137 +1,140 @@
 <!doctype html>
 <html lang="pt-br">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AXIOM PRIME | O Futuro da Execução Multimercado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "sans-serif"], mono: ["Fira Code", "monospace"] },
+            colors: { brand: { 400: "#ff8a00", 500: "#ff6b00", glow: "#ff5500" } }
+          }
+        }
+      };
+    </script>
     <style>
-        body { background-color: #050505; color: #fff; overflow-x: hidden; font-family: 'Inter', sans-serif; }
-        .stars-bg { position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)); background-size: 200px 200px; opacity: 0.1; z-index: -1; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-axiom { background: linear-gradient(135deg, #ff8a00, #ff5500); transition: all 0.3s ease; }
-        .btn-axiom:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 107, 0, 0.4); }
-        /* Garante que o SVG não bloqueie cliques */
-        svg { pointer-events: none; }
+      body { background-color: #050505; color: #fff; overflow-x: hidden; scroll-behavior: smooth; }
+      .glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+      .stars-bg { position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)), radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0)); background-size: 200px 200px; opacity: 0.15; z-index: 0; }
+      .bg-gradient-radial { background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, rgba(0, 0, 0, 0) 60%); }
+      .btn-axiom-core { background: linear-gradient(135deg, #ff8a00 0%, #ff5500 100%); transition: all 0.3s ease; }
+      .btn-axiom-core:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 107, 0, 0.6); }
+      /* Correção Crítica: Impede que fundos bloqueiem o mouse */
+      .pointer-none { pointer-events: none; }
+      .pointer-auto { pointer-events: auto; }
     </style>
-</head>
-<body class="h-screen flex items-center justify-center relative">
-    <div class="stars-bg"></div>
+  </head>
+  <body class="antialiased h-screen relative overflow-hidden flex flex-col items-center justify-center">
+    
+    <div class="stars-bg pointer-none"></div>
+    <div class="absolute inset-0 bg-gradient-radial z-0 pointer-none"></div>
 
-    <div class="absolute inset-0 z-0 flex items-center justify-center">
-        <svg class="w-full h-full opacity-40" viewBox="0 0 1920 1080">
-            <g stroke="#ff6b00" fill="none" stroke-width="1">
-                <ellipse cx="960" cy="540" rx="800" ry="400" opacity="0.1" />
-                <ellipse cx="960" cy="540" rx="600" ry="300" opacity="0.2" />
-                <ellipse cx="960" cy="540" rx="300" ry="150" opacity="0.4" />
-            </g>
-        </svg>
+    <div class="absolute inset-0 z-10 pointer-none flex items-center justify-center overflow-hidden">
+      <svg class="w-full h-full min-w-[1200px] opacity-60" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+        <g stroke="#ff6b00" fill="none" stroke-width="1.5">
+          <ellipse cx="150" cy="540" rx="120" ry="450" opacity="0.1" />
+          <ellipse cx="550" cy="540" rx="70" ry="300" opacity="0.3" />
+          <ellipse cx="920" cy="540" rx="20" ry="70" opacity="0.9" />
+          <ellipse cx="1770" cy="540" rx="120" ry="450" opacity="0.1" />
+          <ellipse cx="1370" cy="540" rx="70" ry="300" opacity="0.3" />
+          <ellipse cx="1000" cy="540" rx="20" ry="70" opacity="0.9" />
+        </g>
+      </svg>
     </div>
 
-    <main class="relative z-50 text-center px-6">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tighter">
-            Revolucionando o <br>
-            <span class="text-orange-500 font-light">{</span> Futuro das Finanças <span class="text-orange-500 font-light">}</span>
+    <main class="relative z-20 w-full max-w-7xl mx-auto px-6 h-full flex flex-col items-center justify-center">
+      
+      <div class="absolute top-[15%] left-1/2 -translate-x-1/2 text-center w-full pointer-none">
+        <h1 class="text-4xl md:text-6xl font-medium tracking-tight leading-tight">
+          Revolucionando o <br />
+          <span class="text-brand-400 font-light">{</span> Futuro das Finanças Digitais <span class="text-brand-400 font-light">}</span>
         </h1>
-        <p class="text-gray-400 max-w-xl mx-auto mb-12">Analises em tempo real e execução blindada em uma plataforma de elite.</p>
+      </div>
 
-        <button onclick="iniciarAcesso()" class="group relative inline-flex flex-col items-center">
-            <span class="text-[10px] tracking-[0.3em] text-orange-500 mb-4 font-bold uppercase">Acessar Terminal</span>
-            <div class="w-24 h-24 rounded-full border border-orange-500/50 flex items-center justify-center relative bg-black/50 btn-axiom">
-                <div class="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin group-hover:animate-none"></div>
+      <div class="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center">
+        <div onclick="fluxoAcesso()" class="group cursor-pointer flex flex-col items-center pointer-auto">
+          <p class="text-[10px] uppercase tracking-[0.3em] text-white mb-6 font-bold group-hover:text-brand-500 transition-colors">COMEÇAR AGORA</p>
+          <div class="w-24 h-24 rounded-full border border-brand-500 flex items-center justify-center relative shadow-[0_0_40px_rgba(255,107,0,0.3)] btn-axiom-core">
+            <div class="w-14 h-14 rounded-full bg-[#111] flex items-center justify-center">
+                <div class="w-5 h-5 border-[3px] border-brand-400 rounded-full border-t-transparent animate-spin group-hover:animate-none"></div>
             </div>
-        </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hidden md:block absolute top-10 right-10 glass-panel p-5 rounded-2xl w-64 shadow-2xl pointer-none">
+        <div class="flex items-center gap-3 mb-2"><span class="text-green-500 font-bold">USDT</span></div>
+        <div class="text-3xl font-bold font-mono">$13,852.93</div>
+        <div class="text-[10px] text-gray-500 mt-2">ATIVO NO MOTOR</div>
+      </div>
     </main>
 
     <div id="modal-cadastro" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/90 p-4">
-        <div class="glass max-w-md w-full p-8 rounded-3xl text-center">
-            <h2 class="text-2xl font-bold mb-2">Quase lá!</h2>
-            <p class="text-gray-400 text-sm mb-6">Complete seu perfil para liberar o Axiom Dashboard.</p>
-            
+        <div class="glass-panel max-w-md w-full p-8 rounded-3xl text-center border border-brand-500/30">
+            <h2 class="text-2xl font-bold mb-2">Quase lá, Anderson!</h2>
+            <p class="text-gray-400 text-sm mb-6">Complete seu perfil para o terminal Axiom.</p>
             <div class="space-y-4">
-                <input type="text" id="reg-nome" placeholder="Seu Nome Completo" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-orange-500 outline-none">
-                <input type="email" id="reg-email" placeholder="E-mail" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-orange-500 outline-none">
-                <input type="text" id="reg-tel" placeholder="Telefone / WhatsApp" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-orange-500 outline-none">
-                
-                <button onclick="finalizarCadastro()" class="w-full p-4 btn-axiom rounded-xl font-bold uppercase tracking-widest">
-                    Salvar e Entrar
-                </button>
+                <input type="text" id="reg-nome" placeholder="Nome Completo" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-500 outline-none">
+                <input type="text" id="reg-tel" placeholder="WhatsApp (DDD + Número)" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-500 outline-none">
+                <button onclick="salvarPerfil()" class="w-full p-4 btn-axiom-core rounded-xl font-bold uppercase tracking-widest">Liberar Acesso</button>
             </div>
         </div>
     </div>
 
     <script>
-        const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-        const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
+      const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
+      const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-        // 1. Função que decide se abre Modal ou Dashboard
-        async function iniciarAcesso() {
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (!session) {
-                // Se não tem sessão, inicia login com Google
-                await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: window.location.origin + '/index.html' }
-                });
-            } else {
-                // Se já está logado, verifica se tem perfil na tabela gestao_usuarios
-                const { data: perfil } = await supabase
-                    .table('gestao_usuarios')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .single();
+      async function fluxoAcesso() {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (!session) {
+              // Inicia Login com Google
+              await supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: window.location.origin + '/index.html' }
+              });
+          } else {
+              // Verifica se já tem perfil
+              const { data: perfil } = await supabase.table('gestao_usuarios').select('*').eq('user_id', session.user.id).single();
+              if (perfil) {
+                  window.location.href = "dashboard.html";
+              } else {
+                  document.getElementById('modal-cadastro').classList.remove('hidden');
+              }
+          }
+      }
 
-                if (perfil) {
-                    window.location.href = "dashboard.html";
-                } else {
-                    // Se logou mas não preencheu dados, abre o modal
-                    document.getElementById('modal-cadastro').classList.remove('hidden');
-                    document.getElementById('reg-email').value = session.user.email;
-                }
-            }
-        }
+      async function salvarPerfil() {
+          const { data: { session } } = await supabase.auth.getSession();
+          const nome = document.getElementById('reg-nome').value;
+          const tel = document.getElementById('reg-tel').value;
 
-        // 2. Salva os dados no Supabase e redireciona
-        async function finalizarCadastro() {
-            const nome = document.getElementById('reg-nome').value;
-            const tel = document.getElementById('reg-tel').value;
-            const email = document.getElementById('reg-email').value;
-            
-            const { data: { session } } = await supabase.auth.getSession();
+          if (nome && tel && session) {
+              const { error } = await supabase.table('gestao_usuarios').insert([
+                  { user_id: session.user.id, nome_cliente: nome, email: session.user.email, telefone: tel }
+              ]);
+              if (!error) window.location.href = "dashboard.html";
+              else alert("Erro ao salvar: " + error.message);
+          } else {
+              alert("Preencha todos os campos!");
+          }
+      }
 
-            if (nome && tel && session) {
-                const { error } = await supabase.table('gestao_usuarios').insert([
-                    { 
-                        user_id: session.user.id, 
-                        nome_cliente: nome, 
-                        email: email, 
-                        telefone: tel 
-                    }
-                ]);
-
-                if (!error) {
-                    window.location.href = "dashboard.html";
-                } else {
-                    alert("Erro ao salvar: " + error.message);
-                }
-            } else {
-                alert("Por favor, preencha todos os campos.");
-            }
-        }
-
-        // Auto-check ao carregar a página
-        window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                // Verifica se já tem perfil para pular a Landing
-                const { data } = await supabase.table('gestao_usuarios').select('id').eq('user_id', session.user.id).single();
-                if (data) window.location.href = "dashboard.html";
-            }
-        };
+      // Check Automático
+      window.onload = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+              const { data } = await supabase.table('gestao_usuarios').select('id').eq('user_id', session.user.id).single();
+              if (data) window.location.href = "dashboard.html";
+          }
+      }
     </script>
-</body>
+  </body>
 </html>
