@@ -155,7 +155,7 @@
     >
       <!-- Title Section -->
       <div
-        class="absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center w-full max-w-3xl"
+        class="absolute top-[15%] left-1/2 transform -translate-x-1/2 text-center w-full max-w-3xl pointer-events-none"
       >
         <h1
           class="text-[2.5rem] md:text-5xl lg:text-[3.5rem] font-medium tracking-tight text-white leading-[1.2]"
@@ -177,10 +177,9 @@
       <div
         class="absolute top-[58%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-50"
       >
-        <a
-          href="./login.html"
-          onclick="window.location.href='./login.html'; return false;"
-          class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center"
+        <div
+          onclick="window.location.href='login.html';"
+          class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center pointer-events-auto"
           style="z-index: 100;"
         >
           <p
@@ -209,7 +208,7 @@
               </div>
             </div>
           </div>
-        </a>
+        </div>
       </div>
 
       <!-- Top Right: Float Card -->
@@ -310,10 +309,9 @@
       <div
         class="hidden md:flex absolute bottom-8 right-10 z-50 flex-col items-center gap-2"
       >
-        <a
-          href="./login.html"
-          onclick="window.location.href='./login.html'; return false;"
-          class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center"
+        <div
+          onclick="window.location.href='login.html';"
+          class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center pointer-events-auto"
           style="z-index: 100;"
         >
           <span class="text-[10px] uppercase font-semibold text-gray-400 tracking-wider mb-2 group-hover:text-brand-500 transition-colors cursor-pointer">ACESSAR</span>
@@ -337,7 +335,7 @@
               </div>
             </div>
           </div>
-        </a>
+        </div>
       </div>
 
       <!-- Bottom Center: Cookie Banner -->
