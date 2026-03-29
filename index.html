@@ -178,7 +178,7 @@
         class="absolute top-[58%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-50"
       >
         <div
-          onclick="window.location.href='login.html';"
+          onclick="loginGoogle()"
           class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center pointer-events-auto"
           style="z-index: 100;"
         >
@@ -310,7 +310,7 @@
         class="hidden md:flex absolute bottom-8 right-10 z-50 flex-col items-center gap-2"
       >
         <div
-          onclick="window.location.href='login.html';"
+          onclick="loginGoogle()"
           class="relative group cursor-pointer border-none bg-transparent outline-none flex flex-col items-center pointer-events-auto"
           style="z-index: 100;"
         >
@@ -385,5 +385,25 @@
       </div>
     </main>
 
+    <script>
+      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
+      const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
+      const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+
+      async function loginGoogle() {
+          await supabase.auth.signInWithOAuth({ 
+              provider: 'google', 
+              options: { redirectTo: window.location.origin + '/dashboard.html' } 
+          });
+      }
+
+      async function checkAutoLogin() {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+              window.location.href = "dashboard.html";
+          }
+      }
+      checkAutoLogin();
+    </script>
   </body>
 </html>
