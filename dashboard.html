@@ -1,304 +1,161 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AXIOM PRIME | THE NEXUS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom Prime | Ecossistema de Trading de Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --cyan: #00ffff;
-        --magenta: #ff00ff;
-        --gold: #ffd700;
-        --bg: #050505;
-      }
-      body {
-        background-color: var(--bg);
-        font-family: "Fira Code", monospace;
-        color: #e2e8f0;
-      }
-      .glass {
-        background: rgba(15, 15, 15, 0.7);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
-      .neon-cyan {
-        color: var(--cyan);
-        text-shadow: 0 0 10px var(--cyan);
-      }
-      .neon-magenta {
-        color: var(--magenta);
-        text-shadow: 0 0 10px var(--magenta);
-      }
-      .gold-glow {
-        color: var(--gold);
-        text-shadow: 0 0 15px var(--gold);
-      }
-      .timer-circle {
-        border: 4px solid rgba(255, 215, 0, 0.2);
-        position: relative;
-      }
-      .pulse {
-        animation: pulse 2s infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 0.5;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glow-red { box-shadow: 0 0 30px rgba(229, 9, 20, 0.2); }
+        .signal-card { border-left: 4px solid #222; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .call-card { border-left-color: #22c55e; box-shadow: -10px 0 30px rgba(34, 197, 94, 0.1); }
+        .put-card { border-left-color: #ef4444; box-shadow: -10px 0 30px rgba(239, 68, 68, 0.1); }
+        .split-view { height: calc(100vh - 72px); }
+        @keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .live-dot { animation: pulse-live 2s infinite; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .hidden { display: none !important; }
     </style>
-  </head>
-  <body class="p-4 md:p-8 relative">
-    <div class="max-w-7xl mx-auto">
-      <nav
-        class="flex justify-between items-center mb-10 glass p-6 rounded-2xl"
-      >
-        <h1 class="text-xl font-bold tracking-widest">
-          AXIOM<span class="gold-glow">PRIME</span>
-        </h1>
-        <div class="flex items-center gap-4 relative">
-          <span class="text-[10px] text-green-400 pulse">SYNCED</span>
-          <button
-            onclick="togglePerfil()"
-            class="w-10 h-10 bg-gray-800 rounded-full border border-gray-700 flex items-center justify-center font-bold text-white uppercase text-sm hover:border-cyan-500"
-          >
-            <span id="user-initials">U</span>
-          </button>
-          <div
-            id="perfil-menu"
-            class="hidden absolute top-14 right-0 w-60 glass p-6 rounded-xl text-center z-50"
-          >
-            <p class="text-[10px] text-gray-500 mb-1">USUÁRIO DELUXE</p>
-            <p id="user-email" class="text-xs text-white mb-4">
-              email@quantum.com
-            </p>
-            <button
-              onclick="alterarSenha()"
-              class="w-full text-[10px] text-cyan-400 bg-cyan-950 p-2 rounded mb-2 hover:bg-cyan-900"
-            >
-              ALTERAR CHAVE MESTRA
-            </button>
-            <button
-              onclick="logout()"
-              class="w-full text-[10px] text-red-400 bg-red-950 p-2 rounded hover:bg-red-900"
-            >
-              [LOGOUT]
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <div
-          class="md:col-span-4 glass rounded-3xl p-10 flex flex-col items-center justify-center text-center"
-        >
-          <h3 class="text-[10px] tracking-[0.4em] text-gray-500 mb-8 uppercase">
-            Neural Scan Active
-          </h3>
-          <div
-            class="w-60 h-60 timer-circle rounded-full flex items-center justify-center mb-8 relative"
-          >
-            <div class="text-center z-10">
-              <p class="text-[10px] text-gray-400 mb-1">PROX. SCAN EM</p>
-              <p id="countdown" class="text-5xl font-bold gold-glow italic">
-                00:58
-              </p>
+</head>
+<body class="flex flex-col min-h-screen">
+    
+    <nav class="h-[72px] border-b border-zinc-900 flex items-center justify-between px-10 bg-black/80 backdrop-blur-md z-20">
+        <div class="flex items-center gap-6">
+            <span class="text-2xl font-black text-red-600 tracking-tighter">AXIOM</span>
+            <div class="h-4 w-[px] bg-zinc-800"></div>
+            <div class="flex items-center gap-2 text-[9px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full live-dot"></span> VPS V3 ONLINE
             </div>
-          </div>
-          <p class="text-[10px] text-cyan-400 tracking-widest uppercase">
-            Monitorando Multimercado
-          </p>
         </div>
 
-        <div class="md:col-span-8 glass rounded-3xl p-8">
-          <div class="flex justify-between items-center mb-8">
-            <h2 class="text-sm font-bold tracking-widest uppercase italic">
-              The Nexus
-              <span class="text-xs text-gray-600 ml-2">// Supabase Sync</span>
-            </h2>
-            <span
-              class="text-[10px] bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/20 pulse"
-              >LIVE</span
-            >
-          </div>
-          <div class="overflow-x-auto h-[350px]">
-            <table class="w-full text-xs">
-              <thead>
-                <tr class="text-gray-600 border-b border-gray-800 text-left">
-                  <th class="pb-4">TIME</th>
-                  <th class="pb-4">ATIVO</th>
-                  <th class="pb-4">AÇÃO</th>
-                  <th class="pb-4">CONF.</th>
-                  <th class="pb-4 text-right">STATUS</th>
-                </tr>
-              </thead>
-              <tbody id="signal-rows"></tbody>
-            </table>
-          </div>
+        <div class="flex items-center gap-8">
+            <div class="text-right border-r border-zinc-800 pr-8">
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Saldo Banca Deriv</p>
+                <p id="user-balance" class="text-white font-mono font-bold text-lg">$ 0.00</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="user-email" class="text-[10px] font-medium text-zinc-400">agente@quantum.com</p>
+                </div>
+                <button onclick="logout()" class="p-2 text-zinc-600 hover:text-red-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 split-view">
+        
+        <div class="flex-1 bg-black border-r border-zinc-900 relative">
+            <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"></iframe>
+            <div id="loading-deriv" class="absolute inset-0 bg-black flex items-center justify-center pointer-events-none opacity-0 transition-opacity">
+                <span class="text-zinc-800 text-[10px] font-bold tracking-widest animate-pulse">CARREGANDO DERIV...</span>
+            </div>
         </div>
 
-        <div class="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
-          <div class="glass p-6 rounded-2xl text-center">
-            <p class="text-[10px] text-gray-500 uppercase mb-1">
-              Assertividade Hoje
-            </p>
-            <p class="text-3xl font-bold neon-cyan">91.4%</p>
-          </div>
-          <div class="glass p-6 rounded-2xl text-center">
-            <p class="text-[10px] text-gray-500 uppercase mb-1">
-              Sinais Gerados
-            </p>
-            <p class="text-3xl font-bold text-white">45</p>
-          </div>
-          <div class="glass p-6 rounded-2xl text-center">
-            <p class="text-[10px] text-gray-500 uppercase mb-1">Melhor Ativo</p>
-            <p class="text-3xl font-bold gold-glow">EUR/USD</p>
-          </div>
-          <div class="glass p-6 rounded-2xl text-center">
-            <p class="text-[10px] text-gray-500 uppercase mb-1">Pool Slaves</p>
-            <p class="text-3xl font-bold text-green-400">92/100</p>
-          </div>
+        <div class="w-[420px] bg-zinc-950 flex flex-col">
+            <div class="p-6 border-b border-zinc-900 bg-black/20">
+                <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Oportunidades em Tempo Real</h3>
+            </div>
+            
+            <div id="signal-feed" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div id="waiting-msg" class="h-full flex flex-col items-center justify-center text-zinc-800 space-y-3">
+                    <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <span class="text-[10px] font-bold uppercase tracking-widest">Aguardando Mercado...</span>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-
-    <div
-      id="redefinir-senha"
-      class="hidden fixed inset-0 flex items-center justify-center bg-black/80 z-[100] p-6"
-    >
-      <div class="glass p-10 rounded-3xl w-full max-w-md text-center">
-        <h3 class="text-xl font-bold gold-glow mb-4 uppercase tracking-widest">
-          Alterar Chave
-        </h3>
-        <p class="text-xs text-gray-400 mb-6">
-          Digite sua nova senha de acesso.
-        </p>
-        <input
-          type="password"
-          id="nova-senha"
-          class="w-full p-4 rounded-lg bg-gray-950 border border-gray-700 text-sm mb-4"
-          placeholder="Nova Senha"
-        />
-        <button
-          onclick="confirmarNovaSenha()"
-          class="w-full bg-cyan-500 py-4 rounded-lg text-black font-bold text-xs tracking-widest uppercase mb-2"
-        >
-          Confirmar
-        </button>
-        <button
-          onclick="fecharRedefinirSenha()"
-          class="text-xs text-gray-600 hover:text-white"
-        >
-          Cancelar
-        </button>
-        <p id="msg-senha" class="text-xs mt-3 hidden"></p>
-      </div>
     </div>
 
     <script>
-      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-      const SB_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-      const supabase = supabase.createClient(SB_URL, SB_KEY);
-      let currentUser;
+        // CONFIGURAÇÕES SUPABASE INTEGRADAS (ANDERSON)
+        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
+        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
+        const supabase = window.supabase.createClient(sbUrl, sbKey);
 
-      async function checkUser() {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) {
-          window.location.href = "index.html";
-          return;
-        }
-        currentUser = user;
-        document.getElementById("user-email").innerText = user.email;
-        document.getElementById("user-initials").innerText = user.email
-          .substring(0, 2)
-          .toUpperCase();
-      }
-      checkUser();
+        let currentUser = null;
 
-      async function loadSignals() {
-        const { data } = await supabase
-          .from("live_signals")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(6);
-        if (data) {
-          document.getElementById("signal-rows").innerHTML = data
-            .map(
-              (s) => `
-                    <tr class="border-b border-gray-900/50 hover:bg-white/5 transition">
-                        <td class="py-4 text-gray-500">${new Date(s.created_at).toLocaleTimeString("pt-BR")}</td>
-                        <td class="py-4 font-bold neon-cyan">${s.par}</td>
-                        <td class="py-4 ${s.acao.includes("COMPRAR") ? "text-green-400" : "text-red-400"}">${s.acao}</td>
-                        <td class="py-4">${s.confianca}</td>
-                        <td class="py-4 text-right gold-glow font-bold italic">${s.status}</td>
-                    </tr>
-                `,
-            )
-            .join("");
-        }
-      }
-      setInterval(loadSignals, 2000);
-      loadSignals();
-
-      let time = 60;
-      setInterval(() => {
-        time--;
-        if (time < 0) time = 60;
-        const min = Math.floor(time / 60)
-          .toString()
-          .padStart(2, "0");
-        const sec = (time % 60).toString().padStart(2, "0");
-        document.getElementById("countdown").innerText = `${min}:${sec}`;
-      }, 1000);
-
-      function togglePerfil() {
-        document.getElementById("perfil-menu").classList.toggle("hidden");
-      }
-      function alterarSenha() {
-        document.getElementById("perfil-menu").classList.add("hidden");
-        document.getElementById("redefinir-senha").classList.remove("hidden");
-      }
-      function fecharRedefinirSenha() {
-        document.getElementById("redefinir-senha").classList.add("hidden");
-      }
-      async function confirmarNovaSenha() {
-        const novaSenha = document.getElementById("nova-senha").value;
-        const msg = document.getElementById("msg-senha");
-        if (novaSenha.length < 6) {
-          msg.innerText = "Mínimo 6 caracteres.";
-          msg.className = "text-xs mt-3 text-red-500";
-          msg.classList.remove("hidden");
-          return;
-        }
-        const { error } = await supabase.auth.updateUser({
-          password: novaSenha,
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = session.user;
+            document.getElementById('user-email').innerText = currentUser.email;
+            
+            initAxiomEngine();
+            updateBalance(currentUser.id);
         });
-        if (error) {
-          msg.innerText = "Erro.";
-          msg.className = "text-xs mt-3 text-red-500";
-        } else {
-          msg.innerText = "Sucesso!";
-          msg.className = "text-xs mt-3 text-green-500";
-          setTimeout(fecharRedefinirSenha, 1500);
+
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
         }
-        msg.classList.remove("hidden");
-      }
-      async function logout() {
-        await supabase.auth.signOut();
-        window.location.href = "index.html";
-      }
+
+        // MOTOR DE SINAIS REALTIME
+        function initAxiomEngine() {
+            const feed = document.getElementById('signal-feed');
+            
+            supabase.channel('public:sinais_axiom')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                    document.getElementById('waiting-msg').classList.add('hidden');
+                    const sinal = payload.new;
+                    
+                    const cardClass = sinal.direcao === 'CALL' ? 'call-card' : 'put-card';
+                    const textClass = sinal.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
+                    const glowClass = sinal.direcao === 'CALL' ? 'bg-green-500' : 'bg-red-500';
+                    
+                    const html = \`
+                        <div class="signal-card glass p-6 rounded-2xl \${cardClass} animate-in slide-in-from-right duration-500">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[9px] font-black text-zinc-600 tracking-widest uppercase">Volatility 75 (1M)</span>
+                                <span class="text-[9px] text-zinc-700 font-mono">\${new Date().toLocaleTimeString()}</span>
+                            </div>
+                            <h4 class="text-5xl font-black \${textClass} tracking-tighter">\${sinal.direcao}</h4>
+                            <div class="mt-6">
+                                <div class="flex justify-between text-[9px] mb-2 uppercase font-bold text-zinc-500">
+                                    <span>Confiança Axiom</span>
+                                    <span>\${(sinal.confianca * 100).toFixed(2)}%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                                    <div class="h-full \${glowClass} transition-all duration-1000" style="width: \${sinal.confianca * 100}%"></div>
+                                </div>
+                            </div>
+                            <button onclick="replicarOperacao()" class="w-full mt-6 py-4 bg-white text-black text-[10px] font-black rounded-xl hover:bg-red-600 hover:text-white transition-all transform active:scale-95 uppercase tracking-widest">
+                                Replicar na Banca
+                            </button>
+                        </div>
+                    \`;
+                    feed.insertAdjacentHTML('afterbegin', html);
+                })
+                .subscribe();
+        }
+
+        async function updateBalance(uid) {
+            const { data } = await supabase.table('gestao_usuarios').select('saldo_deriv').eq('user_id', uid).single();
+            if (data && data.saldo_deriv !== undefined) {
+                document.getElementById('user-balance').innerText = \`$ \${data.saldo_deriv.toFixed(2)}\`;
+            } else {
+                document.getElementById('user-balance').innerText = "$ 0.00";
+            }
+        }
+
+        function replicarOperacao() {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "ENVIADO PARA VPS...";
+            btn.classList.add('bg-zinc-800', 'text-zinc-400');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-zinc-800', 'text-zinc-400');
+            }, 2000);
+        }
     </script>
-  </body>
+</body>
 </html>
