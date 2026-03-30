@@ -49,35 +49,37 @@
 
 <body>
 
-    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center relative p-6">
+    <div id="screen-landing" class="min-h-screen flex flex-col items-center justify-center relative p-6">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a0505_0%,_#000_70%)]"></div>
-        <div class="relative z-10 text-center space-y-8">
-            <h1 class="text-7xl font-black tracking-tighter text-red-600">AXIOM <span class="text-white">PRIME</span>
-            </h1>
-            <p class="text-zinc-500 max-w-sm mx-auto uppercase tracking-[0.3em] text-[10px] font-bold">The Next Gen
-                Trading Engine</p>
-            <button onclick="loginGoogle()"
+        <div class="relative z-10 text-center space-y-8 animate-in fade-in duration-700">
+            <h1 class="text-7xl font-black tracking-tighter text-red-600">AXIOM <span
+                    class="text-white font-light">PRIME</span></h1>
+            <p class="text-zinc-500 max-w-sm mx-auto uppercase tracking-[0.3em] text-[10px] font-bold">Revolucionando o
+                Futuro das Finanças</p>
+
+            <button onclick="fazerLogin()"
                 class="glass px-12 py-5 rounded-full font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105 flex items-center gap-3 mx-auto">
-                <img src="https://www.google.com/favicon.ico" class="w-4"> CONECTAR VIA GOOGLE CLOUD
+                <img src="https://www.google.com/favicon.ico" class="w-4"> COMEÇAR AGORA
             </button>
         </div>
     </div>
 
-    <div id="dash-screen" class="hidden flex flex-col min-h-screen">
+    <div id="screen-dashboard" class="hidden flex flex-col min-h-screen">
         <nav
             class="h-[72px] border-b border-zinc-900 flex items-center justify-between px-10 bg-black/80 backdrop-blur-md">
             <div class="flex items-center gap-6">
                 <span class="text-2xl font-black text-red-600">AXIOM</span>
                 <div
                     class="text-[9px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-widest">
-                    VPS V3 Online</div>
+                    Motor VPS Ativo</div>
             </div>
             <div class="flex items-center gap-6">
                 <div class="text-right">
-                    <p class="text-[9px] text-zinc-500 font-bold uppercase">Saldo Banca</p>
-                    <p id="user-balance" class="text-white font-mono font-bold">$ 0.00</p>
+                    <p class="text-[9px] text-zinc-500 font-bold uppercase">Status da Conta</p>
+                    <p id="user-display" class="text-white text-xs font-bold italic">Validando...</p>
                 </div>
-                <button onclick="logout()" class="text-zinc-600 hover:text-red-500 transition">Sair</button>
+                <button onclick="fazerLogout()"
+                    class="text-zinc-600 hover:text-red-500 transition text-xs font-bold">SAIR</button>
             </div>
         </nav>
 
@@ -88,70 +90,75 @@
             <div class="w-[400px] bg-zinc-950 overflow-y-auto p-4 space-y-4" id="signal-feed">
                 <div id="waiting-msg"
                     class="h-full flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase">
-                    Aguardando sinais...</div>
+                    Aguardando sinais da VPS...</div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES SUPABASE
         const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-        
-        // Use window.supabase para evitar conflito com nomes de variáveis
-        const axiomClient = window.supabase.createClient(sbUrl, sbKey);
 
-        async function loginGoogle() {
-            console.log("Iniciando login...");
-            const { error } = await axiomClient.auth.signInWithOAuth({ 
-                provider: 'google', 
-                options: { 
-                    redirectTo: 'https://axiom.wayia.com.br' 
-                } 
+        const axiom = window.supabase.createClient(sbUrl, sbKey);
+
+        // FUNÇÃO DE LOGIN
+        async function fazerLogin() {
+            const { error } = await axiom.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: 'https://axiom.wayia.com.br' }
             });
-            if (error) {
-                console.error("Erro no login:", error.message);
-                alert("Erro: " + error.message);
-            }
+            if (error) alert("Erro ao acessar: " + error.message);
         }
 
-        async function logout() {
-            await axiomClient.auth.signOut();
+        // FUNÇÃO DE LOGOUT
+        async function fazerLogout() {
+            await axiom.auth.signOut();
             window.location.reload();
         }
 
-        // Observador de estado
-        axiomClient.auth.onAuthStateChange((event, session) => {
+        // GERENCIADOR DE TELAS (O CORAÇÃO DO FLUXO)
+        axiom.auth.onAuthStateChange((event, session) => {
+            const landing = document.getElementById('screen-landing');
+            const dash = document.getElementById('screen-dashboard');
+
             if (session) {
-                console.log("Usuário logado:", session.user.email);
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('dash-screen').classList.remove('hidden');
-                initAxiomEngine();
+                // Usuário Logado: Esconde Landing e mostra Dash
+                landing.classList.add('hidden');
+                dash.classList.remove('hidden');
+                document.getElementById('user-display').innerText = session.user.email;
+                ligarMotorSinais();
+            } else {
+                // Usuário Deslogado: Mostra Landing e esconde Dash
+                landing.classList.remove('hidden');
+                dash.classList.add('hidden');
             }
         });
 
-        function initAxiomEngine() {
-            console.log("Motor de sinais ativado...");
-            axiomClient.channel('custom-all-channel')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
-                const waiting = document.getElementById('waiting-msg');
-                if (waiting) waiting.classList.add('hidden');
-                
-                const s = payload.new;
-                const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
-                const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
-                
-                const html = `
-                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-pulse">
-                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2">
-                            <span>VOLATILITY 75</span>
+        // ESCUTA OS SINAIS DO SUPABASE (VPS)
+        function ligarMotorSinais() {
+            axiom.channel('custom-all-channel')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                    const waiting = document.getElementById('waiting-msg');
+                    if (waiting) waiting.remove();
+
+                    const s = payload.new;
+                    const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
+                    const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
+
+                    const cardHtml = `
+                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-in slide-in-from-right">
+                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2 font-bold">
+                            <span>VOLATILITY 75 (1M)</span>
                             <span>${new Date().toLocaleTimeString()}</span>
                         </div>
                         <h4 class="text-4xl font-black ${textClass}">${s.direcao}</h4>
-                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase">Replicar Agora</button>
+                        <div class="mt-4 h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-600" style="width: ${s.confianca * 100}%"></div>
+                        </div>
+                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase hover:bg-red-600 hover:text-white transition">Replicar Entrada</button>
                     </div>`;
-                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', html);
-            }).subscribe();
+                    document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', cardHtml);
+                }).subscribe();
         }
     </script>
 </body>
