@@ -1,140 +1,159 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AXIOM PRIME | O Futuro da Execução Multimercado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom Prime | Trading Intelligence</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet" />
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: { sans: ["Inter", "sans-serif"], mono: ["Fira Code", "monospace"] },
-            colors: { brand: { 400: "#ff8a00", 500: "#ff6b00", glow: "#ff5500" } }
-          }
-        }
-      };
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-      body { background-color: #050505; color: #fff; overflow-x: hidden; scroll-behavior: smooth; }
-      .glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-      .stars-bg { position: absolute; inset: 0; background-image: radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0, 0, 0, 0)), radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0)); background-size: 200px 200px; opacity: 0.15; z-index: 0; }
-      .bg-gradient-radial { background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, rgba(0, 0, 0, 0) 60%); }
-      .btn-axiom-core { background: linear-gradient(135deg, #ff8a00 0%, #ff5500 100%); transition: all 0.3s ease; }
-      .btn-axiom-core:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 107, 0, 0.6); }
-      /* Correção Crítica: Impede que fundos bloqueiem o mouse */
-      .pointer-none { pointer-events: none; }
-      .pointer-auto { pointer-events: auto; }
-    </style>
-  </head>
-  <body class="antialiased h-screen relative overflow-hidden flex flex-col items-center justify-center">
-    
-    <div class="stars-bg pointer-none"></div>
-    <div class="absolute inset-0 bg-gradient-radial z-0 pointer-none"></div>
+        body {
+            background: #050505;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
 
-    <div class="absolute inset-0 z-10 pointer-none flex items-center justify-center overflow-hidden">
-      <svg class="w-full h-full min-w-[1200px] opacity-60" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-        <g stroke="#ff6b00" fill="none" stroke-width="1.5">
-          <ellipse cx="150" cy="540" rx="120" ry="450" opacity="0.1" />
-          <ellipse cx="550" cy="540" rx="70" ry="300" opacity="0.3" />
-          <ellipse cx="920" cy="540" rx="20" ry="70" opacity="0.9" />
-          <ellipse cx="1770" cy="540" rx="120" ry="450" opacity="0.1" />
-          <ellipse cx="1370" cy="540" rx="70" ry="300" opacity="0.3" />
-          <ellipse cx="1000" cy="540" rx="20" ry="70" opacity="0.9" />
-        </g>
-      </svg>
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .signal-card {
+            border-left: 4px solid #222;
+            transition: 0.4s ease;
+        }
+
+        .call-card {
+            border-left-color: #22c55e;
+            box-shadow: -10px 0 30px rgba(34, 197, 94, 0.1);
+        }
+
+        .put-card {
+            border-left-color: #ef4444;
+            box-shadow: -10px 0 30px rgba(239, 68, 68, 0.1);
+        }
+
+        .split-view {
+            height: calc(100vh - 72px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center relative p-6">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a0505_0%,_#000_70%)]"></div>
+        <div class="relative z-10 text-center space-y-8">
+            <h1 class="text-7xl font-black tracking-tighter text-red-600">AXIOM <span class="text-white">PRIME</span>
+            </h1>
+            <p class="text-zinc-500 max-w-sm mx-auto uppercase tracking-[0.3em] text-[10px] font-bold">The Next Gen
+                Trading Engine</p>
+            <button onclick="loginGoogle()"
+                class="glass px-12 py-5 rounded-full font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105 flex items-center gap-3 mx-auto">
+                <img src="https://www.google.com/favicon.ico" class="w-4"> CONECTAR VIA GOOGLE CLOUD
+            </button>
+        </div>
     </div>
 
-    <main class="relative z-20 w-full max-w-7xl mx-auto px-6 h-full flex flex-col items-center justify-center">
-      
-      <div class="absolute top-[15%] left-1/2 -translate-x-1/2 text-center w-full pointer-none">
-        <h1 class="text-4xl md:text-6xl font-medium tracking-tight leading-tight">
-          Revolucionando o <br />
-          <span class="text-brand-400 font-light">{</span> Futuro das Finanças Digitais <span class="text-brand-400 font-light">}</span>
-        </h1>
-      </div>
-
-      <div class="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col items-center">
-        <div onclick="fluxoAcesso()" class="group cursor-pointer flex flex-col items-center pointer-auto">
-          <p class="text-[10px] uppercase tracking-[0.3em] text-white mb-6 font-bold group-hover:text-brand-500 transition-colors">COMEÇAR AGORA</p>
-          <div class="w-24 h-24 rounded-full border border-brand-500 flex items-center justify-center relative shadow-[0_0_40px_rgba(255,107,0,0.3)] btn-axiom-core">
-            <div class="w-14 h-14 rounded-full bg-[#111] flex items-center justify-center">
-                <div class="w-5 h-5 border-[3px] border-brand-400 rounded-full border-t-transparent animate-spin group-hover:animate-none"></div>
+    <div id="dash-screen" class="hidden flex flex-col min-h-screen">
+        <nav
+            class="h-[72px] border-b border-zinc-900 flex items-center justify-between px-10 bg-black/80 backdrop-blur-md">
+            <div class="flex items-center gap-6">
+                <span class="text-2xl font-black text-red-600">AXIOM</span>
+                <div
+                    class="text-[9px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                    VPS V3 Online</div>
             </div>
-          </div>
-        </div>
-      </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-[9px] text-zinc-500 font-bold uppercase">Saldo Banca</p>
+                    <p id="user-balance" class="text-white font-mono font-bold">$ 0.00</p>
+                </div>
+                <button onclick="logout()" class="text-zinc-600 hover:text-red-500 transition">Sair</button>
+            </div>
+        </nav>
 
-      <div class="hidden md:block absolute top-10 right-10 glass-panel p-5 rounded-2xl w-64 shadow-2xl pointer-none">
-        <div class="flex items-center gap-3 mb-2"><span class="text-green-500 font-bold">USDT</span></div>
-        <div class="text-3xl font-bold font-mono">$13,852.93</div>
-        <div class="text-[10px] text-gray-500 mt-2">ATIVO NO MOTOR</div>
-      </div>
-    </main>
-
-    <div id="modal-cadastro" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/90 p-4">
-        <div class="glass-panel max-w-md w-full p-8 rounded-3xl text-center border border-brand-500/30">
-            <h2 class="text-2xl font-bold mb-2">Quase lá, Anderson!</h2>
-            <p class="text-gray-400 text-sm mb-6">Complete seu perfil para o terminal Axiom.</p>
-            <div class="space-y-4">
-                <input type="text" id="reg-nome" placeholder="Nome Completo" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-500 outline-none">
-                <input type="text" id="reg-tel" placeholder="WhatsApp (DDD + Número)" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 focus:border-brand-500 outline-none">
-                <button onclick="salvarPerfil()" class="w-full p-4 btn-axiom-core rounded-xl font-bold uppercase tracking-widest">Liberar Acesso</button>
+        <div class="flex split-view">
+            <div class="flex-1 border-r border-zinc-900">
+                <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"></iframe>
+            </div>
+            <div class="w-[400px] bg-zinc-950 overflow-y-auto p-4 space-y-4" id="signal-feed">
+                <div id="waiting-msg"
+                    class="h-full flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase">
+                    Aguardando sinais...</div>
             </div>
         </div>
     </div>
 
     <script>
-      const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-      const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-      const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+        // CONFIGURAÇÕES SUPABASE
+        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
+        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
+        
+        // Use window.supabase para evitar conflito com nomes de variáveis
+        const axiomClient = window.supabase.createClient(sbUrl, sbKey);
 
-      async function fluxoAcesso() {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (!session) {
-              // Inicia Login com Google
-              await supabase.auth.signInWithOAuth({
-                  provider: 'google',
-                  options: { redirectTo: window.location.origin + '/index.html' }
-              });
-          } else {
-              // Verifica se já tem perfil
-              const { data: perfil } = await supabase.table('gestao_usuarios').select('*').eq('user_id', session.user.id).single();
-              if (perfil) {
-                  window.location.href = "dashboard.html";
-              } else {
-                  document.getElementById('modal-cadastro').classList.remove('hidden');
-              }
-          }
-      }
+        async function loginGoogle() {
+            console.log("Iniciando login...");
+            const { error } = await axiomClient.auth.signInWithOAuth({ 
+                provider: 'google', 
+                options: { 
+                    redirectTo: 'https://axiom.wayia.com.br' 
+                } 
+            });
+            if (error) {
+                console.error("Erro no login:", error.message);
+                alert("Erro: " + error.message);
+            }
+        }
 
-      async function salvarPerfil() {
-          const { data: { session } } = await supabase.auth.getSession();
-          const nome = document.getElementById('reg-nome').value;
-          const tel = document.getElementById('reg-tel').value;
+        async function logout() {
+            await axiomClient.auth.signOut();
+            window.location.reload();
+        }
 
-          if (nome && tel && session) {
-              const { error } = await supabase.table('gestao_usuarios').insert([
-                  { user_id: session.user.id, nome_cliente: nome, email: session.user.email, telefone: tel }
-              ]);
-              if (!error) window.location.href = "dashboard.html";
-              else alert("Erro ao salvar: " + error.message);
-          } else {
-              alert("Preencha todos os campos!");
-          }
-      }
+        // Observador de estado
+        axiomClient.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                console.log("Usuário logado:", session.user.email);
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('dash-screen').classList.remove('hidden');
+                initAxiomEngine();
+            }
+        });
 
-      // Check Automático
-      window.onload = async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-              const { data } = await supabase.table('gestao_usuarios').select('id').eq('user_id', session.user.id).single();
-              if (data) window.location.href = "dashboard.html";
-          }
-      }
+        function initAxiomEngine() {
+            console.log("Motor de sinais ativado...");
+            axiomClient.channel('custom-all-channel')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                const waiting = document.getElementById('waiting-msg');
+                if (waiting) waiting.classList.add('hidden');
+                
+                const s = payload.new;
+                const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
+                const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
+                
+                const html = `
+                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-pulse">
+                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2">
+                            <span>VOLATILITY 75</span>
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <h4 class="text-4xl font-black ${textClass}">${s.direcao}</h4>
+                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase">Replicar Agora</button>
+                    </div>`;
+                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', html);
+            }).subscribe();
+        }
     </script>
-  </body>
+</body>
+
 </html>
