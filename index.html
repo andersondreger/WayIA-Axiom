@@ -85,7 +85,12 @@
 
         <div class="flex split-view">
             <div class="flex-1 border-r border-zinc-900">
-                <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"></iframe>
+                <iframe src="https://app.deriv.com/dtrader" 
+                        id="deriv-frame"
+                        class="w-full h-full border-none opacity-90" 
+                        sandbox="allow-forms text-zinc-400 allow-scripts allow-same-origin allow-popups"
+                        allow="geolocation; microphone; camera">
+                </iframe>
             </div>
             <div class="w-[400px] bg-zinc-950 overflow-y-auto p-4 space-y-4" id="signal-feed">
                 <div id="waiting-msg"
@@ -98,40 +103,41 @@
     <script>
         const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-
+        
         const axiom = window.supabase.createClient(sbUrl, sbKey);
 
-        // FUNÇÃO DE LOGIN
         async function fazerLogin() {
-            // Forçamos o HTTPS e o redirecionamento para a raiz do SEU site
-            const { error } = await axiom.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: 'https://axiom.wayia.com.br' }
+            // Se o botão não estiver disparando, o console vai nos avisar agora
+            console.log("Tentando abrir o portal Google...");
+            const { error } = await axiom.auth.signInWithOAuth({ 
+                provider: 'google', 
+                options: { 
+                    redirectTo: 'https://axiom.wayia.com.br' 
+                } 
             });
-            if (error) alert("Erro: " + error.message);
+            if (error) alert("Erro Axiom: " + error.message);
         }
 
-        // FUNÇÃO DE LOGOUT
         async function fazerLogout() {
             await axiom.auth.signOut();
             window.location.reload();
         }
 
-        // Monitor de estado reforçado
+        // BLOQUEIO DE SEGURANÇA: Se a Deriv tentar roubar a URL, o site volta
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+
         axiom.auth.onAuthStateChange((event, session) => {
             const landing = document.getElementById('screen-landing');
             const dash = document.getElementById('screen-dashboard');
 
             if (session) {
-                // Se o Google tentar te jogar pra fora, isso aqui te puxa de volta
-                if (window.location.hostname === 'app.deriv.com') {
-                    window.location.href = 'https://axiom.wayia.com.br';
-                }
-                
-                // Usuário Logado: Esconde Landing e mostra Dash
+                console.log("Acesso autorizado para:", session.user.email);
                 landing.classList.add('hidden');
                 dash.classList.remove('hidden');
                 
+                // Exibição do e-mail do usuário no dashboard
                 const userDisplay = document.getElementById('user-display');
                 if (userDisplay && session.user && session.user.email) {
                     userDisplay.innerText = session.user.email;
@@ -139,37 +145,32 @@
                 
                 ligarMotorSinais();
             } else {
-                // Usuário Deslogado: Mostra Landing e esconde Dash
                 landing.classList.remove('hidden');
                 dash.classList.add('hidden');
             }
         });
 
-        // ESCUTA OS SINAIS DO SUPABASE (VPS)
         function ligarMotorSinais() {
             axiom.channel('custom-all-channel')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
-                    const waiting = document.getElementById('waiting-msg');
-                    if (waiting) waiting.remove();
-
-                    const s = payload.new;
-                    const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
-                    const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
-
-                    const cardHtml = `
-                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-in slide-in-from-right">
-                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2 font-bold">
-                            <span>VOLATILITY 75 (1M)</span>
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                const waiting = document.getElementById('waiting-msg');
+                if (waiting) waiting.remove();
+                
+                const s = payload.new;
+                const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
+                const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
+                
+                const cardHtml = `
+                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-pulse">
+                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2 font-bold uppercase">
+                            <span>VOLATILITY 75</span>
                             <span>${new Date().toLocaleTimeString()}</span>
                         </div>
                         <h4 class="text-4xl font-black ${textClass}">${s.direcao}</h4>
-                        <div class="mt-4 h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
-                            <div class="h-full bg-red-600" style="width: ${s.confianca * 100}%"></div>
-                        </div>
-                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase hover:bg-red-600 hover:text-white transition">Replicar Entrada</button>
+                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase">Replicar</button>
                     </div>`;
-                    document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', cardHtml);
-                }).subscribe();
+                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', cardHtml);
+            }).subscribe();
         }
     </script>
 </body>
