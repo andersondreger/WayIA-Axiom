@@ -103,11 +103,12 @@
 
         // FUNÇÃO DE LOGIN
         async function fazerLogin() {
+            // Forçamos o HTTPS e o redirecionamento para a raiz do SEU site
             const { error } = await axiom.auth.signInWithOAuth({
                 provider: 'google',
                 options: { redirectTo: 'https://axiom.wayia.com.br' }
             });
-            if (error) alert("Erro ao acessar: " + error.message);
+            if (error) alert("Erro: " + error.message);
         }
 
         // FUNÇÃO DE LOGOUT
@@ -116,16 +117,26 @@
             window.location.reload();
         }
 
-        // GERENCIADOR DE TELAS (O CORAÇÃO DO FLUXO)
+        // Monitor de estado reforçado
         axiom.auth.onAuthStateChange((event, session) => {
             const landing = document.getElementById('screen-landing');
             const dash = document.getElementById('screen-dashboard');
 
             if (session) {
+                // Se o Google tentar te jogar pra fora, isso aqui te puxa de volta
+                if (window.location.hostname === 'app.deriv.com') {
+                    window.location.href = 'https://axiom.wayia.com.br';
+                }
+                
                 // Usuário Logado: Esconde Landing e mostra Dash
                 landing.classList.add('hidden');
                 dash.classList.remove('hidden');
-                document.getElementById('user-display').innerText = session.user.email;
+                
+                const userDisplay = document.getElementById('user-display');
+                if (userDisplay && session.user && session.user.email) {
+                    userDisplay.innerText = session.user.email;
+                }
+                
                 ligarMotorSinais();
             } else {
                 // Usuário Deslogado: Mostra Landing e esconde Dash
