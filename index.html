@@ -4,172 +4,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Prime | Trading Intelligence</title>
+    <title>Axiom Prime | WayIA</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #050505;
+            background: #000;
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         .glass {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .signal-card {
-            border-left: 4px solid #222;
-            transition: 0.4s ease;
-        }
-
-        .call-card {
-            border-left-color: #22c55e;
-            box-shadow: -10px 0 30px rgba(34, 197, 94, 0.1);
-        }
-
-        .put-card {
-            border-left-color: #ef4444;
-            box-shadow: -10px 0 30px rgba(239, 68, 68, 0.1);
+        .hero-bg {
+            background: radial-gradient(circle at center, #1a0505 0%, #000 70%);
         }
 
         .split-view {
-            height: calc(100vh - 72px);
+            height: calc(100vh - 80px);
         }
 
-        .hidden {
-            display: none !important;
+        /* Animação de Glow para Sinais */
+        @keyframes glow {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse-signal {
+            animation: glow 2s infinite;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="screen-landing" class="min-h-screen flex flex-col items-center justify-center relative p-6">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a0505_0%,_#000_70%)]"></div>
-        <div class="relative z-10 text-center space-y-8 animate-in fade-in duration-700">
-            <h1 class="text-7xl font-black tracking-tighter text-red-600">AXIOM <span
-                    class="text-white font-light">PRIME</span></h1>
-            <p class="text-zinc-500 max-w-sm mx-auto uppercase tracking-[0.3em] text-[10px] font-bold">Revolucionando o
-                Futuro das Finanças</p>
+    <div id="screen-landing"
+        class="min-h-screen flex flex-col items-center justify-center relative hero-bg p-6 text-center">
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-4 uppercase">Revolucionando o <br> <span
+                class="text-red-600 italic">{ Futuro das Finanças }</span></h1>
+        <p class="text-zinc-500 max-w-xl mx-auto mb-12 text-sm leading-relaxed uppercase tracking-widest">Explore
+            análises em tempo real e inovações revolucionárias.</p>
 
-            <button onclick="fazerLogin()"
-                class="glass px-12 py-5 rounded-full font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105 flex items-center gap-3 mx-auto">
-                <img src="https://www.google.com/favicon.ico" class="w-4"> COMEÇAR AGORA
-            </button>
-        </div>
+        <button onclick="loginComGoogle()"
+            class="glass px-12 py-5 rounded-full font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all transform hover:scale-110 flex items-center gap-4">
+            <img src="https://www.google.com/favicon.ico" class="w-4"> COMEÇAR AGORA
+        </button>
     </div>
 
-    <div id="screen-dashboard" class="hidden flex flex-col min-h-screen">
-        <nav
-            class="h-[72px] border-b border-zinc-900 flex items-center justify-between px-10 bg-black/80 backdrop-blur-md">
-            <div class="flex items-center gap-6">
-                <span class="text-2xl font-black text-red-600">AXIOM</span>
-                <div
-                    class="text-[9px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase tracking-widest">
-                    Motor VPS Ativo</div>
+    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col">
+        <nav class="h-20 border-b border-zinc-900 flex items-center justify-between px-10 bg-black/50 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <span class="text-2xl font-black text-red-600 tracking-tighter">AXIOM</span>
+                <span
+                    class="bg-green-600/20 text-green-500 text-[10px] font-bold px-3 py-1 rounded-full border border-green-600/30">MOTOR
+                    VPS ATIVO</span>
             </div>
             <div class="flex items-center gap-6">
                 <div class="text-right">
                     <p class="text-[9px] text-zinc-500 font-bold uppercase">Status da Conta</p>
-                    <p id="user-display" class="text-white text-xs font-bold italic">Validando...</p>
+                    <span id="user-mail" class="text-xs text-white font-bold italic"></span>
                 </div>
-                <button onclick="fazerLogout()"
-                    class="text-zinc-600 hover:text-red-500 transition text-xs font-bold">SAIR</button>
+                <button onclick="sair()"
+                    class="text-[10px] font-black border border-zinc-800 px-4 py-2 rounded hover:bg-red-600 transition">SAIR</button>
             </div>
         </nav>
 
-        <div class="flex split-view">
-            <div class="flex-1 border-r border-zinc-900">
-                <iframe src="https://app.deriv.com/dtrader" 
-                        id="deriv-frame"
-                        class="w-full h-full border-none opacity-90" 
-                        sandbox="allow-forms text-zinc-400 allow-scripts allow-same-origin allow-popups"
-                        allow="geolocation; microphone; camera">
-                </iframe>
+        <div class="flex flex-1 split-view overflow-hidden">
+            <div class="flex-1 bg-black">
+                <iframe src="https://app.deriv.com/dtrader" id="deriv-frame"
+                    class="w-full h-full border-none opacity-90"
+                    sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+                    allow="geolocation; microphone; camera"></iframe>
             </div>
-            <div class="w-[400px] bg-zinc-950 overflow-y-auto p-4 space-y-4" id="signal-feed">
-                <div id="waiting-msg"
-                    class="h-full flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase">
-                    Aguardando sinais da VPS...</div>
+            <div id="signal-feed" class="w-96 bg-zinc-950 border-l border-zinc-900 p-4 overflow-y-auto space-y-4">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Sinais Axiom</p>
+                    <span class="w-2 h-2 bg-red-600 rounded-full pulse-signal"></span>
+                </div>
+                <div id="no-signal"
+                    class="h-40 flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase italic">
+                    Aguardando motor VPS...</div>
             </div>
         </div>
     </div>
 
     <script>
-        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
-        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-        
-        const axiom = window.supabase.createClient(sbUrl, sbKey);
+        const URL_SUPABASE = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
+        const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
 
-        async function fazerLogin() {
-            // Se o botão não estiver disparando, o console vai nos avisar agora
-            console.log("Tentando abrir o portal Google...");
-            const { error } = await axiom.auth.signInWithOAuth({ 
-                provider: 'google', 
-                options: { 
-                    redirectTo: 'https://axiom.wayia.com.br' 
-                } 
+        const client = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+
+        async function loginComGoogle() {
+            await client.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: 'https://axiom.wayia.com.br' }
             });
-            if (error) alert("Erro Axiom: " + error.message);
         }
 
-        async function fazerLogout() {
-            await axiom.auth.signOut();
+        async function sair() {
+            await client.auth.signOut();
             window.location.reload();
         }
 
-        // BLOQUEIO DE SEGURANÇA: Se a Deriv tentar roubar a URL, o site volta
-        if (window.top !== window.self) {
-            window.top.location = window.self.location;
-        }
-
-        axiom.auth.onAuthStateChange((event, session) => {
+        client.auth.onAuthStateChange((event, session) => {
             const landing = document.getElementById('screen-landing');
             const dash = document.getElementById('screen-dashboard');
 
             if (session) {
-                console.log("Acesso autorizado para:", session.user.email);
                 landing.classList.add('hidden');
                 dash.classList.remove('hidden');
-                
-                // Exibição do e-mail do usuário no dashboard
-                const userDisplay = document.getElementById('user-display');
-                if (userDisplay && session.user && session.user.email) {
-                    userDisplay.innerText = session.user.email;
-                }
-                
-                ligarMotorSinais();
+                document.getElementById('user-mail').innerText = session.user.email;
+                iniciarSinais();
             } else {
                 landing.classList.remove('hidden');
                 dash.classList.add('hidden');
             }
         });
 
-        function ligarMotorSinais() {
-            axiom.channel('custom-all-channel')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
-                const waiting = document.getElementById('waiting-msg');
-                if (waiting) waiting.remove();
-                
+        function iniciarSinais() {
+            client.channel('sinais').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                const empty = document.getElementById('no-signal');
+                if (empty) empty.classList.add('hidden');
+
                 const s = payload.new;
-                const cardClass = s.direcao === 'CALL' ? 'call-card' : 'put-card';
-                const textClass = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
-                
-                const cardHtml = `
-                    <div class="signal-card glass p-6 rounded-xl ${cardClass} animate-pulse">
-                        <div class="flex justify-between text-[9px] text-zinc-600 mb-2 font-bold uppercase">
-                            <span>VOLATILITY 75</span>
-                            <span>${new Date().toLocaleTimeString()}</span>
+                const corSinal = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
+                const card = `
+                    <div class="glass p-6 rounded-2xl border-l-4 ${s.direcao === 'CALL' ? 'border-green-600' : 'border-red-600'} animate-in slide-in-from-right">
+                        <div class="flex justify-between text-[8px] text-zinc-600 mb-2 font-black uppercase">
+                            <span>Vol 75 (1M)</span> <span>${new Date().toLocaleTimeString()}</span>
                         </div>
-                        <h4 class="text-4xl font-black ${textClass}">${s.direcao}</h4>
-                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded uppercase">Replicar</button>
+                        <h4 class="text-4xl font-black ${corSinal} tracking-tighter">${s.direcao}</h4>
+                        <div class="mt-4 flex items-center gap-2">
+                            <div class="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden">
+                                <div class="h-full bg-red-600" style="width: ${s.confianca * 100}%"></div>
+                            </div>
+                            <span class="text-[9px] text-zinc-500">${(s.confianca * 100).toFixed(0)}%</span>
+                        </div>
+                        <button class="w-full mt-5 py-3 bg-white text-black text-[10px] font-black rounded hover:bg-red-600 hover:text-white transition uppercase">Replicar Entrada</button>
                     </div>`;
-                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', cardHtml);
+                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
             }).subscribe();
         }
     </script>
