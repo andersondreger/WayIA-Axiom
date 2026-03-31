@@ -87,7 +87,7 @@
   <script>
     const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
     const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-    const supabase = supabase.createClient(SB_URL, SB_KEY);
+    const supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
     
     let isRegistering = false;
 
@@ -123,9 +123,9 @@
       let authResult;
       
       if (isRegistering) {
-        authResult = await supabase.auth.signUp({ email, password });
+        authResult = await supabaseClient.auth.signUp({ email, password });
       } else {
-        authResult = await supabase.auth.signInWithPassword({ email, password });
+        authResult = await supabaseClient.auth.signInWithPassword({ email, password });
       }
 
       if (authResult.error) {
@@ -143,14 +143,14 @@
     });
 
     async function loginGoogle() {
-        await supabase.auth.signInWithOAuth({ 
+        await supabaseClient.auth.signInWithOAuth({ 
             provider: 'google', 
             options: { redirectTo: window.location.origin + '/dashboard.html' } 
         });
     }
 
     async function checkAutoLogin() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (session) {
             window.location.href = "dashboard.html";
         }
