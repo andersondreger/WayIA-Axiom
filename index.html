@@ -4,13 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Prime | WayIA</title>
+    <title>WayIA Axiom | Governance & Audit System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --axiom-cyan: #00D1FF;
+            --axiom-green: #00FF85;
+            --axiom-red: #FF0032;
+        }
+
         body {
-            background: #000;
+            background: #020202;
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -20,147 +26,234 @@
             display: none !important;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .glass-dark {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .hero-bg {
-            background: radial-gradient(circle at center, #1a0505 0%, #000 70%);
+            background: radial-gradient(circle at center, #1a0505 0%, #000 80%);
         }
 
-        .split-view {
+        .split-height {
             height: calc(100vh - 80px);
         }
 
-        /* Animação de Glow para Sinais */
-        @keyframes glow {
+        /* Laser Scan FX */
+        .scan-line {
+            height: 1px;
+            background: var(--axiom-cyan);
+            width: 100%;
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            animation: scan 5s linear infinite;
+            box-shadow: 0 0 10px var(--axiom-cyan);
+            opacity: 0.3;
+        }
 
-            0%,
-            100% {
-                opacity: 1;
+        @keyframes scan {
+            0% {
+                top: 0%;
             }
 
-            50% {
-                opacity: 0.5;
+            100% {
+                top: 100%;
             }
         }
 
-        .pulse-signal {
-            animation: glow 2s infinite;
+        /* HUD Glow */
+        .hud-border {
+            border: 1px solid rgba(0, 209, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 209, 255, 0.02);
+        }
+
+        .win-glow {
+            box-shadow: 0 0 15px rgba(0, 255, 133, 0.15);
         }
     </style>
 </head>
 
 <body>
 
-    <div id="screen-landing"
-        class="min-h-screen flex flex-col items-center justify-center relative hero-bg p-6 text-center">
-        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-4 uppercase">Revolucionando o <br> <span
-                class="text-red-600 italic">{ Futuro das Finanças }</span></h1>
-        <p class="text-zinc-500 max-w-xl mx-auto mb-12 text-sm leading-relaxed uppercase tracking-widest">Explore
-            análises em tempo real e inovações revolucionárias.</p>
+    <div id="screen-landing" class="min-h-screen flex flex-col items-center justify-center relative hero-bg p-6">
+        <div class="relative z-10 text-center space-y-12 animate-in fade-in duration-1000">
+            <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/logos/logoatu-removebg-preview.png"
+                class="w-48 mx-auto filter drop-shadow-2xl">
 
-        <button onclick="loginComGoogle()"
-            class="glass px-12 py-5 rounded-full font-black text-xs tracking-widest hover:bg-white hover:text-black transition-all transform hover:scale-110 flex items-center gap-4">
-            <img src="https://www.google.com/favicon.ico" class="w-4"> COMEÇAR AGORA
-        </button>
-    </div>
+            <div class="space-y-4">
+                <h1 class="text-6xl font-black tracking-tighter uppercase leading-none">Axiom <span
+                        class="text-zinc-600 italic">Auditor</span></h1>
+                <p class="text-[9px] text-zinc-500 tracking-[0.8em] font-bold uppercase">Algorithmic Governance &
+                    Financial Security</p>
+            </div>
 
-    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col">
-        <nav class="h-20 border-b border-zinc-900 flex items-center justify-between px-10 bg-black/50 backdrop-blur-md">
-            <div class="flex items-center gap-4">
-                <span class="text-2xl font-black text-red-600 tracking-tighter">AXIOM</span>
-                <span
-                    class="bg-green-600/20 text-green-500 text-[10px] font-bold px-3 py-1 rounded-full border border-green-600/30">MOTOR
-                    VPS ATIVO</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[9px] text-zinc-500 font-bold uppercase">Status da Conta</p>
-                    <span id="user-mail" class="text-xs text-white font-bold italic"></span>
-                </div>
-                <button onclick="sair()"
-                    class="text-[10px] font-black border border-zinc-800 px-4 py-2 rounded hover:bg-red-600 transition">SAIR</button>
-            </div>
-        </nav>
-
-        <div class="flex flex-1 split-view overflow-hidden">
-            <div class="flex-1 bg-black">
-                <iframe src="https://app.deriv.com/dtrader" id="deriv-frame"
-                    class="w-full h-full border-none opacity-90"
-                    sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-                    allow="geolocation; microphone; camera"></iframe>
-            </div>
-            <div id="signal-feed" class="w-96 bg-zinc-950 border-l border-zinc-900 p-4 overflow-y-auto space-y-4">
-                <div class="flex justify-between items-center mb-6">
-                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Sinais Axiom</p>
-                    <span class="w-2 h-2 bg-red-600 rounded-full pulse-signal"></span>
-                </div>
-                <div id="no-signal"
-                    class="h-40 flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase italic">
-                    Aguardando motor VPS...</div>
-            </div>
+            <button onclick="loginGoogle()"
+                class="glass-dark px-16 py-6 rounded-none border-l-2 border-r-2 border-white/10 font-black text-[10px] tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105">
+                ESTABLISH SECURE CONNECTION
+            </button>
         </div>
     </div>
 
+    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col">
+        <nav
+            class="h-20 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/80 backdrop-blur-2xl z-50">
+            <div class="flex items-center gap-8">
+                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/logos/logoatu-removebg-preview.png"
+                    class="h-10">
+                <div class="flex flex-col border-l border-zinc-800 pl-6">
+                    <span class="text-[9px] font-black text-zinc-500 uppercase">System Status</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-green-500 uppercase tracking-tighter">Auditor VPS
+                            Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-12">
+                <div class="flex gap-10">
+                    <div class="text-right">
+                        <p class="text-[8px] text-zinc-600 font-black uppercase">Win Rate (24h)</p>
+                        <p class="text-[#00FF85] font-mono font-bold text-sm">87.4%</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[8px] text-zinc-600 font-black uppercase">Banca Deriv</p>
+                        <p id="user-balance" class="text-white font-mono font-bold text-sm tracking-tighter">$ --.--</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 border-l border-zinc-800 pl-8">
+                    <div class="text-right">
+                        <p id="user-name" class="text-[10px] font-bold text-white uppercase"></p>
+                        <p class="text-[8px] text-zinc-500 uppercase">Procurador Autorizado</p>
+                    </div>
+                    <button onclick="logout()" class="p-2 text-zinc-600 hover:text-red-600 transition"><svg width="18"
+                            height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg></button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex flex-1 split-height overflow-hidden">
+            <div class="flex-1 bg-black relative hud-border">
+                <div class="scan-line"></div>
+                <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"></iframe>
+            </div>
+
+            <div class="w-[450px] bg-[#050505] border-l border-zinc-900 flex flex-col">
+                <div class="p-6 border-b border-zinc-900 bg-zinc-900/5">
+                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Governance Intelligence
+                    </h3>
+                </div>
+
+                <div id="signal-feed" class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                    <div class="glass-dark p-5 rounded-none border-l-2 border-blue-500 space-y-5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest">Auditoria em
+                                Tempo Real</span>
+                            <span class="text-[8px] text-zinc-600 font-mono">ID: AX-9928</span>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex items-center justify-between text-[9px] uppercase font-bold text-zinc-400">
+                                <span class="flex items-center gap-2">● Estabilidade VPS</span>
+                                <span class="text-green-500">100%</span>
+                            </li>
+                            <li class="flex items-center justify-between text-[9px] uppercase font-bold text-zinc-400">
+                                <span class="flex items-center gap-2">● Fluxo de Dados (Deriv)</span>
+                                <span class="text-green-500">Sincronizado</span>
+                            </li>
+                            <li class="flex items-center justify-between text-[9px] uppercase font-bold text-zinc-400">
+                                <span class="flex items-center gap-2">● Latência Executiva</span>
+                                <span class="text-blue-500">0.02ms</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="no-signal" class="h-64 flex flex-col items-center justify-center text-zinc-800 space-y-4">
+                        <div class="relative">
+                            <svg class="animate-spin" width="30" height="30" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                            </svg>
+                        </div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em]">Aguardando Veredito do
+                            Auditor...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
     <script>
-        const URL_SUPABASE = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
-        const KEY_SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
+        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
+        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
 
-        const client = window.supabase.createClient(URL_SUPABASE, KEY_SUPABASE);
+        const axiom = window.supabase.createClient(sbUrl, sbKey);
 
-        async function loginComGoogle() {
-            await client.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: 'https://axiom.wayia.com.br' }
-            });
+        async function loginGoogle() {
+            await axiom.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://axiom.wayia.com.br' } });
         }
 
-        async function sair() {
-            await client.auth.signOut();
+        async function logout() {
+            await axiom.auth.signOut();
             window.location.reload();
         }
 
-        client.auth.onAuthStateChange((event, session) => {
-            const landing = document.getElementById('screen-landing');
-            const dash = document.getElementById('screen-dashboard');
-
+        axiom.auth.onAuthStateChange((event, session) => {
             if (session) {
-                landing.classList.add('hidden');
-                dash.classList.remove('hidden');
-                document.getElementById('user-mail').innerText = session.user.email;
-                iniciarSinais();
-            } else {
-                landing.classList.remove('hidden');
-                dash.classList.add('hidden');
+                document.getElementById('screen-landing').classList.add('hidden');
+                document.getElementById('screen-dashboard').classList.remove('hidden');
+                document.getElementById('user-name').innerText = session.user.user_metadata.full_name || "Axiom Trader";
+                fetchBalance(session.user.id);
+                initAxiomEngine();
             }
         });
 
-        function iniciarSinais() {
-            client.channel('sinais').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
-                const empty = document.getElementById('no-signal');
-                if (empty) empty.classList.add('hidden');
+        function initAxiomEngine() {
+            axiom.channel('axiom-live')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+                    const empty = document.getElementById('no-signal');
+                    if (empty) empty.classList.add('hidden');
 
-                const s = payload.new;
-                const corSinal = s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500';
-                const card = `
-                    <div class="glass p-6 rounded-2xl border-l-4 ${s.direcao === 'CALL' ? 'border-green-600' : 'border-red-600'} animate-in slide-in-from-right">
-                        <div class="flex justify-between text-[8px] text-zinc-600 mb-2 font-black uppercase">
-                            <span>Vol 75 (1M)</span> <span>${new Date().toLocaleTimeString()}</span>
+                    const s = payload.new;
+                    const typeColor = s.direcao === 'CALL' ? 'text-[#00FF85]' : 'text-[#FF0032]';
+                    const borderColor = s.direcao === 'CALL' ? 'border-[#00FF85]' : 'border-[#FF0032]';
+
+                    const card = `
+                    <div class="glass-dark p-6 rounded-none border-l-4 ${borderColor} animate-in slide-in-from-right duration-500 win-glow">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Asset: Volatility 75</span>
+                            <span class="text-[9px] text-zinc-700 font-mono">${new Date().toLocaleTimeString()}</span>
                         </div>
-                        <h4 class="text-4xl font-black ${corSinal} tracking-tighter">${s.direcao}</h4>
-                        <div class="mt-4 flex items-center gap-2">
-                            <div class="h-1 flex-1 bg-zinc-900 rounded-full overflow-hidden">
-                                <div class="h-full bg-red-600" style="width: ${s.confianca * 100}%"></div>
+                        <div class="space-y-1 mb-8">
+                            <p class="text-[8px] text-zinc-500 uppercase font-black">Veredito do Auditor:</p>
+                            <h4 class="text-6xl font-black ${typeColor} tracking-tighter italic">${s.direcao}</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase tracking-widest">
+                                <span>Índice de Confiança</span>
+                                <span class="${typeColor}">${(s.confianca * 100).toFixed(1)}%</span>
                             </div>
-                            <span class="text-[9px] text-zinc-500">${(s.confianca * 100).toFixed(0)}%</span>
+                            <div class="h-1 w-full bg-zinc-900 rounded-none overflow-hidden">
+                                <div class="h-full ${s.direcao === 'CALL' ? 'bg-[#00FF85]' : 'bg-[#FF0032]'}" style="width: ${s.confianca * 100}%"></div>
+                            </div>
                         </div>
-                        <button class="w-full mt-5 py-3 bg-white text-black text-[10px] font-black rounded hover:bg-red-600 hover:text-white transition uppercase">Replicar Entrada</button>
+                        <div class="mt-8 pt-6 border-t border-zinc-900/50">
+                            <button class="w-full py-4 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all">Replicar Operação</button>
+                        </div>
                     </div>`;
-                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
-            }).subscribe();
+                    document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
+                }).subscribe();
+        }
+
+        async function fetchBalance(uid) {
+            const { data } = await axiom.table('gestao_usuarios').select('saldo_deriv').eq('user_id', uid).single();
+            if (data) document.getElementById('user-balance').innerText = `$ ${data.saldo_deriv.toFixed(2)}`;
         }
     </script>
 </body>
