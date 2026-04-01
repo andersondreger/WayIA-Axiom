@@ -164,7 +164,7 @@
                             📊 ANÁLISE EM TEMPO REAL
                         </h3>
 
-                        <button class="w-full py-4 bg-[#00FF85] text-[#16191D] rounded-xl font-black uppercase text-[13px] mb-8 shadow-[0_0_20px_rgba(0,255,133,0.4)] hover:bg-[#00e575] hover:scale-[1.02] transition-all">
+                        <button onclick="simularSinal()" class="w-full py-4 bg-[#00FF85] text-[#16191D] rounded-xl font-black uppercase text-[13px] mb-8 shadow-[0_0_20px_rgba(0,255,133,0.4)] hover:bg-[#00e575] hover:scale-[1.02] transition-all">
                             [ CONECTAR E ANALISAR AGORA ]
                         </button>
 
@@ -218,60 +218,73 @@
             'R_10': 'https://app.deriv.com/dtrader?symbol=R_10'
         };
 
+        function renderSinal(sinal) {
+            const empty = document.getElementById('no-signal');
+            if (empty) empty.classList.add('hidden');
+
+            const frame = document.getElementById('deriv-frame');
+
+            // --- LÓGICA DE SINCRONIZAÇÃO DO GRÁFICO ---
+            if (sinal.ativo && ativosDeriv[sinal.ativo]) {
+                console.log(`Sincronizando gráfico com: ${sinal.ativo}`);
+                frame.src = ativosDeriv[sinal.ativo];
+            }
+
+            const isCall = sinal.direcao === 'CALL';
+            const color = isCall ? 'text-[#00FF85]' : 'text-[#FF4444]';
+            const direcaoTexto = isCall ? 'CALL (Compra)' : 'PUT (Venda)';
+            const entradaMock = sinal.entrada || (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
+            const nomeAtivo = sinal.ativo || 'VOLATILITY 75 INDEX';
+
+            const card = `
+                <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="flex justify-between text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-widest px-1">
+                        <span>${nomeAtivo}</span>
+                        <span>${new Date().toLocaleTimeString()}</span>
+                    </div>
+                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                        <span class="w-8 text-lg">👁️</span> <span class="text-zinc-500">VEREDITO:</span> <span class="ml-auto ${color} uppercase tracking-wide">${direcaoTexto}</span>
+                    </div>
+                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                        <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(sinal.confianca * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                        <span class="w-8 text-lg">💸</span> <span class="text-zinc-500">ENTRADA:</span> <span class="ml-auto text-white tracking-wide">${entradaMock}</span>
+                    </div>
+                    
+                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed mt-5 shadow-lg">
+                        <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 1:</div>
+                        Sinais algorítmicos alinhados com fluxo de volume indicativo de pressão ${isCall ? 'compradora' : 'vendedora'} no curto prazo.
+                    </div>
+                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed shadow-lg mb-2">
+                        <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 2:</div>
+                        Métricas de volatilidade no modelo cruzado fortalecem a decisão estratégica atual mantendo margem segura de erro.
+                    </div>
+                    
+                    <button onclick="window.open('${frame.src}', '_blank')" class="w-full mt-4 py-4 bg-[#2A2F35] text-white rounded-xl font-black uppercase text-xs hover:bg-zinc-700 transition border border-zinc-600 shadow-lg">
+                        ABRIR OPERAÇÃO NO TERMINAL
+                    </button>
+                </div>`;
+            document.getElementById('signal-feed').innerHTML = card;
+        }
+
         function initAxiomEngine() {
             console.log("Motor de Sincronização Ativado...");
+            
+            // Ouvir em todas as possíveis variações de nomes de canais já usados para garantir que nenhum seja perdido
+            axiom.channel('sinais').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
+            axiom.channel('live-axiom').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
+            axiom.channel('axiom-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
+        }
 
-            axiom.channel('live-axiom').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
-                const empty = document.getElementById('no-signal');
-                if (empty) empty.classList.add('hidden');
-
-                const sinal = payload.new;
-                const frame = document.getElementById('deriv-frame');
-
-                // --- LÓGICA DE SINCRONIZAÇÃO DO GRÁFICO ---
-                if (sinal.ativo && ativosDeriv[sinal.ativo]) {
-                    console.log(`Sincronizando gráfico com: ${sinal.ativo}`);
-                    frame.src = ativosDeriv[sinal.ativo];
-                }
-
-                const isCall = sinal.direcao === 'CALL';
-                const color = isCall ? 'text-[#00FF85]' : 'text-[#FF4444]';
-                const direcaoTexto = isCall ? 'CALL (Compra)' : 'PUT (Venda)';
-                const entradaMock = sinal.entrada || (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
-                const nomeAtivo = sinal.ativo || 'VOLATILITY 75 INDEX';
-
-                const card = `
-                    <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="flex justify-between text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-widest px-1">
-                            <span>${nomeAtivo}</span>
-                            <span>${new Date().toLocaleTimeString()}</span>
-                        </div>
-                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                            <span class="w-8 text-lg">👁️</span> <span class="text-zinc-500">VEREDITO:</span> <span class="ml-auto ${color} uppercase tracking-wide">${direcaoTexto}</span>
-                        </div>
-                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                            <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(sinal.confianca * 100).toFixed(0)}%</span>
-                        </div>
-                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                            <span class="w-8 text-lg">💸</span> <span class="text-zinc-500">ENTRADA:</span> <span class="ml-auto text-white tracking-wide">${entradaMock}</span>
-                        </div>
-                        
-                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed mt-5 shadow-lg">
-                            <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 1:</div>
-                            Sinais algorítmicos alinhados com fluxo de volume indicativo de pressão ${isCall ? 'compradora' : 'vendedora'} no curto prazo.
-                        </div>
-                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed shadow-lg mb-2">
-                            <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 2:</div>
-                            Métricas de volatilidade no modelo cruzado fortalecem a decisão estratégica atual mantendo margem segura de erro.
-                        </div>
-                        
-                        <button onclick="window.open('${frame.src}', '_blank')" class="w-full mt-4 py-4 bg-[#2A2F35] text-white rounded-xl font-black uppercase text-xs hover:bg-zinc-700 transition border border-zinc-600 shadow-lg">
-                            ABRIR OPERAÇÃO NO TERMINAL
-                        </button>
-                    </div>`;
-                // Substituir conteúdo para ficar apenas 1 sinal na tela, conforme a imagem de referência
-                document.getElementById('signal-feed').innerHTML = card;
-            }).subscribe();
+        // Simulação instantânea conectada ao botão verde principal
+        function simularSinal() {
+            const mock = {
+                ativo: ['R_75', 'R_100', '1HZ10V', 'R_10'][Math.floor(Math.random()*4)],
+                direcao: Math.random() > 0.5 ? 'CALL' : 'PUT',
+                confianca: (Math.random() * (0.99 - 0.70) + 0.70)
+            };
+            renderSinal(mock);
         }
 
         async function fetchBalance(uid) {
