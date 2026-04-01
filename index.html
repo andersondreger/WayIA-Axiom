@@ -4,13 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Prime | WayIA Governance</title>
+    <title>Axiom Prime | Intelligent Auditor</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --axiom-cyan: #00D1FF;
+            --axiom-red: #FF0032;
+            --axiom-green: #00FF85;
+        }
+
         body {
-            background: #000;
+            background: #020202;
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -20,25 +26,27 @@
             display: none !important;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.02);
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .hero-bg {
-            background: radial-gradient(circle at center, #1a0505 0%, #000 75%);
+            background: radial-gradient(circle at center, #1a0505 0%, #000 80%);
         }
 
-        .scan-line {
-            height: 1px;
-            background: #ff0000;
+        /* Scanner Animado */
+        .scan-bar {
+            height: 2px;
+            background: var(--axiom-cyan);
             width: 100%;
             position: absolute;
             top: 0;
-            z-index: 10;
-            animation: scan 4s linear infinite;
-            opacity: 0.2;
+            z-index: 20;
+            animation: scan 6s linear infinite;
+            box-shadow: 0 0 15px var(--axiom-cyan);
+            opacity: 0.4;
         }
 
         @keyframes scan {
@@ -50,6 +58,23 @@
                 top: 100%;
             }
         }
+
+        /* Widgets de Auditoria */
+        .widget-border {
+            border-left: 3px solid var(--axiom-cyan);
+            background: linear-gradient(90deg, rgba(0, 209, 255, 0.05) 0%, transparent 100%);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .split-view {
+            height: calc(100vh - 80px);
+        }
     </style>
 </head>
 
@@ -57,54 +82,104 @@
 
     <div id="screen-landing"
         class="min-h-screen flex flex-col items-center justify-center relative hero-bg p-6 text-center">
-        <div class="relative z-10 space-y-12 animate-in fade-in duration-700">
-            <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/logos/logoatu-removebg-preview.png"
-                alt="Axiom Logo" class="w-48 mx-auto drop-shadow-2xl">
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+
+        <div class="relative z-10 space-y-10 animate-in fade-in duration-1000">
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-24 h-24 bg-red-600/20 rounded-full blur-2xl absolute"></div>
+                <h2 class="text-5xl font-black tracking-tighter relative z-10">AXIOM <span
+                        class="text-zinc-500 font-light">PRIME</span></h2>
+                <div class="h-[2px] w-20 bg-red-600"></div>
+            </div>
 
             <div class="space-y-4">
-                <h1 class="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none">
-                    AUDITORIA <span class="text-zinc-600 italic">WAYIA</span>
+                <h1 class="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-tight">
+                    Auditoria de <br> <span class="text-red-600 italic">Alta Performance</span>
                 </h1>
-                <p class="text-[9px] text-zinc-500 tracking-[0.5em] font-bold uppercase">ALGORITHMIC GOVERNANCE &
-                    FINANCIAL SECURITY</p>
+                <p
+                    class="text-zinc-500 max-w-lg mx-auto text-[10px] tracking-[0.5em] font-bold uppercase leading-relaxed">
+                    Sincronização Algorítmica com a Infraestrutura Deriv
+                </p>
             </div>
 
             <button onclick="fazerLogin()"
-                class="glass px-12 py-5 rounded-full font-black text-[10px] tracking-widest hover:bg-white hover:text-black transition-all flex items-center gap-3 mx-auto border border-zinc-800">
-                <img src="https://www.google.com/favicon.ico" class="w-4"> ESTABELECER CONEXÃO SEGURA
+                class="glass-panel px-14 py-5 rounded-none border-x-2 border-white/10 font-black text-[10px] tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105">
+                ESTABELECER CONEXÃO SEGURA
             </button>
-
-            <p class="text-[8px] text-zinc-700 uppercase font-bold tracking-widest">PROCURADORIA OFICIAL DREGER |
-                POWERED BY WAYIA</p>
         </div>
     </div>
 
-    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col">
-        <nav class="h-20 border-b border-zinc-900 flex items-center justify-between px-10 bg-black/50 backdrop-blur-md">
-            <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/logos/logoatu-removebg-preview.png"
-                class="h-8">
+    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col bg-[#050505]">
+        <nav
+            class="h-20 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/80 backdrop-blur-xl z-50">
             <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[8px] text-zinc-500 font-bold uppercase">Banca Auditoria</p>
-                    <p id="user-balance" class="text-white font-mono font-bold">$ 0.00</p>
+                <div class="text-xl font-black text-red-600 tracking-tighter">AXIOM</div>
+                <div class="flex flex-col border-l border-zinc-800 pl-6">
+                    <span class="text-[8px] font-black text-zinc-600 uppercase">System Integrity</span>
+                    <div class="flex items-center gap-2">
+                        <div class="status-dot text-green-500 bg-green-500 animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-green-500 uppercase">Motor VPS Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-10">
+                <div class="flex gap-8">
+                    <div class="text-right">
+                        <p class="text-[8px] text-zinc-600 font-black uppercase">Taxa de Auditoria</p>
+                        <p class="text-[#00D1FF] font-mono font-bold text-sm">94.8%</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[8px] text-zinc-600 font-black uppercase">Banca Auditoria</p>
+                        <p id="user-balance" class="text-white font-mono font-bold text-sm tracking-tighter">$ 0.00</p>
+                    </div>
                 </div>
                 <button onclick="fazerLogout()"
-                    class="text-[10px] font-black border border-zinc-800 px-4 py-2 rounded hover:bg-red-600 transition">SAIR</button>
+                    class="px-5 py-2 border border-zinc-800 rounded-none text-[9px] font-black hover:bg-red-600 transition">SAIR</button>
             </div>
         </nav>
 
-        <div class="flex flex-1 overflow-hidden">
-            <div class="flex-1 bg-black relative">
-                <div class="scan-line"></div>
+        <main class="flex flex-1 split-view overflow-hidden">
+            <div class="flex-1 bg-black relative hud-border">
+                <div class="scan-bar"></div>
                 <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"
                     sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
             </div>
-            <div id="signal-feed" class="w-96 bg-zinc-950 border-l border-zinc-900 p-4 overflow-y-auto space-y-4">
-                <div id="no-signal"
-                    class="h-40 flex items-center justify-center text-zinc-800 text-[10px] font-bold uppercase italic text-center">
-                    Escaneando ativos em tempo real...</div>
+
+            <div class="w-[420px] bg-zinc-950 border-l border-zinc-900 flex flex-col">
+                <div class="p-6 border-b border-zinc-900 flex justify-between items-center">
+                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Processamento IA</h3>
+                    <span class="text-[8px] font-mono text-zinc-600">v3.0.42</span>
+                </div>
+
+                <div id="signal-feed" class="flex-1 overflow-y-auto p-5 space-y-6">
+                    <div class="p-5 glass-panel widget-border space-y-4">
+                        <div class="flex justify-between items-center text-[9px] font-black text-zinc-500">
+                            <span>AUDITORIA EM CURSO</span>
+                            <span class="animate-pulse">● LIVE</span>
+                        </div>
+                        <ul class="space-y-2 text-[9px] font-bold text-zinc-400 uppercase">
+                            <li class="flex justify-between border-b border-zinc-900 pb-1"><span>Fluxo de Dados</span>
+                                <span class="text-green-500">Normal</span></li>
+                            <li class="flex justify-between border-b border-zinc-900 pb-1"><span>Latência VPS</span>
+                                <span class="text-blue-500">0.12ms</span></li>
+                            <li class="flex justify-between"><span>Verificação de Risco</span> <span
+                                    class="text-green-500">Ativa</span></li>
+                        </ul>
+                    </div>
+
+                    <div id="no-signal" class="h-64 flex flex-col items-center justify-center text-zinc-800 space-y-4">
+                        <svg class="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                        <span class="text-[9px] font-black uppercase tracking-[0.3em]">Sincronizando com
+                            Mercado...</span>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -113,10 +188,7 @@
         const axiom = window.supabase.createClient(sbUrl, sbKey);
 
         async function fazerLogin() {
-            await axiom.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: 'https://axiom.wayia.com.br' }
-            });
+            await axiom.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://axiom.wayia.com.br' } });
         }
 
         async function fazerLogout() {
@@ -124,29 +196,49 @@
             window.location.reload();
         }
 
-        // ESSA É A PARTE QUE FAZ O SITE MUDAR DE TELA
         axiom.auth.onAuthStateChange((event, session) => {
             if (session) {
-                console.log("Logado com sucesso!");
                 document.getElementById('screen-landing').classList.add('hidden');
                 document.getElementById('screen-dashboard').classList.remove('hidden');
-                ligarMotorSinais();
+                fetchBalance(session.user.id);
+                initAxiomEngine();
             }
         });
 
-        function ligarMotorSinais() {
-            axiom.channel('sinais').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+        function initAxiomEngine() {
+            axiom.channel('live-axiom').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
                 const empty = document.getElementById('no-signal');
                 if (empty) empty.classList.add('hidden');
+
                 const s = payload.new;
+                const color = s.direcao === 'CALL' ? 'text-[#00FF85]' : 'text-[#FF0032]';
+                const border = s.direcao === 'CALL' ? 'border-[#00FF85]' : 'border-[#FF0032]';
+
                 const card = `
-                    <div class="glass p-6 rounded-2xl border-l-4 ${s.direcao === 'CALL' ? 'border-green-600' : 'border-red-600'} animate-in slide-in-from-right">
-                        <h4 class="text-4xl font-black ${s.direcao === 'CALL' ? 'text-green-500' : 'text-red-500'}">${s.direcao}</h4>
-                        <p class="text-[10px] text-zinc-500 mt-2 font-bold uppercase">Confiança: ${(s.confianca * 100).toFixed(0)}%</p>
-                        <button class="w-full mt-4 py-3 bg-white text-black text-[10px] font-black rounded-lg uppercase">Replicar Agora</button>
+                    <div class="glass-panel p-6 border-l-4 ${border} animate-in slide-in-from-right duration-500">
+                        <div class="flex justify-between text-[8px] font-black text-zinc-600 mb-4 uppercase tracking-widest">
+                            <span>Volatility 75 Index</span>
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <h4 class="text-5xl font-black ${color} tracking-tighter italic">${s.direcao}</h4>
+                        <div class="mt-6 space-y-2">
+                            <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase">
+                                <span>Índice de Confiança</span>
+                                <span class="${color}">${(s.confianca * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="h-1 w-full bg-zinc-900 rounded-none overflow-hidden">
+                                <div class="h-full ${s.direcao === 'CALL' ? 'bg-[#00FF85]' : 'bg-[#FF0032]'}" style="width: ${s.confianca * 100}%"></div>
+                            </div>
+                        </div>
+                        <button class="w-full mt-6 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition">Executar Ordem</button>
                     </div>`;
                 document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
             }).subscribe();
+        }
+
+        async function fetchBalance(uid) {
+            const { data } = await axiom.table('gestao_usuarios').select('saldo_deriv').eq('user_id', uid).single();
+            if (data) document.getElementById('user-balance').innerText = `$ ${data.saldo_deriv.toFixed(2)}`;
         }
     </script>
 </body>
