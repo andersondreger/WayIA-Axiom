@@ -149,7 +149,7 @@
                     <div class="flex-1 rounded-xl overflow-hidden border border-[#2A2F35] bg-[#16191D] relative min-h-[500px] flex p-4">
                         <div class="w-full h-full rounded-lg overflow-hidden relative">
                             <div class="scan-bar"></div>
-                            <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+                            <iframe id="deriv-frame" src="https://app.deriv.com/dtrader" class="w-full h-full border-none" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
                         </div>
                     </div>
                 </div>
@@ -211,24 +211,46 @@
             }
         });
 
+        const ativosDeriv = {
+            'R_75': 'https://app.deriv.com/dtrader?symbol=R_75',
+            'R_100': 'https://app.deriv.com/dtrader?symbol=R_100',
+            '1HZ10V': 'https://app.deriv.com/dtrader?symbol=1HZ10V',
+            'R_10': 'https://app.deriv.com/dtrader?symbol=R_10'
+        };
+
         function initAxiomEngine() {
+            console.log("Motor de Sincronização Ativado...");
+
             axiom.channel('live-axiom').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
                 const empty = document.getElementById('no-signal');
                 if (empty) empty.classList.add('hidden');
 
-                const s = payload.new;
-                const isCall = s.direcao === 'CALL';
+                const sinal = payload.new;
+                const frame = document.getElementById('deriv-frame');
+
+                // --- LÓGICA DE SINCRONIZAÇÃO DO GRÁFICO ---
+                if (sinal.ativo && ativosDeriv[sinal.ativo]) {
+                    console.log(`Sincronizando gráfico com: ${sinal.ativo}`);
+                    frame.src = ativosDeriv[sinal.ativo];
+                }
+
+                const isCall = sinal.direcao === 'CALL';
                 const color = isCall ? 'text-[#00FF85]' : 'text-[#FF4444]';
                 const direcaoTexto = isCall ? 'CALL (Compra)' : 'PUT (Venda)';
-                const entradaMock = (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
+                const entradaMock = sinal.entrada || (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
+                const nomeAtivo = sinal.ativo || 'VOLATILITY 75 INDEX';
 
                 const card = `
                     <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="flex justify-between text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-widest px-1">
+                            <span>${nomeAtivo}</span>
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
                         <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
                             <span class="w-8 text-lg">👁️</span> <span class="text-zinc-500">VEREDITO:</span> <span class="ml-auto ${color} uppercase tracking-wide">${direcaoTexto}</span>
                         </div>
                         <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                            <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(s.confianca * 100).toFixed(0)}%</span>
+                            <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(sinal.confianca * 100).toFixed(0)}%</span>
                         </div>
                         <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
                             <span class="w-8 text-lg">💸</span> <span class="text-zinc-500">ENTRADA:</span> <span class="ml-auto text-white tracking-wide">${entradaMock}</span>
@@ -242,6 +264,10 @@
                             <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 2:</div>
                             Métricas de volatilidade no modelo cruzado fortalecem a decisão estratégica atual mantendo margem segura de erro.
                         </div>
+                        
+                        <button onclick="window.open('${frame.src}', '_blank')" class="w-full mt-4 py-4 bg-[#2A2F35] text-white rounded-xl font-black uppercase text-xs hover:bg-zinc-700 transition border border-zinc-600 shadow-lg">
+                            ABRIR OPERAÇÃO NO TERMINAL
+                        </button>
                     </div>`;
                 // Substituir conteúdo para ficar apenas 1 sinal na tela, conforme a imagem de referência
                 document.getElementById('signal-feed').innerHTML = card;
