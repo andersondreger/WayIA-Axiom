@@ -110,76 +110,82 @@
         </div>
     </div>
 
-    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col bg-[#050505]">
-        <nav
-            class="h-20 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/80 backdrop-blur-xl z-50">
-            <div class="flex items-center gap-6">
-                <div class="text-xl font-black text-red-600 tracking-tighter">AXIOM</div>
-                <div class="flex flex-col border-l border-zinc-800 pl-6">
-                    <span class="text-[8px] font-black text-zinc-600 uppercase">System Integrity</span>
-                    <div class="flex items-center gap-2">
-                        <div class="status-dot text-green-500 bg-green-500 animate-pulse"></div>
-                        <span class="text-[10px] font-bold text-green-500 uppercase">Motor VPS Online</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-10">
-                <div class="flex gap-8">
-                    <div class="text-right">
-                        <p class="text-[8px] text-zinc-600 font-black uppercase">Taxa de Auditoria</p>
-                        <p class="text-[#00D1FF] font-mono font-bold text-sm">94.8%</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[8px] text-zinc-600 font-black uppercase">Banca Auditoria</p>
-                        <p id="user-balance" class="text-white font-mono font-bold text-sm tracking-tighter">$ 0.00</p>
-                    </div>
-                </div>
-                <button onclick="fazerLogout()"
-                    class="px-5 py-2 border border-zinc-800 rounded-none text-[9px] font-black hover:bg-red-600 transition">SAIR</button>
-            </div>
-        </nav>
-
-        <main class="flex flex-1 split-view overflow-hidden">
-            <div class="flex-1 bg-black relative hud-border">
-                <div class="scan-bar"></div>
-                <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-90"
-                    sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
-            </div>
-
-            <div class="w-[420px] bg-zinc-950 border-l border-zinc-900 flex flex-col">
-                <div class="p-6 border-b border-zinc-900 flex justify-between items-center">
-                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Processamento IA</h3>
-                    <span class="text-[8px] font-mono text-zinc-600">v3.0.42</span>
+    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col bg-[#16191D] p-4 md:p-8">
+        <div class="flex-1 flex flex-col max-w-[1400px] w-full mx-auto bg-[#1C2025] rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border border-[#2A2F35]">
+            <!-- Header -->
+            <nav class="h-20 border-b border-[#2A2F35] flex items-center justify-between px-8 bg-[#22272D]">
+                <div class="flex items-center gap-4">
+                    <div class="text-4xl text-gray-300">🏛️</div>
+                    <div class="text-2xl font-black text-white tracking-tight">Axiom <span class="text-[#00FF85]">IA</span></div>
                 </div>
 
-                <div id="signal-feed" class="flex-1 overflow-y-auto p-5 space-y-6">
-                    <div class="p-5 glass-panel widget-border space-y-4">
-                        <div class="flex justify-between items-center text-[9px] font-black text-zinc-500">
-                            <span>AUDITORIA EM CURSO</span>
-                            <span class="animate-pulse">● LIVE</span>
+                <div class="flex items-center gap-8 font-mono text-[13px] text-[#00FF85]">
+                    <span class="cursor-pointer hover:text-white transition">[ Dashboard ]</span>
+                    <span class="cursor-pointer hover:text-white transition">[ Sobre ]</span>
+                    <span class="cursor-pointer hover:text-white transition">[ Contato ]</span>
+                    <button onclick="fazerLogout()" class="text-red-400 hover:text-red-500 transition ml-4">[ Sair ]</button>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="flex flex-1 p-8 gap-8">
+                <!-- Left Chart Panel -->
+                <div class="flex-1 flex flex-col gap-5">
+                    <!-- Toggles -->
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-3">
+                            <button class="px-6 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">BTC/USD</button>
+                            <button class="px-6 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">SOL/USD</button>
+                            <button class="px-6 py-2.5 border border-[#00FF85] rounded-lg text-sm font-bold text-[#00FF85] bg-[#00FF85]/10">NEAR/USD</button>
                         </div>
-                        <ul class="space-y-2 text-[9px] font-bold text-zinc-400 uppercase">
-                            <li class="flex justify-between border-b border-zinc-900 pb-1"><span>Fluxo de Dados</span>
-                                <span class="text-green-500">Normal</span></li>
-                            <li class="flex justify-between border-b border-zinc-900 pb-1"><span>Latência VPS</span>
-                                <span class="text-blue-500">0.12ms</span></li>
-                            <li class="flex justify-between"><span>Verificação de Risco</span> <span
-                                    class="text-green-500">Ativa</span></li>
-                        </ul>
+                        <div class="flex gap-3">
+                            <button class="px-5 py-2.5 border border-[#00FF85] rounded-lg text-sm font-bold text-[#00FF85] bg-[#00FF85]/10">M1</button>
+                            <button class="px-5 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">M5</button>
+                            <button class="px-5 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">M15</button>
+                        </div>
                     </div>
 
-                    <div id="no-signal" class="h-64 flex flex-col items-center justify-center text-zinc-800 space-y-4">
-                        <svg class="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                        </svg>
-                        <span class="text-[9px] font-black uppercase tracking-[0.3em]">Sincronizando com
-                            Mercado...</span>
+                    <!-- Iframe Wrapper -->
+                    <div class="flex-1 rounded-xl overflow-hidden border border-[#2A2F35] bg-[#16191D] relative min-h-[500px] flex p-4">
+                        <div class="w-full h-full rounded-lg overflow-hidden relative">
+                            <div class="scan-bar"></div>
+                            <iframe src="https://app.deriv.com/dtrader" class="w-full h-full border-none" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
+
+                <!-- Right Side Panel -->
+                <div class="w-[380px] flex flex-col">
+                    <!-- Glowing Container -->
+                    <div class="flex-1 bg-[#1C2025] rounded-xl p-6 flex flex-col relative"
+                         style="border: 2px solid #00FF85; box-shadow: 0 0 35px rgba(0, 255, 133, 0.15);">
+                        
+                        <h3 class="text-sm font-bold text-white flex items-center justify-center gap-2 mb-8 mt-2">
+                            📊 ANÁLISE EM TEMPO REAL
+                        </h3>
+
+                        <button class="w-full py-4 bg-[#00FF85] text-[#16191D] rounded-xl font-black uppercase text-[13px] mb-8 shadow-[0_0_20px_rgba(0,255,133,0.4)] hover:bg-[#00e575] hover:scale-[1.02] transition-all">
+                            [ CONECTAR E ANALISAR AGORA ]
+                        </button>
+
+                        <div id="signal-feed" class="flex-1 overflow-y-auto w-full">
+                            <!-- Empty State -->
+                            <div id="no-signal" class="h-40 flex flex-col items-center justify-center text-zinc-500 space-y-4">
+                                <svg class="animate-spin text-[#00FF85]" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                </svg>
+                                <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Sincronizando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="py-5 text-center text-[11px] text-zinc-500 font-medium tracking-wide">
+                © 2026 Axiom IA by WayIA. Todos os direitos reservados. | <a href="#" class="underline hover:text-white transition">Termos de Uso</a>
+            </footer>
+        </div>
     </div>
 
     <script>
@@ -211,28 +217,34 @@
                 if (empty) empty.classList.add('hidden');
 
                 const s = payload.new;
-                const color = s.direcao === 'CALL' ? 'text-[#00FF85]' : 'text-[#FF0032]';
-                const border = s.direcao === 'CALL' ? 'border-[#00FF85]' : 'border-[#FF0032]';
+                const isCall = s.direcao === 'CALL';
+                const color = isCall ? 'text-[#00FF85]' : 'text-[#FF4444]';
+                const direcaoTexto = isCall ? 'CALL (Compra)' : 'PUT (Venda)';
+                const entradaMock = (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
 
                 const card = `
-                    <div class="glass-panel p-6 border-l-4 ${border} animate-in slide-in-from-right duration-500">
-                        <div class="flex justify-between text-[8px] font-black text-zinc-600 mb-4 uppercase tracking-widest">
-                            <span>Volatility 75 Index</span>
-                            <span>${new Date().toLocaleTimeString()}</span>
+                    <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                            <span class="w-8 text-lg">👁️</span> <span class="text-zinc-500">VEREDITO:</span> <span class="ml-auto ${color} uppercase tracking-wide">${direcaoTexto}</span>
                         </div>
-                        <h4 class="text-5xl font-black ${color} tracking-tighter italic">${s.direcao}</h4>
-                        <div class="mt-6 space-y-2">
-                            <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase">
-                                <span>Índice de Confiança</span>
-                                <span class="${color}">${(s.confianca * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="h-1 w-full bg-zinc-900 rounded-none overflow-hidden">
-                                <div class="h-full ${s.direcao === 'CALL' ? 'bg-[#00FF85]' : 'bg-[#FF0032]'}" style="width: ${s.confianca * 100}%"></div>
-                            </div>
+                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                            <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(s.confianca * 100).toFixed(0)}%</span>
                         </div>
-                        <button class="w-full mt-6 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition">Executar Ordem</button>
+                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
+                            <span class="w-8 text-lg">💸</span> <span class="text-zinc-500">ENTRADA:</span> <span class="ml-auto text-white tracking-wide">${entradaMock}</span>
+                        </div>
+                        
+                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed mt-5 shadow-lg">
+                            <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 1:</div>
+                            Sinais algorítmicos alinhados com fluxo de volume indicativo de pressão ${isCall ? 'compradora' : 'vendedora'} no curto prazo.
+                        </div>
+                        <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed shadow-lg mb-2">
+                            <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 2:</div>
+                            Métricas de volatilidade no modelo cruzado fortalecem a decisão estratégica atual mantendo margem segura de erro.
+                        </div>
                     </div>`;
-                document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
+                // Substituir conteúdo para ficar apenas 1 sinal na tela, conforme a imagem de referência
+                document.getElementById('signal-feed').innerHTML = card;
             }).subscribe();
         }
 
