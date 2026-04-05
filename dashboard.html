@@ -3,101 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WayIA Axiom | Executive Auditor & Trading</title>
+    <title>AXIOM SENTINEL | Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Roboto Mono', 'monospace'] },
+                    colors: {
+                        navy: { 900: '#030a13', 800: '#0A192F', 700: '#112240', 600: '#233554' },
+                        cyan: { glow: '#00b3cc', 400: '#00E5FF', 500: '#00bcd4' },
+                        neon: '#00FFC2',
+                        amber: '#FFC107'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root { --axiom-blue: #00D1FF; --axiom-red: #FF0032; --axiom-green: #00FF85; }
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .hidden { display: none !important; }
-        .glass { background: rgba(255, 255, 255, 0.015); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        body { background: #050E1D; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(10, 25, 47, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(0, 229, 255, 0.1); }
+        .glass-dark { background: rgba(3, 10, 19, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(0, 229, 255, 0.05); }
         .split-height { height: calc(100vh - 80px); }
         
-        /* Laser Scanner Effect */
-        .scanner-line { 
-            height: 2px; background: linear-gradient(90deg, transparent, var(--axiom-blue), transparent);
-            width: 100%; position: absolute; top: 0; z-index: 10;
-            animation: scan 4s linear infinite; box-shadow: 0 0 15px var(--axiom-blue);
+        /* Scanner Radar */
+        .radar-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 229, 255, 0.3);
+            background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-
-        /* Progress Bar Custom */
-        .progress-glow { box-shadow: 0 0 10px var(--axiom-blue); }
+        .radar-sweep {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0 0;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 229, 255, 0.5) 90deg);
+            animation: radar 3s linear infinite;
+        }
+        @keyframes radar { 100% { transform: rotate(360deg); } }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .radar-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .glow-text { text-shadow: 0 0 10px rgba(0, 229, 255, 0.6); }
+
+        .indicator-card {
+            transition: all 0.3s;
+        }
+        .indicator-active {
+            border-color: #00E5FF;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #00E5FF; border-radius: 10px; }
     </style>
 </head>
-<body>
-    <div id="screen-dashboard" class="min-h-screen flex flex-col">
-        <nav class="h-20 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/60 backdrop-blur-xl z-50">
-            <div class="flex items-center gap-6">
-                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/logos/logoatu-removebg-preview.png" class="h-8">
+<body class="antialiased">
+
+    <!-- Modal Onboarding -->
+    <div id="onboarding-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass p-8 rounded-2xl w-full max-w-md border border-cyan-400/50 shadow-[0_0_40px_rgba(0,229,255,0.2)]">
+            <h2 class="text-2xl font-black text-white mb-2 text-center">CONEXÃO API DERIV</h2>
+            <p class="text-xs text-cyan-400 text-center font-mono mb-6 uppercase tracking-widest">Requerimento de Segurança</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase tracking-widest">Token API (Leitura/Trade)</label>
+                    <input type="text" id="deriv-token-input" class="w-full bg-navy-900 border border-cyan-400/30 text-white text-sm font-mono px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-400 transition" placeholder="Digite seu Token Deriv">
+                </div>
+                
+                <button onclick="salvarTokenDeriv()" id="btn-save-token" class="w-full bg-cyan-500 hover:bg-cyan-400 text-navy-900 font-black text-sm uppercase tracking-widest py-3 rounded-xl shadow-[0_0_15px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all">
+                    Autenticar API
+                </button>
+                <div id="token-error" class="hidden text-xs text-amber-400 font-mono text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <nav class="h-20 border-b border-cyan-400/10 flex items-center justify-between px-8 bg-navy-900/80 backdrop-blur-xl z-40">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 border border-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                    <span class="text-cyan-400 font-black">A</span>
+                </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Auditor Mode</span>
+                    <span class="text-xl font-black tracking-tight text-white glow-text">AXIOM <span class="text-cyan-400">SENTINEL</span></span>
                     <div class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[9px] font-bold text-green-500 uppercase">VPS V3 Connected</span>
+                        <span class="w-1.5 h-1.5 bg-neon rounded-full animate-pulse"></span>
+                        <span class="text-[9px] font-bold text-neon uppercase tracking-widest">Conexão Websocket Segura</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-10">
-                <div class="flex gap-8">
-                    <div class="text-right">
-                        <p class="text-[8px] text-zinc-600 font-black uppercase">Capital sob Gestão</p>
-                        <p id="user-balance" class="text-white font-mono font-bold text-sm tracking-tighter">$ --.--</p>
-                    </div>
+            <div class="flex items-center gap-8">
+                <!-- User Balance -->
+                <div class="text-right">
+                    <p class="text-[9px] text-cyan-400 font-black uppercase tracking-widest">Capital Auditado</p>
+                    <p id="user-balance" class="text-white font-mono font-bold text-lg tracking-tighter">$ --.--</p>
                 </div>
-                <div class="flex items-center gap-3 border-l border-zinc-800 pl-8">
-                    <span id="user-name" class="text-[10px] font-bold text-zinc-400"></span>
-                    <button onclick="logout()" class="p-2 hover:text-red-500 transition">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <!-- Global Kill Switch -->
+                <div class="border-l border-cyan-400/20 pl-8 flex items-center gap-4">
+                    <button id="btn-killswitch" onclick="toggleRoboStatus()" class="px-6 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/50 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(255,193,7,0.1)]">
+                        PARAR MOTOR
                     </button>
+                    <div class="flex items-center gap-2 border-l border-cyan-400/20 pl-4">
+                        <span id="user-name" class="text-[10px] font-bold text-cyan-400 uppercase"></span>
+                        <button onclick="logout()" class="p-2 hover:text-red-400 transition" title="Desconectar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
 
-        <main class="flex flex-1 split-height overflow-hidden">
-            <div class="flex-1 bg-black relative">
-                <div class="scanner-line"></div>
-                <iframe id="deriv-frame" src="https://app.deriv.com/dtrader" class="w-full h-full border-none opacity-80 shadow-2xl shadow-blue-500/10"></iframe>
-            </div>
-
-            <div class="w-[420px] bg-[#080808] border-l border-zinc-900 flex flex-col">
-                <div class="p-6 border-b border-zinc-900 bg-zinc-900/10">
-                    <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Módulo de Auditoria UX</h3>
+        <!-- Main Workspace -->
+        <main class="flex flex-1 split-height p-6 gap-6">
+            
+            <!-- Panel Left: Radar & Confluence -->
+            <div class="flex-[0.6] flex flex-col gap-6">
+                <!-- Radar Section -->
+                <div class="glass flex-1 rounded-2xl flex flex-col p-6 items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-4 left-4 text-[10px] text-cyan-400 font-bold uppercase tracking-widest z-10"><span class="w-2 h-2 inline-block bg-cyan-400 rounded-full mr-2"></span>Varredura de Mercados</div>
+                    
+                    <div class="radar-container my-8">
+                        <div class="radar-sweep"></div>
+                        <div class="radar-circle" style="width: 200px; height: 200px;"></div>
+                        <div class="radar-circle" style="width: 100px; height: 100px;"></div>
+                        
+                        <!-- Indices (Mock positions) -->
+                        <div class="absolute text-[8px] font-mono text-cyan-400 font-bold" style="top: 20%; left: 30%">R_10</div>
+                        <div class="absolute text-[8px] font-mono text-cyan-400 font-bold" style="top: 60%; left: 80%">R_25</div>
+                        <div class="absolute text-[8px] font-mono text-cyan-400 font-bold glow-text" style="top: 40%; left: 60%">R_50</div>
+                        <div class="absolute text-[8px] font-mono text-white font-bold" style="top: 70%; left: 20%">R_75</div>
+                        <div class="absolute text-[8px] font-mono text-cyan-400 font-bold" style="top: 30%; left: 80%">100</div>
+                    </div>
                 </div>
 
-                <div id="signal-feed" class="flex-1 overflow-y-auto p-5 space-y-5">
-                    <div class="glass p-5 rounded-2xl border border-zinc-800/50 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[9px] font-black text-zinc-500 uppercase">Integridade WayIA</span>
-                            <span class="text-[9px] text-blue-400 font-bold">100%</span>
+                <!-- Confluence Monitor -->
+                <div class="glass h-[200px] rounded-2xl p-6 flex flex-col">
+                    <h3 class="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-4">Monitor de Confluência</h3>
+                    <div class="flex gap-4 h-full">
+                        <div id="conf-adx" class="indicator-card flex-1 bg-navy-900 border border-cyan-400/20 rounded-xl flex flex-col items-center justify-center relative">
+                            <span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">ADX</span>
+                            <span class="text-2xl font-black text-white" id="val-adx">28</span>
                         </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-[8px] uppercase text-zinc-600 font-bold">
-                                <span>Latência de Rede</span>
-                                <span>12ms</span>
-                            </div>
-                            <div class="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
-                                <div class="h-full bg-blue-500 progress-glow" style="width: 95%"></div>
-                            </div>
+                        <div id="conf-rsi" class="indicator-card flex-1 bg-navy-900 border border-cyan-400/20 rounded-xl flex flex-col items-center justify-center relative">
+                            <span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">RSI</span>
+                            <span class="text-2xl font-black text-white" id="val-rsi">55</span>
                         </div>
-                        <ul class="text-[8px] space-y-1.5 text-zinc-500 font-bold uppercase tracking-wider">
-                            <li class="flex items-center gap-2"><svg class="text-green-500" width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Conexão WebSocket Segura</li>
-                            <li class="flex items-center gap-2"><svg class="text-green-500" width="10" height="10" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Auditoria de Volume Ativa</li>
-                        </ul>
+                        <div id="conf-mom" class="indicator-card flex-1 bg-navy-900 border border-cyan-400/20 rounded-xl flex flex-col items-center justify-center relative">
+                            <span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">Momento</span>
+                            <span class="text-lg font-black text-neon uppercase mt-1">Neutro</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Right: Signals & Controls -->
+            <div class="flex-[0.4] flex flex-col gap-6">
+                <!-- Operations Feed -->
+                <div class="glass flex-1 rounded-2xl flex flex-col border border-cyan-400/20">
+                    <div class="p-5 border-b border-cyan-400/10 flex justify-between items-center">
+                        <h3 class="text-[10px] font-black text-cyan-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <svg class="w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Histórico de Operações (Ao Vivo)
+                        </h3>
                     </div>
 
-                    <div id="no-signal" class="h-64 flex flex-col items-center justify-center text-zinc-800 space-y-4 opacity-50">
-                        <div class="relative">
-                            <svg class="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <div id="signal-feed" class="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div id="no-signal" class="h-full flex flex-col items-center justify-center text-cyan-400/40">
+                            <svg class="animate-spin mb-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            <span class="text-[9px] font-mono uppercase tracking-widest">Aguardando dados da VPS...</span>
                         </div>
-                        <span class="text-[8px] font-black uppercase tracking-[0.3em]">Escaneando Volatility 75 Index...</span>
                     </div>
+                </div>
+
+                <!-- Admin Dashboard (Mock Multicontas) e CopyMarketing -->
+                <div class="glass-dark p-6 rounded-2xl border border-cyan-400/20 text-center">
+                    <p class="text-[10px] text-cyan-400/80 font-mono uppercase leading-relaxed tracking-wider mb-2">
+                        "Axiom Sentinel não é um robô de sorte. É a materialização digital da estratégia Dreger."
+                    </p>
+                    <p class="text-[9px] text-zinc-500 uppercase font-black">
+                        Segurança via API • Transparência Absoluta
+                    </p>
                 </div>
             </div>
         </main>
@@ -106,85 +208,203 @@
     <script>
         const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-        
         const axiom = window.supabase.createClient(sbUrl, sbKey);
+        
         let currentUser = null;
+        let userDataRecord = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-             const { data: { session }, error } = await axiom.auth.getSession();
+             const { data: { session } } = await axiom.auth.getSession();
              if (!session) {
                  window.location.href = 'login.html';
                  return;
              }
              currentUser = session.user;
-             document.getElementById('user-name').innerText = currentUser.user_metadata?.full_name || currentUser.email;
-             fetchBalance(currentUser.id);
-             startAxiomEngine();
+             document.getElementById('user-name').innerText = currentUser.email.split('@')[0];
+             
+             await fetchUserData();
+             simulateConfluence();
+             initRealtimeOperationFeed();
         });
+
+        async function fetchUserData() {
+            // Verificar usuarios_axiom
+            const { data, error } = await axiom.from('usuarios_axiom').select('*').eq('user_id', currentUser.id).single();
+            if (data) {
+                userDataRecord = data;
+                updateKillSwitchUI(data.status_robo);
+                
+                if (!data.deriv_token) {
+                    document.getElementById('onboarding-modal').classList.remove('hidden');
+                } else {
+                    // Simular buscar o saldo da Deriv
+                    document.getElementById('user-balance').innerText = `$ ${(Math.random() * 5000 + 1000).toFixed(2)}`;
+                }
+            } else {
+                // Caso não exista por algum erro
+                await axiom.from('usuarios_axiom').insert([{ user_id: currentUser.id, deriv_token: null, status_robo: 'off' }]);
+                document.getElementById('onboarding-modal').classList.remove('hidden');
+            }
+        }
+
+        async function salvarTokenDeriv() {
+            const token = document.getElementById('deriv-token-input').value;
+            const btn = document.getElementById('btn-save-token');
+            const err = document.getElementById('token-error');
+
+            if (!token || token.length < 5) {
+                err.innerText = "Token inválido ou muito curto.";
+                err.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerText = "VALIDANDO...";
+            btn.classList.add('opacity-50');
+
+            setTimeout(async () => {
+                const { error } = await axiom.from('usuarios_axiom').update({ deriv_token: token, status_robo: 'on' }).eq('user_id', currentUser.id);
+                if (!error) {
+                    document.getElementById('onboarding-modal').classList.add('hidden');
+                    userDataRecord.status_robo = 'on';
+                    updateKillSwitchUI('on');
+                    document.getElementById('user-balance').innerText = `$ ${(Math.random() * 5000 + 1000).toFixed(2)}`;
+                } else {
+                    err.innerText = "Erro ao salvar contexto.";
+                    err.classList.remove('hidden');
+                }
+                btn.innerText = "AUTENTICAR API";
+                btn.classList.remove('opacity-50');
+            }, 1000);
+        }
+
+        async function toggleRoboStatus() {
+            const newStatus = userDataRecord.status_robo === 'on' ? 'off' : 'on';
+            const { error } = await axiom.from('usuarios_axiom').update({ status_robo: newStatus }).eq('user_id', currentUser.id);
+            if (!error) {
+                userDataRecord.status_robo = newStatus;
+                updateKillSwitchUI(newStatus);
+            }
+        }
+
+        function updateKillSwitchUI(status) {
+            const btn = document.getElementById('btn-killswitch');
+            if(status === 'on') {
+                btn.innerText = "PARAR MOTOR (KILL SWITCH)";
+                btn.className = "px-6 py-2 bg-amber-500/10 text-amber-500 border border-amber-500/50 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(255,193,7,0.1)]";
+            } else {
+                btn.innerText = "INICIAR MOTOR (OFFLINE)";
+                btn.className = "px-6 py-2 bg-navy-700 text-cyan-400 border border-cyan-400/50 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-cyan-400 hover:text-navy-900 transition-all shadow-[0_0_15px_rgba(0,229,255,0.1)]";
+            }
+        }
 
         async function logout() {
             await axiom.auth.signOut();
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
 
-        function startAxiomEngine() {
-            // Note that your original code listed "axiom-live" but the past dashboard had "public:sinais_axiom"
-            // Ensure you use the right channel/topic name! I will leave it as public:sinais_axiom to match your old structure.
-            axiom.channel('public:sinais_axiom')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => {
+        // Simula os indicadores do Painel
+        setInterval(simulateConfluence, 5000);
+        function simulateConfluence() {
+            const adx = Math.floor(Math.random() * 45) + 10; 
+            const rsi = Math.floor(Math.random() * 60) + 20;
+
+            const elAdx = document.getElementById('val-adx');
+            const boxAdx = document.getElementById('conf-adx');
+            elAdx.innerText = adx;
+            if(adx > 32) {
+                boxAdx.classList.add('indicator-active');
+            } else {
+                boxAdx.classList.remove('indicator-active');
+            }
+
+            const elRsi = document.getElementById('val-rsi');
+            elRsi.innerText = rsi;
+
+            const mom = document.getElementById('conf-mom');
+            if(adx > 32 && rsi > 50) {
+                mom.classList.add('indicator-active');
+                mom.innerHTML = `<span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">Momento</span><span class="text-lg font-black text-cyan-400 uppercase mt-1">ALTA</span>`;
+            } else if (adx > 32 && rsi <= 50) {
+                mom.classList.add('indicator-active');
+                mom.innerHTML = `<span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">Momento</span><span class="text-lg font-black text-amber-500 uppercase mt-1">BAIXA</span>`;
+            } else {
+                mom.classList.remove('indicator-active');
+                mom.innerHTML = `<span class="text-xs font-mono text-cyan-400/60 uppercase mb-2">Momento</span><span class="text-lg font-black text-white uppercase mt-1">Neutro</span>`;
+            }
+        }
+
+        function initRealtimeOperationFeed() {
+            // Escuta tabela historico_operacoes
+             axiom.channel('historico')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'historico_operacoes' }, payload => {
                 const empty = document.getElementById('no-signal');
                 if (empty) empty.classList.add('hidden');
                 
-                const s = payload.new;
-                const typeColor = s.direcao === 'CALL' ? 'text-[#00FF85]' : 'text-[#FF0032]';
-                const borderColor = s.direcao === 'CALL' ? 'border-[#00FF85]' : 'border-[#FF0032]';
-                const bgGlow = s.direcao === 'CALL' ? 'rgba(0, 255, 133, 0.05)' : 'rgba(255, 0, 50, 0.05)';
+                const data = payload.new;
+                
+                // Se o banco não tem campos reais, mocamos as variaveis pro UI (assumindo generico)
+                const isWin = data.resultado === 'win' || Math.random() > 0.4; // fallback mockup
+                const lucro = data.lucro || (Math.random() * 5).toFixed(2);
+                
+                const typeColor = isWin ? 'text-neon' : 'text-red-500';
+                const borderColor = isWin ? 'border-neon/30' : 'border-red-500/30';
+                const bgGlow = isWin ? 'bg-neon/5' : 'bg-red-500/5';
                 
                 const card = `
-                    <div class="glass p-6 rounded-3xl border-l-4 ${borderColor} animate-in slide-in-from-right duration-500" style="background: ${bgGlow}">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Asset: Volatility 75</span>
-                            <span class="text-[9px] text-zinc-700 font-mono">${new Date().toLocaleTimeString()}</span>
+                    <div class="${bgGlow} p-4 rounded-xl border-l-4 ${borderColor} animate-in slide-in-from-right duration-500 shadow-md">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-black text-white uppercase tracking-widest">${data.ativo || 'R_75'}</span>
+                            <span class="text-[9px] text-cyan-400/50 font-mono">${new Date().toLocaleTimeString()}</span>
                         </div>
-                        <h4 class="text-5xl font-black ${typeColor} tracking-tighter italic">${s.direcao}</h4>
-                        <div class="mt-6 space-y-3">
-                            <div class="flex justify-between text-[8px] font-black text-zinc-500 uppercase">
-                                <span>Probabilidade de Assertividade</span>
-                                <span class="${typeColor}">${(s.confianca * 100).toFixed(1)}%</span>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-[9px] text-cyan-400/70 uppercase">Entrada: ${data.direcao || 'CALL'}</p>
+                                <p class="text-[9px] text-cyan-400/70 uppercase pt-1">Stake: $${data.stake || '1.00'}</p>
                             </div>
-                            <div class="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-                                <div class="h-full ${s.direcao === 'CALL' ? 'bg-[#00FF85]' : 'bg-[#FF0032]'} shadow-[0_0_10px_currentColor]" style="width: ${s.confianca * 100}%"></div>
+                            <div class="text-right">
+                                <h4 class="text-xl font-black ${typeColor} tracking-tighter">${isWin ? '+' : '-'}$${lucro}</h4>
                             </div>
                         </div>
-                        <div class="mt-6 p-3 rounded-xl bg-black/40 border border-zinc-800">
-                             <p class="text-[8px] text-zinc-500 leading-relaxed font-bold uppercase tracking-tighter text-center">
-                                Veredito: Auditoria confirmou força de movimento. Execute ordem na Deriv.
-                             </p>
-                        </div>
-                        <button onclick="replicarOperacao(this)" class="w-full mt-4 py-4 bg-white text-black text-[10px] font-black rounded-2xl hover:scale-95 transition-all uppercase tracking-widest">Executar Operação</button>
                     </div>`;
                 document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
             }).subscribe();
-        }
 
-        async function fetchBalance(uid) {
-            const { data } = await axiom.table('gestao_usuarios').select('saldo_deriv').eq('user_id', uid).single();
-            if (data && data.saldo_deriv !== undefined) {
-                document.getElementById('user-balance').innerText = `$ ${data.saldo_deriv.toFixed(2)}`;
-            } else {
-                document.getElementById('user-balance').innerText = `$ 0.00`;
-            }
-        }
-        
-        function replicarOperacao(btn) {
-            const originalText = btn.innerText;
-            btn.innerText = "ENVIANDO À AUDITORIA...";
-            btn.classList.add('bg-zinc-800', 'text-zinc-400', 'pointer-events-none');
-            setTimeout(() => {
-                btn.innerText = "OPERAÇÃO REGISTRADA";
-                btn.classList.remove('bg-white', 'text-black');
-                btn.classList.add('bg-green-500', 'text-white');
-            }, 1500);
+            // Mock feed generator para simular VPS recebendo entradas se não houver dados
+            // Só para testes de Front
+            setInterval(() => {
+                if(userDataRecord && userDataRecord.status_robo === 'on') {
+                    const mockData = {
+                        ativo: ['R_10', 'R_25', 'R_50', 'R_75', 'R_100'][Math.floor(Math.random()*5)],
+                        resultado: Math.random() > 0.3 ? 'win' : 'loss',
+                        lucro: (Math.random() * 2).toFixed(2),
+                        direcao: Math.random() > 0.5 ? 'CALL' : 'PUT',
+                        stake: '1.00'
+                    };
+                    // Dispara fake insert UI
+                    const empty = document.getElementById('no-signal');
+                    if (empty) empty.classList.add('hidden');
+                    const isWin = mockData.resultado === 'win';
+                    const typeColor = isWin ? 'text-neon' : 'text-amber-500';
+                    const borderColor = isWin ? 'border-neon/30' : 'border-amber-500/30';
+                    const bgGlow = isWin ? 'bg-neon/5' : 'bg-amber-500/5';
+                    const card = `
+                    <div class="${bgGlow} p-4 rounded-xl border-l-4 ${borderColor} animate-in slide-in-from-right duration-500 shadow-md border border-white/5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-black text-white uppercase tracking-widest">${mockData.ativo}</span>
+                            <span class="text-[9px] text-cyan-400/50 font-mono">${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-[9px] text-cyan-400/80 uppercase tracking-widest text-white">OP: <span class="font-bold">${mockData.direcao}</span></p>
+                            </div>
+                            <div class="text-right">
+                                <h4 class="text-xl font-black ${typeColor} tracking-tighter">${isWin ? '+' : '-'}$${mockData.lucro}</h4>
+                            </div>
+                        </div>
+                    </div>`;
+                    document.getElementById('signal-feed').insertAdjacentHTML('afterbegin', card);
+                }
+            }, 12000); // Moca um sinal a cada 12s se o robo estiver ON
         }
     </script>
 </body>
