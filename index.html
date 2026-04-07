@@ -3,134 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WayIA Axiom - O Sentinel do Mercado Sintético</title>
+    <title>WayIA Axiom | Inteligência Sentinela</title>
     <style>
-        /* RESET BÁSICO */
-        body, h1, h2, p { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #000; color: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; overflow-x: hidden; }
-
-        /* VÍDEO DE FUNDO (HERO) */
-        .hero { position: relative; width: 100%; height: 100vh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .hero-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: -100; transform: translateX(-50%) translateY(-50%); object-fit: cover; filter: brightness(0.6); }
-        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%); z-index: -99; }
-
-        /* CABEÇALHO (LOGO E NAVEGAÇÃO) */
-        header { position: absolute; top: 0; left: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .logo { font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; text-decoration: none; display: flex; align-items: center; }
-        .logo-wayia { color: #fff; }
-        .logo-axiom { color: #E50914; margin-left: 2px; }
+        :root { --primary: #E50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
         
-        /* BOTÕES MESTRE (HERO) */
-        .hero-content h1 { font-size: 5rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 20px; line-height: 1.1; }
-        .hero-content p { font-size: 1.5rem; margin-bottom: 50px; opacity: 0.8; font-weight: 300; }
-        .btn-container { display: flex; gap: 20px; justify-content: center; }
-        .btn { padding: 18px 45px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; border: none; cursor: pointer; transition: 0.4s; }
-        .btn-primary { background-color: #E50914; color: #fff; }
-        .btn-secondary { background-color: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
-        .btn:hover { transform: scale(1.1); filter: brightness(1.2); box-shadow: 0 0 30px rgba(229, 9, 20, 0.5); }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; overflow-x: hidden; }
 
-        /* SEÇÃO SOBRE O MERCADO SINTÉTICO (FILOSOFIA AXIOM) */
-        .section-about { padding: 100px 50px; text-align: center; background-color: #141414; }
-        .section-about h2 { font-size: 3rem; margin-bottom: 30px; font-weight: 800; }
-        .section-about p { font-size: 1.3rem; max-width: 800px; margin: 0 auto 50px auto; line-height: 1.6; opacity: 0.8; }
-        .about-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-        .about-card { background: #2f2f2f; padding: 40px; border-radius: 8px; border: 1px solid #444; }
-        .about-card h3 { font-size: 1.5rem; color: #E50914; margin-bottom: 15px; }
-        .about-card p { font-size: 1.1rem; opacity: 0.7; }
+        /* VÍDEO DE FUNDO COM OVERLAY CINEMATOGRÁFICO */
+        .video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; overflow: hidden; }
+        .video-container video { min-width: 100%; min-height: 100%; object-fit: cover; filter: saturate(1.2) brightness(0.4) contrast(1.1); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%); z-index: -1; }
 
-        /* SEÇÃO CURSO EXPRESS (ESTILO NETFLIX) */
-        .section-course { padding: 100px 50px; background-color: #000; }
-        .section-course h2 { color: #fff; padding-left: 20px; font-size: 2rem; margin-bottom: 10px; }
-        .row-title { font-size: 1.4rem; color: rgba(255,255,255,0.6); padding-left: 20px; margin-bottom: 20px; }
-        .row { display: flex; overflow-x: auto; gap: 15px; padding: 20px; scrollbar-width: none; }
-        .card { min-width: 320px; height: 180px; background-color: #333; border-radius: 5px; cursor: pointer; transition: 0.4s; position: relative; background-size: cover; border: 1px solid #444; }
-        .card:hover { transform: scale(1.1); z-index: 10; border-color: #E50914; }
-        .card-content { position: absolute; bottom: 0; padding: 15px; width: 100%; background: linear-gradient(transparent, black); }
-        .badge { background-color: #E50914; color: #fff; font-size: 0.7rem; padding: 3px 7px; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+        /* SCANLINE ANIMATION (EFEITO DE MONITOR) */
+        body::before { content: " "; display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
 
-        /* FOOTER */
-        footer { padding: 50px; text-align: center; border-top: 1px solid #333; opacity: 0.5; }
+        /* CABEÇALHO FUTURISTA */
+        header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); }
+        .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: #fff; }
+        .logo span { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        .status-pulse { display: flex; align-items: center; font-size: 0.7rem; letter-spacing: 2px; color: #00ff88; text-transform: uppercase; }
+        .pulse-dot { height: 8px; width: 8px; background-color: #00ff88; border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite; }
+
+        /* HERO SECTION - TRANSFORMADORA */
+        .hero { height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; }
+        .hero h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 900; line-height: 0.9; text-transform: uppercase; margin-bottom: 20px; background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.4) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; max-width: 600px; color: rgba(255,255,255,0.6); margin-bottom: 40px; letter-spacing: 1px; font-weight: 300; }
+
+        /* BOTÕES HIGH-TECH */
+        .btn-box { display: flex; gap: 20px; }
+        .btn { position: relative; padding: 20px 50px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; color: #fff; transition: 0.5s; overflow: hidden; border: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(5px); }
+        .btn:hover { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 50px var(--primary); transform: translateY(-5px); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+
+        /* GRID DE MÓDULOS - ESTILO COMANDO CENTRAL */
+        .modules-grid { padding: 80px 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .mod-card { position: relative; padding: 40px; background: var(--glass); border: 1px solid var(--border); border-radius: 2px; transition: 0.4s; overflow: hidden; }
+        .mod-card:hover { border-color: var(--primary); background: rgba(229, 9, 20, 0.05); }
+        .mod-card::before { content: "DATA_NODE"; position: absolute; top: 10px; right: 10px; font-size: 10px; color: var(--primary); opacity: 0.5; }
+        .mod-card h3 { font-size: 1.5rem; margin-bottom: 15px; letter-spacing: 1px; }
+        .mod-card p { font-size: 0.9rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="#" class="logo">
-            <span class="logo-wayia">WayIA</span><span class="logo-axiom">AXIOM</span>
-        </a>
-    </header>
-
-    <div class="hero">
-        <video autoplay loop muted class="hero-video">
+    <div class="video-container">
+        <video autoplay loop muted playsinline>
             <source src="large-thumbnail20240821-2596943-heqw9s.mp4" type="video/mp4">
         </video>
-        <div class="hero-overlay"></div>
+    </div>
+    <div class="overlay"></div>
+
+    <header>
+        <div class="logo">WayIA <span>Axiom</span></div>
+        <div class="status-pulse">
+            <span class="pulse-dot"></span>
+            Sentinel v5.2 Online
+        </div>
+    </header>
+
+    <main class="hero">
+        <p>CONEXÃO SINTÉTICA ESTABELECIDA</p>
+        <h1>PROJETADO PARA <br> DOMINAR.</h1>
+        <p>Aonde tu pisas é Terra Santa. <br> O Sentinel não apenas lê o mercado, ele antecipa a realidade matemática.</p>
         
-        <div class="hero-content">
-            <h1>SINTÉTICO.<br>SEM EMOÇÃO.</h1>
-            <p>O Sentinel Pro do Mercado Sintético. Tecnologia v5.2 Pulse Mode.</p>
-            <div class="btn-container">
-                <a href="https://deriv.com" target="_blank" class="btn btn-primary">ACESSE DERIV</a>
-                <a href="#curso" class="btn btn-secondary">CURSO EXPRESS</a>
-            </div>
+        <div class="btn-box">
+            <a href="https://deriv.com" target="_blank" class="btn btn-primary">Ativar Sentinel</a>
+            <a href="#curso" class="btn">Curso Express</a>
+        </div>
+    </main>
+
+    <div class="modules-grid" id="curso">
+        <div class="mod-card">
+            <h3>01. A LIMPEZA</h3>
+            <p>Preparação vibracional. O terreno deve ser santo antes do primeiro código. Alinhamento quântico de metas.</p>
+        </div>
+        <div class="mod-card">
+            <h3>02. O PROTOCOLO</h3>
+            <p>Configuração do Cérebro (VPS + n8n). Entenda como o Sentinel monitora bilhões em tempo real sem cansar.</p>
+        </div>
+        <div class="mod-card">
+            <h3>03. ADX MASTER</h3>
+            <p>A técnica Sniper. O filtro de silêncio que separa os apostadores dos operadores de elite.</p>
         </div>
     </div>
 
-    <section class="section-about">
-        <h2>A Terra Santa dos Dados</h2>
-        <p>A WayIA Axiom não opera ativos convencionais. Nós operamos a **pureza matemática** do Mercado Sintético da Deriv. Sem interferência humana, sem notícias falsas.</p>
-        
-        <div class="about-cards">
-            <div class="about-card">
-                <h3>0% Ruído</h3>
-                <p>O mercado é simulado por um gerador de números aleatórios auditado. É a matemática pura.</p>
-            </div>
-            <div class="about-card">
-                <h3>ADX 37 Mestre</h3>
-                <p>Axiom só entra quando a tendência é inquestionável. É o silêncio que precede o lucro.</p>
-            </div>
-            <div class="about-card">
-                <h3>Resiliência Quântica</h3>
-                <p>Nossa tecnologia v5.2 se auto-reconcilia e vigia sua conta 24/7 na VPS.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-course" id="curso">
-        <h2>WayIA Axiom Academy</h2>
-        <div class="row-title">Módulo 1: O Terreno Santo (Mentalidade)</div>
-        <div class="row">
-            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1518005020251-58296d8fca1d?q=80&w=400')">
-                <div class="card-content">
-                    <div class="badge">EP 01</div><br>Limpeza dos Pés: O Começo
-                </div>
-            </div>
-            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400')">
-                <div class="card-content">
-                    <div class="badge">EP 02</div><br>Física Quântica e Renda
-                </div>
-            </div>
-            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=400')">
-                <div class="card-content">
-                    <div class="badge">EP 03</div><br>Colapsando a Abundância
-                </div>
-            </div>
-        </div>
-
-        <div class="row-title">Módulo 2: O Cérebro do Sentinel</div>
-        <div class="row">
-            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=400')">
-                <div class="card-content">Sincronizando VPS e n8n</div>
-            </div>
-            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=400')">
-                <div class="card-content">O Pulso de Vida (Heartbeat)</div>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>&copy; 2026 WayIA Axiom. Uma tecnologia do Projeto Antigravity.</p>
-        <p>WayIA Flow - Todos os direitos reservados.</p>
+    <footer style="padding: 60px; text-align: center; font-size: 0.8rem; opacity: 0.4; letter-spacing: 3px;">
+        WAYIA FLOW // ANTIGRAVITY PROJECT // 2026
     </footer>
 
 </body>
