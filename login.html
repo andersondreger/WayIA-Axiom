@@ -1,208 +1,123 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AXIOM SENTINEL | Conexão Neural</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Roboto Mono', 'monospace'] },
-          colors: { 
-            navy: {
-                900: '#050c17',
-                800: '#0A192F',
-                700: '#112240',
-                600: '#233554'
-            },
-            cyan: {
-                glow: '#00b3cc',
-                400: '#00E5FF',
-                500: '#00bcd4'
-            },
-            neon: '#00FFC2',
-            amber: '#FFC107'
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WayIA | Axioma Sentinel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #E50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: #fff; height: 100vh; display: flex; overflow: hidden; }
+
+        /* LADO ESQUERDO - VISUAL */
+        .side-visual { 
+            flex: 1.2; 
+            background: url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000') no-repeat center center;
+            background-size: cover; 
+            position: relative; 
+            display: flex; 
+            align-items: flex-end; 
+            padding: 60px;
         }
-      }
-    }
-  </script>
-  <style>
-    body { background-color: #0A192F; color: #fff; overflow-x: hidden; }
-    .glass-panel { background: rgba(17, 34, 64, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0, 229, 255, 0.1); }
-    .input-premium { background: rgba(10, 25, 47, 0.5); border: 1px solid rgba(0, 229, 255, 0.2); color: white; transition: all 0.3s ease; }
-    .input-premium:focus { border-color: #00E5FF; outline: none; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
-    .btn-primary { background: linear-gradient(135deg, #00E5FF 0%, #00b3cc 100%); color: #0A192F; transition: all 0.3s ease; }
-    .btn-primary:hover { box-shadow: 0 0 25px rgba(0, 229, 255, 0.4); transform: scale(1.02); }
-    .cyber-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.3; z-index: -2; }
-    
-    .hero-avatar {
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #00E5FF;
-        box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
-        margin: 0 auto;
-    }
+        .side-visual::after { 
+            content: ""; position: absolute; inset: 0; 
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, transparent); 
+        }
+        .visual-content { position: relative; z-index: 2; }
+        .visual-content h1 { font-size: 4rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+        .visual-content p { font-size: 1.2rem; opacity: 0.7; margin-top: 15px; max-width: 400px; }
 
-    .pulse-ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      border: 1px solid #00E5FF;
-      animation: pulse 2s infinite;
-      z-index: -1;
-    }
+        /* LADO DIREITO - LOGIN */
+        .side-auth { 
+            flex: 0.8; 
+            background: #000; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            padding: 60px; 
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+        .auth-box { width: 100%; max-width: 350px; margin: 0 auto; }
+        .logo { font-weight: 900; color: var(--primary); letter-spacing: 4px; font-size: 1.4rem; margin-bottom: 50px; }
 
-    @keyframes pulse {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-    }
-  </style>
+        .input-group { margin-bottom: 25px; }
+        label { display: block; font-size: 0.7rem; text-transform: uppercase; color: #666; margin-bottom: 8px; letter-spacing: 2px; }
+        input { 
+            width: 100%; padding: 16px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; border-radius: 4px; font-size: 1rem; transition: 0.3s;
+        }
+        input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.1); }
+
+        .btn-action { 
+            width: 100%; padding: 18px; background: var(--primary); border: none; color: #fff;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            border-radius: 4px; margin-top: 10px; transition: 0.3s;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4); }
+        .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); margin-top: 15px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: #fff; }
+
+        @media (max-width: 1000px) { .side-visual { display: none; } .side-auth { flex: 1; } }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen relative antialiased px-4">
-  <div class="cyber-bg"></div>
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.05)_0%,rgba(10,25,47,1)_80%)] z-[-1]"></div>
+<body>
 
-  <div class="w-full max-w-md relative z-10 my-10">
-    <div class="glass-panel p-10 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
-      
-      <div class="relative z-10 text-center mb-8">
-        <div class="relative inline-block mb-6">
-            <div class="pulse-ring"></div>
-            <!-- Avatar Dreger Ciborgue -->
-            <img src="C:\Users\Anderson\.gemini\antigravity\brain\5c7ddc7e-2fc0-4345-a748-9b75ff4adbe4\avatar_dreger_ciborgue_1775411632460.png" alt="Dreger Ciborgue" class="hero-avatar">
+    <div class="side-visual">
+        <div class="visual-content">
+            <h1>WayIA <span style="color:var(--primary)">Axiom</span></h1>
+            <p>O Sentinel está operando. Conecte sua conta para gerenciar as frequências de volatilidade.</p>
         </div>
-
-        <h3 class="text-3xl font-black tracking-tight text-white mb-2">AXIOM <span class="text-cyan-400">SENTINEL</span></h3>
-        <p class="text-xs text-cyan-400 uppercase tracking-widest font-mono">Conexão Neural Axiom:<br>Iniciando varredura de mercados sintéticos.</p>
-      </div>
-      
-      <form id="login-form" class="space-y-6 text-left">
-        <div>
-          <label class="block text-[10px] font-semibold text-cyan-400/70 mb-2 ml-1 uppercase tracking-widest">Identidade Operacional</label>
-          <input type="email" id="email" class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-500 focus:bg-navy-900/50" placeholder="agente@axiom.com" required>
-        </div>
-        <div>
-          <label class="block text-[10px] font-semibold text-cyan-400/70 mb-2 ml-1 uppercase tracking-widest">Código de Autorização</label>
-          <input type="password" id="password" class="w-full px-5 py-4 rounded-xl input-premium text-sm font-mono placeholder:text-gray-500 focus:bg-navy-900/50" placeholder="••••••••" required>
-        </div>
-        <button type="submit" id="submit-btn" class="w-full btn-primary py-4 rounded-xl font-black text-sm mt-4 tracking-widest uppercase shadow-lg shadow-cyan-500/20 active:scale-95 flex justify-center items-center gap-2">
-          INICIAR AXIOM <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-        </button>
-      </form>
-
-      <div class="mt-6">
-          <button onclick="loginGoogle()" class="w-full py-4 rounded-xl font-bold text-xs tracking-widest bg-navy-700/50 hover:bg-cyan-500 hover:text-navy-900 text-white border border-cyan-500/30 transition-all flex justify-center items-center gap-3">
-              <img src="https://www.google.com/favicon.ico" class="w-4"> SINCRONIZAR VIA GOOGLE
-          </button>
-      </div>
-
-      <p id="msg-erro" class="text-xs text-amber-500 mt-5 text-center font-mono font-medium hidden bg-amber-500/10 py-2 rounded-lg border border-amber-500/20"></p>
-
-      <div class="mt-8 text-center pt-6 border-t border-cyan-500/10">
-          <p class="text-[11px] text-gray-400 font-mono">
-              <span id="toggle-text">Acesso restrito. Sem credenciais?</span> 
-              <button onclick="toggleMode()" id="toggle-btn" class="text-cyan-400 hover:text-white font-bold ml-1 transition">Requerer Acesso</button>
-          </p>
-      </div>
-
     </div>
-  </div>
 
-  <script>
-    const SB_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU";
-    const supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
-    
-    let isRegistering = false;
+    <div class="side-auth">
+        <div class="auth-box">
+            <div class="logo">SENTINEL ACCESS</div>
+            
+            <div class="input-group">
+                <label>E-mail do Operador</label>
+                <input type="email" id="email" placeholder="nome@exemplo.com">
+            </div>
 
-    function toggleMode() {
-        isRegistering = !isRegistering;
-        const submitBtn = document.getElementById('submit-btn');
-        
-        submitBtn.innerHTML = isRegistering 
-            ? \`REGISTRAR AGENTE <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>\`
-            : \`INICIAR AXIOM <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>\`;
-        
-        document.getElementById('toggle-text').innerText = isRegistering ? "Autenticação já estabelecida?" : "Acesso restrito. Sem credenciais?";
-        document.getElementById('toggle-btn').innerText = isRegistering ? "Retornar ao Login" : "Requerer Acesso";
-        
-        document.getElementById('msg-erro').classList.add('hidden');
-    }
+            <div class="input-group">
+                <label>Senha de Segurança</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
 
-    const loginForm = document.getElementById("login-form");
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+            <button class="btn-action" onclick="handleAuth('login')">Acessar Sistema</button>
+            <button class="btn-action btn-secondary" onclick="handleAuth('signup')">Criar Nova Conta</button>
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const msgErro = document.getElementById("msg-erro");
-      const btn = loginForm.querySelector('button[type="submit"]');
-      const originalText = btn.innerHTML;
-      
-      btn.innerHTML = \`<svg class="animate-spin h-5 w-5 mr-2 inline" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> \${isRegistering ? 'CADASTRANDO...' : 'ESTABELECENDO CONEXÃO...'}\`;
-      btn.classList.add("opacity-80", "cursor-not-allowed");
+            <p style="margin-top: 30px; font-size: 0.8rem; color: #444; text-align: center;">
+                Protegido por Criptografia Sentinel v5.2
+            </p>
+        </div>
+    </div>
 
-      let authResult;
-      
-      if (isRegistering) {
-        authResult = await supabaseClient.auth.signUp({ email, password });
-      } else {
-        authResult = await supabaseClient.auth.signInWithPassword({ email, password });
-      }
+    <script>
+        // DADOS REAIS DO SEU SUPABASE (CONFORME SUAS FOTOS)
+        const SUPABASE_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_hui-V5sstG9eGU6HXo737g_KxnwE4ds";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      if (authResult.error) {
-        msgErro.innerText = isRegistering ? "Erro ao cadastrar: " + authResult.error.message : "Acesso Negado: Código Inválido.";
-        msgErro.classList.remove("hidden");
-        btn.innerHTML = originalText;
-        btn.classList.remove("opacity-80", "cursor-not-allowed");
-      } else {
-        msgErro.classList.add("hidden");
-        btn.innerHTML = "CONEXÃO NEURAL ESTABELECIDA!";
-        
-        // Verifica se usuário existe na tabela usuarios_axiom. Se não, cria.
-        if (authResult.data && authResult.data.user) {
-            const userId = authResult.data.user.id;
-            const { data: userRecord } = await supabaseClient.from('usuarios_axiom').select('*').eq('user_id', userId).single();
-            if (!userRecord && isRegistering) {
-                // Cria entrada inicial no usuarios_axiom se for cadastro
-                await supabaseClient.from('usuarios_axiom').insert([{ user_id: userId, deriv_token: null, status_robo: 'off' }]);
+        async function handleAuth(type) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) return alert("Preencha todos os campos.");
+
+            if (type === 'signup') {
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) alert("Erro no cadastro: " + error.message);
+                else alert("Cadastro realizado! Verifique seu e-mail para confirmar.");
+            } else {
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) alert("Erro no login: " + error.message);
+                else {
+                    alert("Acesso autorizado!");
+                    window.location.href = "dashboard.html"; 
+                }
             }
         }
-
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 800);
-      }
-    });
-
-    async function loginGoogle() {
-        const callbackUrl = window.location.href.replace('login.html', 'dashboard.html');
-        await supabaseClient.auth.signInWithOAuth({ 
-            provider: 'google', 
-            options: { redirectTo: callbackUrl } 
-        });
-    }
-
-    async function checkAutoLogin() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session) {
-            window.location.href = "dashboard.html";
-        }
-    }
-    checkAutoLogin();
-  </script>
-</body>
-</html>ript>
+    </script>
 </body>
 </html>
