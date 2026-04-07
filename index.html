@@ -1,297 +1,137 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Prime | Intelligent Auditor</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <title>WayIA Axiom - O Sentinel do Mercado Sintético</title>
     <style>
-        :root {
-            --axiom-cyan: #00D1FF;
-            --axiom-red: #FF0032;
-            --axiom-green: #00FF85;
-        }
+        /* RESET BÁSICO */
+        body, h1, h2, p { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #000; color: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; overflow-x: hidden; }
 
-        body {
-            background: #020202;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-        }
+        /* VÍDEO DE FUNDO (HERO) */
+        .hero { position: relative; width: 100%; height: 100vh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: -100; transform: translateX(-50%) translateY(-50%); object-fit: cover; filter: brightness(0.6); }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%); z-index: -99; }
 
-        .hidden {
-            display: none !important;
-        }
+        /* CABEÇALHO (LOGO E NAVEGAÇÃO) */
+        header { position: absolute; top: 0; left: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .logo { font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; text-decoration: none; display: flex; align-items: center; }
+        .logo-wayia { color: #fff; }
+        .logo-axiom { color: #E50914; margin-left: 2px; }
+        
+        /* BOTÕES MESTRE (HERO) */
+        .hero-content h1 { font-size: 5rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 20px; line-height: 1.1; }
+        .hero-content p { font-size: 1.5rem; margin-bottom: 50px; opacity: 0.8; font-weight: 300; }
+        .btn-container { display: flex; gap: 20px; justify-content: center; }
+        .btn { padding: 18px 45px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; border: none; cursor: pointer; transition: 0.4s; }
+        .btn-primary { background-color: #E50914; color: #fff; }
+        .btn-secondary { background-color: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+        .btn:hover { transform: scale(1.1); filter: brightness(1.2); box-shadow: 0 0 30px rgba(229, 9, 20, 0.5); }
 
-        .glass-panel {
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        /* SEÇÃO SOBRE O MERCADO SINTÉTICO (FILOSOFIA AXIOM) */
+        .section-about { padding: 100px 50px; text-align: center; background-color: #141414; }
+        .section-about h2 { font-size: 3rem; margin-bottom: 30px; font-weight: 800; }
+        .section-about p { font-size: 1.3rem; max-width: 800px; margin: 0 auto 50px auto; line-height: 1.6; opacity: 0.8; }
+        .about-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .about-card { background: #2f2f2f; padding: 40px; border-radius: 8px; border: 1px solid #444; }
+        .about-card h3 { font-size: 1.5rem; color: #E50914; margin-bottom: 15px; }
+        .about-card p { font-size: 1.1rem; opacity: 0.7; }
 
-        .hero-bg {
-            background: radial-gradient(circle at center, #1a0505 0%, #000 80%);
-        }
+        /* SEÇÃO CURSO EXPRESS (ESTILO NETFLIX) */
+        .section-course { padding: 100px 50px; background-color: #000; }
+        .section-course h2 { color: #fff; padding-left: 20px; font-size: 2rem; margin-bottom: 10px; }
+        .row-title { font-size: 1.4rem; color: rgba(255,255,255,0.6); padding-left: 20px; margin-bottom: 20px; }
+        .row { display: flex; overflow-x: auto; gap: 15px; padding: 20px; scrollbar-width: none; }
+        .card { min-width: 320px; height: 180px; background-color: #333; border-radius: 5px; cursor: pointer; transition: 0.4s; position: relative; background-size: cover; border: 1px solid #444; }
+        .card:hover { transform: scale(1.1); z-index: 10; border-color: #E50914; }
+        .card-content { position: absolute; bottom: 0; padding: 15px; width: 100%; background: linear-gradient(transparent, black); }
+        .badge { background-color: #E50914; color: #fff; font-size: 0.7rem; padding: 3px 7px; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
 
-        /* Scanner Animado */
-        .scan-bar {
-            height: 2px;
-            background: var(--axiom-cyan);
-            width: 100%;
-            position: absolute;
-            top: 0;
-            z-index: 20;
-            animation: scan 6s linear infinite;
-            box-shadow: 0 0 15px var(--axiom-cyan);
-            opacity: 0.4;
-        }
-
-        @keyframes scan {
-            0% {
-                top: 0%;
-            }
-
-            100% {
-                top: 100%;
-            }
-        }
-
-        /* Widgets de Auditoria */
-        .widget-border {
-            border-left: 3px solid var(--axiom-cyan);
-            background: linear-gradient(90deg, rgba(0, 209, 255, 0.05) 0%, transparent 100%);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            box-shadow: 0 0 10px currentColor;
-        }
-
-        .split-view {
-            height: calc(100vh - 80px);
-        }
+        /* FOOTER */
+        footer { padding: 50px; text-align: center; border-top: 1px solid #333; opacity: 0.5; }
     </style>
 </head>
-
 <body>
 
-    <div id="screen-landing"
-        class="min-h-screen flex flex-col items-center justify-center relative hero-bg p-6 text-center">
-        <div class="absolute inset-0 opacity-10"
-            style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+    <header>
+        <a href="#" class="logo">
+            <span class="logo-wayia">WayIA</span><span class="logo-axiom">AXIOM</span>
+        </a>
+    </header>
 
-        <div class="relative z-10 space-y-10 animate-in fade-in duration-1000">
-            <div class="flex flex-col items-center gap-2">
-                <div class="w-24 h-24 bg-red-600/20 rounded-full blur-2xl absolute"></div>
-                <h2 class="text-5xl font-black tracking-tighter relative z-10">AXIOM <span
-                        class="text-zinc-500 font-light">PRIME</span></h2>
-                <div class="h-[2px] w-20 bg-red-600"></div>
+    <div class="hero">
+        <video autoplay loop muted class="hero-video">
+            <source src="large-thumbnail20240821-2596943-heqw9s.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1>SINTÉTICO.<br>SEM EMOÇÃO.</h1>
+            <p>O Sentinel Pro do Mercado Sintético. Tecnologia v5.2 Pulse Mode.</p>
+            <div class="btn-container">
+                <a href="https://deriv.com" target="_blank" class="btn btn-primary">ACESSE DERIV</a>
+                <a href="#curso" class="btn btn-secondary">CURSO EXPRESS</a>
             </div>
-
-            <div class="space-y-4">
-                <h1 class="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-tight">
-                    Auditoria de <br> <span class="text-red-600 italic">Alta Performance</span>
-                </h1>
-                <p
-                    class="text-zinc-500 max-w-lg mx-auto text-[10px] tracking-[0.5em] font-bold uppercase leading-relaxed">
-                    Sincronização Algorítmica com a Infraestrutura Deriv
-                </p>
-            </div>
-
-            <button onclick="fazerLogin()"
-                class="glass-panel px-14 py-5 rounded-none border-x-2 border-white/10 font-black text-[10px] tracking-widest hover:bg-white hover:text-black transition-all duration-500 transform hover:scale-105">
-                ESTABELECER CONEXÃO SEGURA
-            </button>
         </div>
     </div>
 
-    <div id="screen-dashboard" class="hidden min-h-screen flex flex-col bg-[#16191D] p-4 md:p-8">
-        <div class="flex-1 flex flex-col max-w-[1400px] w-full mx-auto bg-[#1C2025] rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border border-[#2A2F35]">
-            <!-- Header -->
-            <nav class="h-20 border-b border-[#2A2F35] flex items-center justify-between px-8 bg-[#22272D]">
-                <div class="flex items-center gap-4">
-                    <div class="text-4xl text-gray-300">🏛️</div>
-                    <div class="text-2xl font-black text-white tracking-tight">Axiom <span class="text-[#00FF85]">IA</span></div>
-                </div>
-
-                <div class="flex items-center gap-8 font-mono text-[13px] text-[#00FF85]">
-                    <span class="cursor-pointer hover:text-white transition">[ Dashboard ]</span>
-                    <span class="cursor-pointer hover:text-white transition">[ Sobre ]</span>
-                    <span class="cursor-pointer hover:text-white transition">[ Contato ]</span>
-                    <button onclick="fazerLogout()" class="text-red-400 hover:text-red-500 transition ml-4">[ Sair ]</button>
-                </div>
-            </nav>
-
-            <!-- Main Content -->
-            <main class="flex flex-1 p-8 gap-8">
-                <!-- Left Chart Panel -->
-                <div class="flex-1 flex flex-col gap-5">
-                    <!-- Toggles -->
-                    <div class="flex justify-between items-center">
-                        <div class="flex gap-3">
-                            <button class="px-6 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">BTC/USD</button>
-                            <button class="px-6 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">SOL/USD</button>
-                            <button class="px-6 py-2.5 border border-[#00FF85] rounded-lg text-sm font-bold text-[#00FF85] bg-[#00FF85]/10">NEAR/USD</button>
-                        </div>
-                        <div class="flex gap-3">
-                            <button class="px-5 py-2.5 border border-[#00FF85] rounded-lg text-sm font-bold text-[#00FF85] bg-[#00FF85]/10">M1</button>
-                            <button class="px-5 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">M5</button>
-                            <button class="px-5 py-2.5 border border-[#2A2F35] rounded-lg text-sm font-bold text-zinc-400 bg-[#16191D] hover:bg-zinc-800 transition">M15</button>
-                        </div>
-                    </div>
-
-                    <!-- Iframe Wrapper -->
-                    <div class="flex-1 rounded-xl overflow-hidden border border-[#2A2F35] bg-[#16191D] relative min-h-[500px] flex p-4">
-                        <div class="w-full h-full rounded-lg overflow-hidden relative">
-                            <div class="scan-bar"></div>
-                            <iframe id="deriv-frame" src="https://app.deriv.com/dtrader" class="w-full h-full border-none" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Side Panel -->
-                <div class="w-[380px] flex flex-col">
-                    <!-- Glowing Container -->
-                    <div class="flex-1 bg-[#1C2025] rounded-xl p-6 flex flex-col relative"
-                         style="border: 2px solid #00FF85; box-shadow: 0 0 35px rgba(0, 255, 133, 0.15);">
-                        
-                        <h3 class="text-sm font-bold text-white flex items-center justify-center gap-2 mb-8 mt-2">
-                            📊 ANÁLISE EM TEMPO REAL
-                        </h3>
-
-                        <button onclick="simularSinal()" class="w-full py-4 bg-[#00FF85] text-[#16191D] rounded-xl font-black uppercase text-[13px] mb-8 shadow-[0_0_20px_rgba(0,255,133,0.4)] hover:bg-[#00e575] hover:scale-[1.02] transition-all">
-                            [ CONECTAR E ANALISAR AGORA ]
-                        </button>
-
-                        <div id="signal-feed" class="flex-1 overflow-y-auto w-full">
-                            <!-- Empty State -->
-                            <div id="no-signal" class="h-40 flex flex-col items-center justify-center text-zinc-500 space-y-4">
-                                <svg class="animate-spin text-[#00FF85]" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                                </svg>
-                                <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Sincronizando...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- Footer -->
-            <footer class="py-5 text-center text-[11px] text-zinc-500 font-medium tracking-wide">
-                © 2026 Axiom IA by WayIA. Todos os direitos reservados. | <a href="#" class="underline hover:text-white transition">Termos de Uso</a>
-            </footer>
+    <section class="section-about">
+        <h2>A Terra Santa dos Dados</h2>
+        <p>A WayIA Axiom não opera ativos convencionais. Nós operamos a **pureza matemática** do Mercado Sintético da Deriv. Sem interferência humana, sem notícias falsas.</p>
+        
+        <div class="about-cards">
+            <div class="about-card">
+                <h3>0% Ruído</h3>
+                <p>O mercado é simulado por um gerador de números aleatórios auditado. É a matemática pura.</p>
+            </div>
+            <div class="about-card">
+                <h3>ADX 37 Mestre</h3>
+                <p>Axiom só entra quando a tendência é inquestionável. É o silêncio que precede o lucro.</p>
+            </div>
+            <div class="about-card">
+                <h3>Resiliência Quântica</h3>
+                <p>Nossa tecnologia v5.2 se auto-reconcilia e vigia sua conta 24/7 na VPS.</p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
-        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-        const axiom = window.supabase.createClient(sbUrl, sbKey);
+    <section class="section-course" id="curso">
+        <h2>WayIA Axiom Academy</h2>
+        <div class="row-title">Módulo 1: O Terreno Santo (Mentalidade)</div>
+        <div class="row">
+            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1518005020251-58296d8fca1d?q=80&w=400')">
+                <div class="card-content">
+                    <div class="badge">EP 01</div><br>Limpeza dos Pés: O Começo
+                </div>
+            </div>
+            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400')">
+                <div class="card-content">
+                    <div class="badge">EP 02</div><br>Física Quântica e Renda
+                </div>
+            </div>
+            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=400')">
+                <div class="card-content">
+                    <div class="badge">EP 03</div><br>Colapsando a Abundância
+                </div>
+            </div>
+        </div>
 
-        async function fazerLogin() {
-            await axiom.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://axiom.wayia.com.br' } });
-        }
+        <div class="row-title">Módulo 2: O Cérebro do Sentinel</div>
+        <div class="row">
+            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=400')">
+                <div class="card-content">Sincronizando VPS e n8n</div>
+            </div>
+            <div class="card" style="background-image: url('https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=400')">
+                <div class="card-content">O Pulso de Vida (Heartbeat)</div>
+            </div>
+        </div>
+    </section>
 
-        async function fazerLogout() {
-            await axiom.auth.signOut();
-            window.location.reload();
-        }
+    <footer>
+        <p>&copy; 2026 WayIA Axiom. Uma tecnologia do Projeto Antigravity.</p>
+        <p>WayIA Flow - Todos os direitos reservados.</p>
+    </footer>
 
-        axiom.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                document.getElementById('screen-landing').classList.add('hidden');
-                document.getElementById('screen-dashboard').classList.remove('hidden');
-                fetchBalance(session.user.id);
-                initAxiomEngine();
-            }
-        });
-
-        const ativosDeriv = {
-            'R_75': 'https://app.deriv.com/dtrader?symbol=R_75',
-            'R_100': 'https://app.deriv.com/dtrader?symbol=R_100',
-            '1HZ10V': 'https://app.deriv.com/dtrader?symbol=1HZ10V',
-            'R_10': 'https://app.deriv.com/dtrader?symbol=R_10'
-        };
-
-        function renderSinal(sinal) {
-            const empty = document.getElementById('no-signal');
-            if (empty) empty.classList.add('hidden');
-
-            const frame = document.getElementById('deriv-frame');
-
-            // --- LÓGICA DE SINCRONIZAÇÃO DO GRÁFICO ---
-            if (sinal.ativo && ativosDeriv[sinal.ativo]) {
-                console.log(`Sincronizando gráfico com: ${sinal.ativo}`);
-                frame.src = ativosDeriv[sinal.ativo];
-            }
-
-            const isCall = sinal.direcao === 'CALL';
-            const color = isCall ? 'text-[#00FF85]' : 'text-[#FF4444]';
-            const direcaoTexto = isCall ? 'CALL (Compra)' : 'PUT (Venda)';
-            const entradaMock = sinal.entrada || (Math.random() * (1.30000 - 1.20000) + 1.20000).toFixed(5);
-            const nomeAtivo = sinal.ativo || 'VOLATILITY 75 INDEX';
-
-            const card = `
-                <div class="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div class="flex justify-between text-[10px] font-black text-zinc-500 mb-2 uppercase tracking-widest px-1">
-                        <span>${nomeAtivo}</span>
-                        <span>${new Date().toLocaleTimeString()}</span>
-                    </div>
-                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                        <span class="w-8 text-lg">👁️</span> <span class="text-zinc-500">VEREDITO:</span> <span class="ml-auto ${color} uppercase tracking-wide">${direcaoTexto}</span>
-                    </div>
-                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                        <span class="w-8 text-lg">🎯</span> <span class="text-zinc-500">CONFIANÇA:</span> <span class="ml-auto text-white tracking-wide">${(sinal.confianca * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-4 flex text-[13px] font-bold items-center shadow-lg">
-                        <span class="w-8 text-lg">💸</span> <span class="text-zinc-500">ENTRADA:</span> <span class="ml-auto text-white tracking-wide">${entradaMock}</span>
-                    </div>
-                    
-                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed mt-5 shadow-lg">
-                        <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 1:</div>
-                        Sinais algorítmicos alinhados com fluxo de volume indicativo de pressão ${isCall ? 'compradora' : 'vendedora'} no curto prazo.
-                    </div>
-                    <div class="bg-[#23272D] border border-[#2A2F35] rounded-xl p-5 text-sm text-zinc-400 leading-relaxed shadow-lg mb-2">
-                        <div class="flex gap-2 font-bold text-white mb-2 text-xs uppercase tracking-widest"><span class="w-5">📝</span> JUSTIFICATIVA TÉCNICA 2:</div>
-                        Métricas de volatilidade no modelo cruzado fortalecem a decisão estratégica atual mantendo margem segura de erro.
-                    </div>
-                    
-                    <button onclick="window.open('${frame.src}', '_blank')" class="w-full mt-4 py-4 bg-[#2A2F35] text-white rounded-xl font-black uppercase text-xs hover:bg-zinc-700 transition border border-zinc-600 shadow-lg">
-                        ABRIR OPERAÇÃO NO TERMINAL
-                    </button>
-                </div>`;
-            document.getElementById('signal-feed').innerHTML = card;
-        }
-
-        function initAxiomEngine() {
-            console.log("Motor de Sincronização Ativado...");
-            
-            // Ouvir em todas as possíveis variações de nomes de canais já usados para garantir que nenhum seja perdido
-            axiom.channel('sinais').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
-            axiom.channel('live-axiom').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
-            axiom.channel('axiom-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sinais_axiom' }, payload => renderSinal(payload.new)).subscribe();
-        }
-
-        // Simulação instantânea conectada ao botão verde principal
-        function simularSinal() {
-            const mock = {
-                ativo: ['R_75', 'R_100', '1HZ10V', 'R_10'][Math.floor(Math.random()*4)],
-                direcao: Math.random() > 0.5 ? 'CALL' : 'PUT',
-                confianca: (Math.random() * (0.99 - 0.70) + 0.70)
-            };
-            renderSinal(mock);
-        }
-
-        async function fetchBalance(uid) {
-            const { data } = await axiom.table('gestao_usuarios').select('saldo_deriv').eq('user_id', uid).single();
-            if (data) document.getElementById('user-balance').innerText = `$ ${data.saldo_deriv.toFixed(2)}`;
-        }
-    </script>
 </body>
-
 </html>
