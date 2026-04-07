@@ -15,6 +15,15 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          login: path.resolve(__dirname, 'login.html'),
+          dashboard: path.resolve(__dirname, 'dashboard.html'),
+        },
+      },
+    },
     server: {
       // REATIVANDO HMR PARA VOCÊ VER AS MUDANÇAS NA HORA
       hmr: true,
