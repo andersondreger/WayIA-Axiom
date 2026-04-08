@@ -195,8 +195,16 @@
 
             if (error) {
                 if (error.message.includes("already registered")) {
-                    alert("Este e-mail já está cadastrado. Redirecionando para o login...");
-                    toggleView('login');
+                    // Tenta fazer login com a senha que ele acabou de digitar
+                    const loginAttempt = await _supabase.auth.signInWithPassword({ email, password });
+                    if (!loginAttempt.error) {
+                        // Se era só problema de já ter conta e a senha bater, vai pro dashboard!
+                        window.location.href = "dashboard.html";
+                    } else {
+                        // Se a senha tava errada, avisa que já tem conta de forma educada
+                        alert("Este e-mail já possui cadastro, mas a senha está incorreta. Voltando para a tela de login...");
+                        toggleView('login');
+                    }
                 } else {
                     alert("Erro no cadastro: " + error.message);
                 }
