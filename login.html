@@ -194,10 +194,15 @@
             });
 
             if (error) {
-                alert("Erro no cadastro: " + error.message);
+                if (error.message.includes("already registered")) {
+                    alert("Este e-mail já está cadastrado. Redirecionando para o login...");
+                    toggleView('login');
+                } else {
+                    alert("Erro no cadastro: " + error.message);
+                }
             } else {
-                alert("Cadastro realizado com sucesso! Pode ser necessário verificar seu e-mail.");
-                toggleView('login');
+                // Cadastro com sucesso, já faz o login direto (se o Supabase não exigir verificação de email)
+                window.location.href = "dashboard.html";
             }
         }
 
