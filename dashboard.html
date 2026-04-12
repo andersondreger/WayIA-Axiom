@@ -78,7 +78,7 @@
                         <label
                             class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase tracking-widest">ADX
                             Mínimo</label>
-                        <input type="number" id="adx-input" step="0.1" value="38.0"
+                        <input type="number" id="adx-input" step="0.1" value="35.0"
                             class="w-full bg-navy-900 border border-cyan-400/30 text-white text-sm font-mono px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-400 transition">
                     </div>
                     <div>
@@ -127,7 +127,7 @@
         <main class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="glass p-6 rounded-2xl text-center">
                 <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4">Status do Motor</h3>
-                <div id="val-adx" class="text-6xl font-black text-white mb-2">38.0</div>
+                <div id="val-adx" class="text-6xl font-black text-white mb-2">35.0</div>
                 <div class="text-xs font-mono text-zinc-500">ADX SNIPER ATUAL</div>
             </div>
             <div id="signal-feed" class="glass p-6 rounded-2xl min-h-[300px] space-y-4">
@@ -151,7 +151,7 @@
             currentUser = session.user;
 
             // Verificar se já tem configuração
-            const { data } = await axiom.from('user_configs').select('*').eq('id', currentUser.id).single();
+            const { data } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
             if (!data || !data.deriv_token) {
                 document.getElementById('onboarding-modal').classList.remove('hidden');
             } else {
@@ -172,12 +172,12 @@
 
             // O COMANDO UPSERT QUE RESOLVE O ERRO DE CONTEXTO
             const { error } = await axiom.from('user_configs').upsert({
-                id: currentUser.id,
+                user_id: currentUser.id,
                 deriv_token: token,
                 adx_minimo: adx,
                 stake: stake,
                 updated_at: new Date()
-            });
+            }, { onConflict: 'user_id' });
 
             if (!error) {
                 document.getElementById('onboarding-modal').classList.add('hidden');
