@@ -76,7 +76,7 @@
                 <div>
                     <label class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase tracking-widest">Token
                         API Deriv</label>
-                    <input type="text" id="deriv-token-input"
+                    <input type="text" id="token-input"
                         class="w-full bg-navy-900 border border-cyan-400/30 text-white text-sm font-mono px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-400 transition"
                         placeholder="Token de Negociação">
                 </div>
@@ -98,7 +98,7 @@
                     </div>
                 </div>
 
-                <button onclick="sincronizarComMotor()" id="btn-save-token"
+                <button onclick="sincronizarConfiguracoes()" id="btn-save-token"
                     class="w-full bg-cyan-500 hover:bg-cyan-400 text-navy-900 font-black text-sm uppercase tracking-widest py-3 rounded-xl shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-all">
                     Sincronizar com Motor
                 </button>
@@ -297,23 +297,27 @@
             window.triggerTradeClosed = (profit) => showTradeClosed(profit, 'R_100', '1 Tick');
         }
 
-        async function sincronizarComMotor() {
-            const token = document.getElementById('deriv-token-input').value;
-            const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
-            const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
+        async function sincronizarConfiguracoes() {
+            const token = document.getElementById('token-input').value;
+            const adx = parseFloat(document.getElementById('adx-input').value);
+            const stake = parseFloat(document.getElementById('stake-input').value);
 
-            // USANDO OS NOMES REAIS IDENTIICADOS PELA IMAGEM
-            const { error } = await axiom.from('user_configs').upsert({ 
-                "eu ia": currentUser.id, 
-                "adx_minimo": adx,
-                "estaca": stake, 
-                "token_deriv": token
-            });
+            // TRADUÇÃO: Código em Inglês -> Banco em Português
+            const { data, error } = await axiom
+                .from('user_configs')
+                .upsert({ 
+                    "eu ia": currentUser.id,      // No banco está 'eu ia'
+                    "token_deriv": token,         // No banco está 'token_deriv'
+                    "adx_minimo": adx,            // No banco está 'adx_minimo'
+                    "estaca": stake,              // No banco está 'estaca'
+                    "updated_at": new Date() 
+                });
 
             if (error) {
-                alert("Erro na Sincronia: " + error.message);
+                console.error("Erro de Coluna:", error.message);
+                alert("Erro: Verifique se o nome das colunas no Supabase bate com o código!");
             } else {
-                alert("Sincronizado! O Cérebro agora lê ADX " + adx);
+                alert("Sincronia realizada com o Mármore! 🚀");
                 document.getElementById('onboarding-modal').classList.add('hidden');
                 document.getElementById('val-adx').innerText = adx;
                 addLiveFeedLog(`Motor sincronizado. Sinal ADX ajustado para ${adx} e Estaca: $${stake}`);
