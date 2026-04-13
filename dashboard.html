@@ -133,11 +133,13 @@
         </nav>
 
         <main class="p-6 flex flex-col gap-6 lg:h-[calc(100vh-80px)]">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[400px]">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-[400px]">
+                
+                <!-- Coluna 1: Status & Live Feed -->
                 <div class="lg:col-span-1 flex flex-col gap-6 h-full">
                     <div class="glass p-6 rounded-2xl text-center shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20">
                         <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4">Status do Motor</h3>
-                        <div id="val-adx" class="text-6xl font-black text-white mb-2 glow-text">35.0</div>
+                        <div id="val-adx" class="text-6xl font-black text-white mb-2 glow-text">--</div>
                         <div class="text-xs font-mono text-zinc-500">ADX SNIPER ATUAL</div>
                     </div>
 
@@ -146,12 +148,13 @@
                         <div id="live-feed-content" class="flex-1 overflow-y-auto space-y-3 font-mono text-xs pr-2">
                             <div class="flex items-start gap-2 text-cyan-400 border-l-2 border-cyan-400 pl-2">
                                 <span class="text-[9px] mt-0.5 opacity-50">SISTEMA</span>
-                                <span>Analisando mercado em alta frequência...</span>
+                                <span>Aguardando Sincronia...</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Colunas 2 e 3: Vídeo Scanner Neural e Gráfico -->
                 <div id="signal-feed" class="lg:col-span-2 glass rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20 h-full">
                     <div id="scanner-view" class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10 transition-opacity duration-500">
                         <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-50">
@@ -166,26 +169,22 @@
 
                     <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20" src=""></iframe>
                 </div>
-            </div>
 
-            <!-- Rodapé Extrato de Operações -->
-            <div class="glass p-4 rounded-xl shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-neon/30">
-                <h3 class="text-neon text-[10px] font-black uppercase tracking-widest mb-3 border-b border-neon/20 pb-2">Extrato de Operações (Deriv Integrado)</h3>
-                <div class="overflow-y-auto max-h-[140px] pr-2 custom-scrollbar">
-                    <table class="w-full text-left text-xs font-mono">
-                        <thead class="text-zinc-500 border-b border-cyan-400/10 sticky top-0 bg-[#0A192F]/90 backdrop-blur-sm z-10">
-                            <tr>
-                                <th class="pb-2 font-normal">ID TRANSAÇÃO</th>
-                                <th class="pb-2 font-normal">ATIVO</th>
-                                <th class="pb-2 font-normal">TEMPO DE CONTRATO</th>
-                                <th class="pb-2 font-normal text-right">LUCRO (USD)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trade-history-table">
-                            <!-- Logs de operações preenchidos aqui -->
-                        </tbody>
-                    </table>
+                <!-- Coluna 4: Menu de Posições (Roxo Neon) -->
+                <div class="lg:col-span-1 flex flex-col h-full glass rounded-xl shadow-[0_0_30px_rgba(138,43,226,0.3)] border border-[#8A2BE2]/50">
+                    <div class="p-4 bg-[#8A2BE2]/10 border-b border-[#8A2BE2]/30 rounded-t-xl text-center">
+                        <h3 class="text-[#8A2BE2] text-[10px] font-black uppercase tracking-widest drop-shadow-[0_0_5px_#8A2BE2]">Menu de Posições</h3>
+                        <div id="lucro-acumulado" class="text-3xl font-black text-white mt-2 drop-shadow-[0_0_10px_#8A2BE2] transition-colors">$0.00</div>
+                        <div class="text-[9px] font-mono text-zinc-400 uppercase mt-1">Lucro Acumulado</div>
+                    </div>
+                    
+                    <div class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                        <div id="trade-history-table" class="flex flex-col gap-3">
+                            <!-- Cards Roxos injetados aqui via appendTradeRow -->
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </main>
     </div>
@@ -228,23 +227,34 @@
             feed.prepend(log);
         }
 
+        let acumuladoVal = 0;
         function appendTradeRow(profit, symbol, contractTime, txId) {
-            const tbody = document.getElementById('trade-history-table');
-            const row = document.createElement('tr');
-            row.className = "border-b border-cyan-400/5 hover:bg-cyan-400/10 transition-colors animate-fade-in-right";
+            const list = document.getElementById('trade-history-table');
+            const card = document.createElement('div');
             
             const isWin = profit >= 0;
-            const PnLClass = isWin ? 'text-neon drop-shadow-[0_0_5px_rgba(0,255,194,0.5)]' : 'text-red-400';
+            const PnLClass = isWin ? 'text-neon drop-shadow-[0_0_5px_rgba(0,255,194,0.5)]' : 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]';
+            const bgBorder = isWin ? 'border-neon/30 bg-neon/5' : 'border-red-400/30 bg-red-400/5';
             const PnLText = isWin ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`;
             const tId = txId || 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
             
-            row.innerHTML = `
-                <td class="py-3 text-cyan-400/70 border-l-[3px] ${isWin ? 'border-neon' : 'border-red-400'} pl-2">${tId}</td>
-                <td class="py-3">${symbol || 'R_100'}</td>
-                <td class="py-3 text-zinc-400">${contractTime || '1 Tick'}</td>
-                <td class="py-3 text-right font-black ${PnLClass} pr-2">${PnLText}</td>
+            card.className = `glass p-3 rounded-lg border ${bgBorder} flex flex-col gap-2 animate-fade-in-right`;
+            card.innerHTML = `
+                <div class="flex justify-between items-center border-b border-white/5 pb-1">
+                    <span class="text-[10px] font-mono text-zinc-400">${tId}</span>
+                    <span class="text-[10px] text-white/80 uppercase font-black tracking-wider">${symbol || 'R_100'}</span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <span class="text-[9px] font-mono text-zinc-500">${contractTime || '1 Tick'}</span>
+                    <span class="font-black text-lg ${PnLClass}">${PnLText}</span>
+                </div>
             `;
-            tbody.prepend(row);
+            list.prepend(card);
+
+            acumuladoVal += profit;
+            const resEl = document.getElementById('lucro-acumulado');
+            resEl.innerText = (acumuladoVal >= 0 ? '+$' : '-$') + Math.abs(acumuladoVal).toFixed(2);
+            resEl.className = `text-3xl font-black mt-2 ${acumuladoVal >= 0 ? 'text-neon drop-shadow-[0_0_10px_rgba(0,255,194,0.6)]' : 'text-red-400 drop-shadow-[0_0_10px_rgba(248,113,113,0.6)]'}`;
         }
 
         function showTradeOpen(symbol) {
@@ -297,29 +307,37 @@
             window.triggerTradeClosed = (profit) => showTradeClosed(profit, 'R_100', '1 Tick');
         }
 
+        function ativarPainelNobreza() {
+            const adx = document.getElementById('adx-input').value;
+            const stake = document.getElementById('stake-input').value;
+            
+            document.getElementById('onboarding-modal').classList.add('hidden');
+            document.getElementById('val-adx').innerText = adx;
+            addLiveFeedLog(`Motor sincronizado. Sinal ADX ajustado para ${adx} e Estaca: $${stake}`);
+        }
+
         async function sincronizarComMotor() {
             const token = document.getElementById('token-input').value;
             const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
             const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
 
-            // USANDO OS NOMES EXATOS DA SUA TABELA EM PORTUGUÊS
+            // MAPA REAL DA IMAGE_9259A9
             const { error } = await axiom.from('user_configs').upsert({ 
-                "eu ia": currentUser.id,      // Coluna com espaço precisa de aspas
-                "token_deriv": token,         // Nome exato da sua imagem
-                "adx_minimo": adx,            // Nome exato da sua imagem
-                "estaca": stake,              // Nome exato da sua imagem
+                "eu ia": currentUser.id,      // Nome com espaço
+                "token_deriv": token,         // Nome em português
+                "adx_minimo": adx,            // Nome em português
+                "estaca": stake,              // Nome em português
                 "é_ativo": true,              // Já ativa você automaticamente
                 "é_admin": true               // Já te dá poderes de admin
             });
 
             if (error) {
-                console.error("Erro de mapeamento:", error);
-                alert("Erro técnico: " + error.message);
+                console.error("Erro técnico:", error);
+                alert("Erro: O banco ainda não reconheceu a coluna. Tente atualizar a página do Supabase.");
             } else {
-                alert("Sincronia Cognitiva Ativada! 🚀\nO Cérebro agora lê ADX " + adx);
-                document.getElementById('onboarding-modal').classList.add('hidden');
-                document.getElementById('val-adx').innerText = adx;
-                addLiveFeedLog(`Motor sincronizado. Sinal ADX ajustado para ${adx} e Estaca: $${stake}`);
+                alert("Sincronia Cognitiva Ativada! 🚀");
+                // Aqui entra a mágica visual que você quer
+                ativarPainelNobreza(); 
             }
         }
 
