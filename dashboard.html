@@ -98,7 +98,7 @@
                     </div>
                 </div>
 
-                <button onclick="sincronizarConfiguracoes()" id="btn-save-token"
+                <button onclick="sincronizarComMotor()" id="btn-save-token"
                     class="w-full bg-cyan-500 hover:bg-cyan-400 text-navy-900 font-black text-sm uppercase tracking-widest py-3 rounded-xl shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-all">
                     Sincronizar com Motor
                 </button>
@@ -297,27 +297,26 @@
             window.triggerTradeClosed = (profit) => showTradeClosed(profit, 'R_100', '1 Tick');
         }
 
-        async function sincronizarConfiguracoes() {
+        async function sincronizarComMotor() {
             const token = document.getElementById('token-input').value;
-            const adx = parseFloat(document.getElementById('adx-input').value);
-            const stake = parseFloat(document.getElementById('stake-input').value);
+            const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
+            const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
 
-            // TRADUÇÃO: Código em Inglês -> Banco em Português
-            const { data, error } = await axiom
-                .from('user_configs')
-                .upsert({ 
-                    "eu ia": currentUser.id,      // No banco está 'eu ia'
-                    "token_deriv": token,         // No banco está 'token_deriv'
-                    "adx_minimo": adx,            // No banco está 'adx_minimo'
-                    "estaca": stake,              // No banco está 'estaca'
-                    "updated_at": new Date() 
-                });
+            // USANDO OS NOMES EXATOS DA SUA TABELA EM PORTUGUÊS
+            const { error } = await axiom.from('user_configs').upsert({ 
+                "eu ia": currentUser.id,      // Coluna com espaço precisa de aspas
+                "token_deriv": token,         // Nome exato da sua imagem
+                "adx_minimo": adx,            // Nome exato da sua imagem
+                "estaca": stake,              // Nome exato da sua imagem
+                "é_ativo": true,              // Já ativa você automaticamente
+                "é_admin": true               // Já te dá poderes de admin
+            });
 
             if (error) {
-                console.error("Erro de Coluna:", error.message);
-                alert("Erro: Verifique se o nome das colunas no Supabase bate com o código!");
+                console.error("Erro de mapeamento:", error);
+                alert("Erro técnico: " + error.message);
             } else {
-                alert("Sincronia realizada com o Mármore! 🚀");
+                alert("Sincronia Cognitiva Ativada! 🚀\nO Cérebro agora lê ADX " + adx);
                 document.getElementById('onboarding-modal').classList.add('hidden');
                 document.getElementById('val-adx').innerText = adx;
                 addLiveFeedLog(`Motor sincronizado. Sinal ADX ajustado para ${adx} e Estaca: $${stake}`);
