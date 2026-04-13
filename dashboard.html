@@ -132,42 +132,59 @@
             </div>
         </nav>
 
-        <main class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[calc(100vh-80px)]">
-            <div class="lg:col-span-1 flex flex-col gap-6 h-full">
-                <div class="glass p-6 rounded-2xl text-center shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20">
-                    <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4">Status do Motor</h3>
-                    <div id="val-adx" class="text-6xl font-black text-white mb-2 glow-text">35.0</div>
-                    <div class="text-xs font-mono text-zinc-500">ADX SNIPER ATUAL</div>
-                </div>
+        <main class="p-6 flex flex-col gap-6 lg:h-[calc(100vh-80px)]">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[400px]">
+                <div class="lg:col-span-1 flex flex-col gap-6 h-full">
+                    <div class="glass p-6 rounded-2xl text-center shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20">
+                        <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4">Status do Motor</h3>
+                        <div id="val-adx" class="text-6xl font-black text-white mb-2 glow-text">35.0</div>
+                        <div class="text-xs font-mono text-zinc-500">ADX SNIPER ATUAL</div>
+                    </div>
 
-                <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20">
-                    <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 border-b border-cyan-400/20 pb-3">Registro de Sincronia (Live Feed)</h3>
-                    <div id="live-feed-content" class="flex-1 overflow-y-auto space-y-3 font-mono text-xs pr-2">
-                        <!-- Logs injectados em realtime -->
-                        <div class="flex items-start gap-2 text-cyan-400 border-l-2 border-cyan-400 pl-2">
-                            <span class="text-[9px] mt-0.5 opacity-50">SISTEMA</span>
-                            <span>Analisando mercado...</span>
+                    <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20">
+                        <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 border-b border-cyan-400/20 pb-3">Registro de Sincronia (Live Feed)</h3>
+                        <div id="live-feed-content" class="flex-1 overflow-y-auto space-y-3 font-mono text-xs pr-2">
+                            <div class="flex items-start gap-2 text-cyan-400 border-l-2 border-cyan-400 pl-2">
+                                <span class="text-[9px] mt-0.5 opacity-50">SISTEMA</span>
+                                <span>Analisando mercado em alta frequência...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div id="signal-feed" class="lg:col-span-2 glass rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20 h-full">
+                    <div id="scanner-view" class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10 transition-opacity duration-500">
+                        <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-50">
+                            <source src="https://cdn.pixabay.com/video/2020/05/25/40156-425257917_tiny.mp4" type="video/mp4">
+                        </video>
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#030a13] to-transparent z-10"></div>
+                        <div class="relative z-20 text-center">
+                            <div class="w-24 h-24 border-4 border-t-cyan-400 border-r-transparent border-b-cyan-400 border-l-transparent rounded-full animate-spin mb-4 mx-auto opacity-80 shadow-[0_0_20px_rgba(0,229,255,0.4)] rounded-full"></div>
+                            <h4 class="text-cyan-400 font-mono text-[10px] sm:text-xs animate-pulse glow-text">REDE NEURAL PULSANDO... AGUARDANDO GATILHO.</h4>
+                        </div>
+                    </div>
+
+                    <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20" src=""></iframe>
+                </div>
             </div>
 
-            <div id="signal-feed" class="lg:col-span-2 glass rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,0,0,0.5)] border-cyan-400/20 min-h-[400px]">
-                <div id="scanner-view" class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10 transition-opacity duration-500">
-                    <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-40">
-                        <source src="https://cdn.pixabay.com/video/2016/09/21/5325-183786445_tiny.mp4" type="video/mp4">
-                    </video>
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a13] to-transparent z-10"></div>
-                    <div class="relative z-20 text-center">
-                        <div class="w-24 h-24 border-4 border-t-cyan-400 border-r-transparent border-b-cyan-400 border-l-transparent rounded-full animate-spin mb-4 mx-auto opacity-80"></div>
-                        <h4 class="text-cyan-400 font-mono text-[10px] sm:text-xs animate-pulse glow-text">PROCESSANDO DADOS EM ALTA FREQUÊNCIA...</h4>
-                    </div>
-                </div>
-
-                <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20" src=""></iframe>
-                
-                <div id="historico-resultados" class="absolute right-4 top-4 z-30 flex flex-col gap-2 pointer-events-none">
-                    <!-- Cards de resultado aparecerão aqui -->
+            <!-- Rodapé Extrato de Operações -->
+            <div class="glass p-4 rounded-xl shrink-0 shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-neon/30">
+                <h3 class="text-neon text-[10px] font-black uppercase tracking-widest mb-3 border-b border-neon/20 pb-2">Extrato de Operações (Deriv Integrado)</h3>
+                <div class="overflow-y-auto max-h-[140px] pr-2 custom-scrollbar">
+                    <table class="w-full text-left text-xs font-mono">
+                        <thead class="text-zinc-500 border-b border-cyan-400/10 sticky top-0 bg-[#0A192F]/90 backdrop-blur-sm z-10">
+                            <tr>
+                                <th class="pb-2 font-normal">ID TRANSAÇÃO</th>
+                                <th class="pb-2 font-normal">ATIVO</th>
+                                <th class="pb-2 font-normal">TEMPO DE CONTRATO</th>
+                                <th class="pb-2 font-normal text-right">LUCRO (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trade-history-table">
+                            <!-- Logs de operações preenchidos aqui -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -186,8 +203,8 @@
             currentUser = session.user;
 
             // Verificar se já tem configuração (corrigido mapeamento de ID)
-            const { data } = await axiom.from('user_configs').select('*').eq('id', currentUser.id).single();
-            if (!data || !data.deriv_token) {
+            const { data } = await axiom.from('user_configs').select('*').eq('eu ia', currentUser.id).single();
+            if (!data || !data.token_deriv) {
                 document.getElementById('onboarding-modal').classList.remove('hidden');
             } else {
                 document.getElementById('val-adx').innerText = data.adx_minimo;
@@ -211,9 +228,28 @@
             feed.prepend(log);
         }
 
+        function appendTradeRow(profit, symbol, contractTime, txId) {
+            const tbody = document.getElementById('trade-history-table');
+            const row = document.createElement('tr');
+            row.className = "border-b border-cyan-400/5 hover:bg-cyan-400/10 transition-colors animate-fade-in-right";
+            
+            const isWin = profit >= 0;
+            const PnLClass = isWin ? 'text-neon drop-shadow-[0_0_5px_rgba(0,255,194,0.5)]' : 'text-red-400';
+            const PnLText = isWin ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`;
+            const tId = txId || 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            
+            row.innerHTML = `
+                <td class="py-3 text-cyan-400/70 border-l-[3px] ${isWin ? 'border-neon' : 'border-red-400'} pl-2">${tId}</td>
+                <td class="py-3">${symbol || 'R_100'}</td>
+                <td class="py-3 text-zinc-400">${contractTime || '1 Tick'}</td>
+                <td class="py-3 text-right font-black ${PnLClass} pr-2">${PnLText}</td>
+            `;
+            tbody.prepend(row);
+        }
+
         function showTradeOpen(symbol) {
-            addLiveFeedLog(`Confirmando Inclinação ADX...`);
-            addLiveFeedLog(`ORDEM EXECUTADA EM ${symbol}. Abrindo gráfico...`, true);
+            addLiveFeedLog(`Detecção Rápida! Confirmando Inclinação ADX...`);
+            addLiveFeedLog(`ORDEM EXECUTADA EM ${symbol}. Carregando visual do TradingView...`, true);
 
             const scanner = document.getElementById('scanner-view');
             const chart = document.getElementById('market-chart');
@@ -225,8 +261,8 @@
             }, 500);
         }
 
-        function showTradeClosed(profit) {
-            addLiveFeedLog(`Ordem encerrada. Status de retorno: $${profit.toFixed(2)}`, profit >= 0);
+        function showTradeClosed(profit, symbol = 'R_100', contractTime = '1 Tick') {
+            addLiveFeedLog(`Ordem encerrada no ativo ${symbol}. Status de retorno: $${profit.toFixed(2)}`, profit >= 0);
 
             const scanner = document.getElementById('scanner-view');
             const chart = document.getElementById('market-chart');
@@ -236,25 +272,8 @@
             
             setTimeout(() => {
                 scanner.classList.remove('opacity-0');
-                showResultCard(profit);
+                appendTradeRow(profit, symbol, contractTime);
             }, 50);
-        }
-
-        function showResultCard(profit) {
-            const histo = document.getElementById('historico-resultados');
-            const card = document.createElement('div');
-            const isWin = profit >= 0;
-            const color = isWin ? 'text-neon border-neon/30' : 'text-red-400 border-red-400/30';
-            const bgColor = isWin ? 'bg-neon/10' : 'bg-red-400/10';
-            
-            card.className = `glass ${bgColor} border ${color} px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in-right pointer-events-auto`;
-            card.innerHTML = `
-                <div class="font-black text-lg ${color}">${isWin ? '+' : ''}$${profit.toFixed(2)}</div>
-                <div class="text-[9px] font-mono uppercase tracking-widest text-white/70">Ordem Fechada</div>
-            `;
-            
-            histo.prepend(card);
-            setTimeout(() => card.remove(), 10000);
         }
 
         function initRealtimeListener() {
@@ -275,29 +294,27 @@
 
             // Atalhos expostos no window para testes ou chamadas nativas do motor localmente
             window.triggerTradeOpen = showTradeOpen;
-            window.triggerTradeClosed = showTradeClosed;
+            window.triggerTradeClosed = (profit) => showTradeClosed(profit, 'R_100', '1 Tick');
         }
 
         async function sincronizarComMotor() {
-            const token = document.getElementById('deriv-token-input').value; // Mapeado do HTML existente
+            const token = document.getElementById('deriv-token-input').value;
             const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
-            const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.')); // Mapeado localmente
+            const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
 
-            // CORREÇÃO DA COLUNA: Mapeando como 'id' e 'estaca'
+            // USANDO OS NOMES REAIS IDENTIICADOS PELA IMAGEM
             const { error } = await axiom.from('user_configs').upsert({ 
-                id: currentUser.id, 
-                deriv_token: token, 
-                adx_minimo: adx,
-                estaca: stake,
-                updated_at: new Date()
-            }, { onConflict: 'id' });
+                "eu ia": currentUser.id, 
+                "adx_minimo": adx,
+                "estaca": stake, 
+                "token_deriv": token
+            });
 
             if (error) {
-                console.error(error);
                 alert("Erro na Sincronia: " + error.message);
             } else {
-                alert("Sincronizado com o Mármore! 🚀");
-                document.getElementById('onboarding-modal').classList.add('hidden'); // Fecha modal
+                alert("Sincronizado! O Cérebro agora lê ADX " + adx);
+                document.getElementById('onboarding-modal').classList.add('hidden');
                 document.getElementById('val-adx').innerText = adx;
                 addLiveFeedLog(`Motor sincronizado. Sinal ADX ajustado para ${adx} e Estaca: $${stake}`);
             }
