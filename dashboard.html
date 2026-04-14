@@ -224,13 +224,19 @@
             if (!session) { window.location.href = 'login.html'; return; }
             currentUser = session.user;
 
-            // BUSCA USANDO O NOME TÉCNICO USER_ID (IMAGE_7E2BC8)
-            const { data } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
-            if (!data || !data.token_deriv) {
-                document.getElementById('onboarding-modal').classList.remove('hidden');
+            // BUSCA CONFIGURAÇÃO E LUCRO INICIAL
+            const { data: config } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
+            if (config) {
+                document.getElementById('val-adx').innerText = config.adx_minimo;
+                if (!config.token_deriv) document.getElementById('onboarding-modal').classList.remove('hidden');
             } else {
-                document.getElementById('val-adx').innerText = data.adx_minimo;
+                document.getElementById('onboarding-modal').classList.remove('hidden');
             }
+
+            // CARREGAR HISTÓRICO EXISTENTE
+            const { data: logs } = await axiom.from('trade_logs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
+            if (logs) logs.forEach(log => updateHistory(log.profit, log.symbol, false));
+
             initRealtime();
         });
 
@@ -239,18 +245,16 @@
             const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
             const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
 
-            // SINCRONIA DEFINITIVA: NOMES TÉCNICOS EM INGLÊS (SEM ESPAÇOS OU ACENTOS)
             const { error } = await axiom.from('user_configs').upsert({
                 user_id: currentUser.id,
                 token_deriv: token,
                 adx_minimo: adx,
                 stake: stake,
-                is_active: true,
-                is_admin: true
+                is_active: true
             }, { onConflict: 'user_id' });
 
             if (error) {
-                alert("Erro na Sincronia: " + error.message + " | Certifique-se de rodar o script SQL para criar a coluna 'stake'.");
+                alert("Erro na Sincronia: " + error.message);
             } else {
                 document.getElementById('onboarding-modal').classList.add('hidden');
                 document.getElementById('val-adx').innerText = adx;
@@ -265,32 +269,40 @@
             div.className = `flex gap-2 animate-fade-in ${highlight ? 'text-neon font-bold' : 'text-cyan-400/60'}`;
             div.innerHTML = `<span class="opacity-30">${time}</span> <span>${msg}</span>`;
             feed.prepend(div);
+            if (feed.children.length > 20) feed.lastChild.remove();
         }
 
         function initRealtime() {
+            // ESCUTAR NOVOS TRADES PARA ATUALIZAR LUCRO E GRÁFICO
             axiom.channel('db_changes')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_logs', filter: `user_id=eq.${currentUser.id}` }, (p) => {
-                    const trade = p.new;
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'trade_logs',
+                    filter: `user_id=eq.${currentUser.id}`
+                }, (payload) => {
+                    const trade = payload.new;
                     if (trade.status === 'OPEN') {
-                        addLog(`DETECTADO GATILHO EM ${trade.symbol}!`, true);
+                        addLog(`GATILHO: ${trade.symbol} DETECTADO!`, true);
                         document.getElementById('scanner-view').classList.add('hidden');
                         document.getElementById('market-chart').classList.remove('hidden');
                         document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${trade.symbol}`;
                     } else if (trade.status === 'CLOSED') {
-                        addLog(`ORDEM ENCERRADA: $${trade.profit.toFixed(2)}`);
+                        addLog(`FECHAMENTO: ${trade.symbol} | $${trade.profit.toFixed(2)}`, trade.profit > 0);
                         document.getElementById('scanner-view').classList.remove('hidden');
                         document.getElementById('market-chart').classList.add('hidden');
-                        updateHistory(trade.profit, trade.symbol);
+                        updateHistory(trade.profit, trade.symbol, true);
                     }
                 }).subscribe();
         }
 
-        function updateHistory(profit, symbol) {
+        function updateHistory(profit, symbol, animate = true) {
             const history = document.getElementById('trade-history-table');
-            const card = document.createElement('div');
             const isWin = profit >= 0;
             acumuladoVal += profit;
-            card.className = `glass mb-3 p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} animate-fade-in`;
+
+            const card = document.createElement('div');
+            card.className = `glass mb-3 p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} ${animate ? 'animate-fade-in' : ''}`;
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-[10px] font-black text-zinc-400">${symbol}</span>
@@ -299,6 +311,7 @@
                 <div class="text-lg font-black ${isWin ? 'text-neon' : 'text-red-400'}">${isWin ? '+' : ''}$${profit.toFixed(2)}</div>
             `;
             history.prepend(card);
+
             const res = document.getElementById('lucro-acumulado');
             res.innerText = `$${acumuladoVal.toFixed(2)}`;
             res.className = `text-4xl font-black glow-purple ${acumuladoVal >= 0 ? 'text-white' : 'text-red-400'}`;
