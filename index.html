@@ -1,52 +1,239 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WayIA Axiom | Inteligência Sentinela</title>
     <style>
-        :root { --primary: #E50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; overflow-x: hidden; }
+        :root {
+            --primary: #E50914;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --neon: #00E5FF;
+        }
 
-        /* VÍDEO DE FUNDO COM OVERLAY CINEMATOGRÁFICO */
-        .video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; overflow: hidden; }
-        .video-container video { min-width: 100%; min-height: 100%; object-fit: cover; filter: saturate(1.2) brightness(0.4) contrast(1.1); }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%); z-index: -1; }
+        /* RESET E CURSOR */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: crosshair;
+        }
 
-        /* SCANLINE ANIMATION (EFEITO DE MONITOR) */
-        body::before { content: " "; display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
 
-        /* CABEÇALHO FUTURISTA */
-        header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); }
-        .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: #fff; }
-        .logo span { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
-        .status-pulse { display: flex; align-items: center; font-size: 0.7rem; letter-spacing: 2px; color: #00ff88; text-transform: uppercase; }
-        .pulse-dot { height: 8px; width: 8px; background-color: #00ff88; border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite; }
+        /* BACKGROUND CINEMÁTICO */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
 
-        /* HERO SECTION - TRANSFORMADORA */
-        .hero { height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; }
-        .hero h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 900; line-height: 0.9; text-transform: uppercase; margin-bottom: 20px; background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.4) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 1.2rem; max-width: 600px; color: rgba(255,255,255,0.6); margin-bottom: 40px; letter-spacing: 1px; font-weight: 300; }
+        .video-container video {
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+            filter: saturate(1.2) brightness(0.3) contrast(1.1);
+        }
 
-        /* BOTÕES HIGH-TECH */
-        .btn-box { display: flex; gap: 20px; }
-        .btn { position: relative; padding: 20px 50px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; color: #fff; transition: 0.5s; overflow: hidden; border: 1px solid var(--border); background: var(--glass); backdrop-filter: blur(5px); }
-        .btn:hover { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 50px var(--primary); transform: translateY(-5px); }
-        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: -1;
+        }
 
-        /* GRID DE MÓDULOS - ESTILO COMANDO CENTRAL */
-        .modules-grid { padding: 80px 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .mod-card { position: relative; padding: 40px; background: var(--glass); border: 1px solid var(--border); border-radius: 2px; transition: 0.4s; overflow: hidden; }
-        .mod-card:hover { border-color: var(--primary); background: rgba(229, 9, 20, 0.05); }
-        .mod-card::before { content: "DATA_NODE"; position: absolute; top: 10px; right: 10px; font-size: 10px; color: var(--primary); opacity: 0.5; }
-        .mod-card h3 { font-size: 1.5rem; margin-bottom: 15px; letter-spacing: 1px; }
-        .mod-card p { font-size: 0.9rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+        /* EFEITO DE SCANLINE */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        /* HEADER */
+        header {
+            padding: 30px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
+        }
+
+        .status-pulse {
+            display: flex;
+            align-items: center;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: #00ff88;
+        }
+
+        .pulse-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #00ff88;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 75vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.9;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.4) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        /* BOTÕES NOBREZA */
+        .btn-box {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            position: relative;
+            padding: 18px 45px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+            color: #fff;
+            transition: 0.4s;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* GRID DE MÓDULOS */
+        .modules-grid {
+            padding: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .mod-card {
+            padding: 40px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            transition: 0.4s;
+        }
+
+        .mod-card:hover {
+            border-color: var(--neon);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .mod-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--neon);
+        }
+
+        .mod-card p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        footer {
+            padding: 60px;
+            text-align: center;
+            font-size: 0.7rem;
+            opacity: 0.3;
+            letter-spacing: 4px;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="video-container">
@@ -60,39 +247,46 @@
         <div class="logo">WayIA <span>Axiom</span></div>
         <div class="status-pulse">
             <span class="pulse-dot"></span>
-            Sentinel v5.2 Online
+            Sentinel v5.2 Active
         </div>
     </header>
 
     <main class="hero">
-        <p>CONEXÃO SINTÉTICA ESTABELECIDA</p>
+        <p>Axiom Neural Engine // Conexão Estabelecida</p>
         <h1>PROJETADO PARA <br> DOMINAR.</h1>
-        <p>Aonde tu pisas é Terra Santa. <br> O Sentinel não apenas lê o mercado, ele antecipa a realidade matemática.</p>
-        
+        <p>Aonde tu pisas é Terra Santa. O Sentinel antecipa a realidade matemática do mercado sintético.</p>
+
         <div class="btn-box">
-            <a href="login.html" class="btn btn-primary">Ativar Sentinel</a>
-            <a href="#curso" class="btn">Curso Express</a>
+            <a href="dashboard.html" class="btn btn-primary">Ativar Sentinel</a>
+            <a href="#protocolo" class="btn">Protocolo</a>
         </div>
     </main>
 
-    <div class="modules-grid" id="curso">
+    <div class="modules-grid" id="protocolo">
         <div class="mod-card">
             <h3>01. A LIMPEZA</h3>
-            <p>Preparação vibracional. O terreno deve ser santo antes do primeiro código. Alinhamento quântico de metas.</p>
+            <p>Preparação vibracional. Alinhamento quântico de metas antes da primeira operação.</p>
         </div>
         <div class="mod-card">
             <h3>02. O PROTOCOLO</h3>
-            <p>Configuração do Cérebro (VPS + n8n). Entenda como o Sentinel monitora bilhões em tempo real sem cansar.</p>
+            <p>Configuração do Cérebro (VPS + n8n). Monitoramento de bilhões de dados sem fadiga.</p>
         </div>
-        <div class="mod-card">
-            <h3>03. ADX MASTER</h3>
-            <p>A técnica Sniper. O filtro de silêncio que separa os apostadores dos operadores de elite.</p>
+        <div class="mod-card :cursor-fix">
+            <h3>03. MASTER AX</h3>
+            <p>A técnica Sniper. O filtro ADX 36.1 que separa a sorte da execução profissional.</p>
         </div>
     </div>
 
-    <footer style="padding: 60px; text-align: center; font-size: 0.8rem; opacity: 0.4; letter-spacing: 3px;">
+    <footer>
         WAYIA FLOW // ANTIGRAVITY PROJECT // 2026
     </footer>
 
+    <script>
+        async function sincronizarAxiomPorto() {
+            // Sincronia de alto nível iniciada
+            console.log("Axiom: Sincronia cognitiva pronta.");
+        }
+    </script>
 </body>
+
 </html>
