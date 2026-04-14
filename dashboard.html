@@ -69,7 +69,6 @@
             animation: fadeInRight 0.4s ease-out forwards;
         }
 
-        /* Scrollbar Personalizada */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -159,7 +158,6 @@
 
         <main class="p-6 flex flex-col gap-6 lg:h-[calc(100vh-80px)]">
             <div class="grid grid-cols-12 gap-6 flex-1">
-
                 <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
                     <div class="glass p-6 rounded-2xl text-center border-cyan-400/20 shadow-2xl">
                         <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Scanning ADX
@@ -168,7 +166,6 @@
                         </div>
                         <div class="text-[9px] font-mono text-zinc-500 uppercase">Filtro de Ruído Ativo</div>
                     </div>
-
                     <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden border-cyan-400/20">
                         <h3
                             class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 border-b border-cyan-400/10 pb-3">
@@ -209,11 +206,8 @@
                         <div class="text-[9px] font-mono text-zinc-500 uppercase mt-2 tracking-widest">Lucro Acumulado
                             na Sessão</div>
                     </div>
-
-                    <div class="flex-1 p-4 overflow-y-auto" id="trade-history-table">
-                    </div>
+                    <div class="flex-1 p-4 overflow-y-auto" id="trade-history-table"></div>
                 </div>
-
             </div>
         </main>
     </div>
@@ -222,7 +216,6 @@
         const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
         const axiom = window.supabase.createClient(sbUrl, sbKey);
-
         let currentUser = null;
         let acumuladoVal = 0;
 
@@ -231,14 +224,13 @@
             if (!session) { window.location.href = 'login.html'; return; }
             currentUser = session.user;
 
-            // Busca configuração inicial (USANDO O MAPEAMENTO PORTUGUÊS)
-            const { data } = await axiom.from('user_configs').select('*').eq('eu ia', currentUser.id).single();
+            // BUSCA USANDO O NOME TÉCNICO USER_ID (IMAGE_7E2BC8)
+            const { data } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
             if (!data || !data.token_deriv) {
                 document.getElementById('onboarding-modal').classList.remove('hidden');
             } else {
                 document.getElementById('val-adx').innerText = data.adx_minimo;
             }
-
             initRealtime();
         });
 
@@ -247,18 +239,18 @@
             const adx = parseFloat(document.getElementById('adx-input').value.replace(',', '.'));
             const stake = parseFloat(document.getElementById('stake-input').value.replace(',', '.'));
 
-            // SALVANDO NAS COLUNAS EM PORTUGUÊS (EXATO COMO NO SEU BANCO)
+            // SINCRONIA DEFINITIVA: NOMES TÉCNICOS EM INGLÊS (SEM ESPAÇOS OU ACENTOS)
             const { error } = await axiom.from('user_configs').upsert({
-                "eu ia": currentUser.id,
-                "token_deriv": token,
-                "adx_minimo": adx,
-                "estaca": stake,
-                "é_ativo": true,
-                "é_admin": true
-            }, { onConflict: '"eu ia"' });
+                user_id: currentUser.id,
+                token_deriv: token,
+                adx_minimo: adx,
+                stake: stake,
+                is_active: true,
+                is_admin: true
+            }, { onConflict: 'user_id' });
 
             if (error) {
-                alert("Erro técnico: " + error.message);
+                alert("Erro na Sincronia: " + error.message + " | Certifique-se de rodar o script SQL para criar a coluna 'stake'.");
             } else {
                 document.getElementById('onboarding-modal').classList.add('hidden');
                 document.getElementById('val-adx').innerText = adx;
@@ -276,7 +268,6 @@
         }
 
         function initRealtime() {
-            // Monitora a tabela de logs da VPS para abrir o gráfico
             axiom.channel('db_changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_logs', filter: `user_id=eq.${currentUser.id}` }, (p) => {
                     const trade = p.new;
@@ -299,7 +290,6 @@
             const card = document.createElement('div');
             const isWin = profit >= 0;
             acumuladoVal += profit;
-
             card.className = `glass mb-3 p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} animate-fade-in`;
             card.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
@@ -309,7 +299,6 @@
                 <div class="text-lg font-black ${isWin ? 'text-neon' : 'text-red-400'}">${isWin ? '+' : ''}$${profit.toFixed(2)}</div>
             `;
             history.prepend(card);
-
             const res = document.getElementById('lucro-acumulado');
             res.innerText = `$${acumuladoVal.toFixed(2)}`;
             res.className = `text-4xl font-black glow-purple ${acumuladoVal >= 0 ? 'text-white' : 'text-red-400'}`;
