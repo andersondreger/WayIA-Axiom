@@ -4,28 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXIOM SENTINEL | Command Center</title>
+    <title>AXIOM SENTINEL | Wedding Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@400;700&display=swap"
-        rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Roboto Mono', 'monospace'] },
-                    colors: { navy: { 900: '#030a13', 800: '#0A192F', 700: '#112240' }, cyan: { 400: '#00E5FF', 500: '#00bcd4' }, neon: '#00FFC2', purple_neon: '#8A2BE2' }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             background: #050E1D;
             color: #fff;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .glass {
@@ -34,28 +21,18 @@
             border: 1px solid rgba(0, 229, 255, 0.1);
         }
 
-        .glass-purple {
-            background: rgba(138, 43, 226, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(138, 43, 226, 0.3);
-        }
-
         .glow-text {
             text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
         }
 
-        .glow-purple {
-            text-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(5px);
             }
 
             to {
@@ -66,105 +43,71 @@
     </style>
 </head>
 
-<body class="antialiased pb-10">
+<body class="antialiased h-screen flex flex-col">
+    <nav class="h-20 border-b border-cyan-400/10 flex items-center justify-between px-8 bg-navy-900/80">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 border-2 border-cyan-400 rounded-full flex items-center justify-center glow-text">A
+            </div>
+            <span class="text-xl font-black text-white glow-text uppercase">Axiom <span
+                    class="text-cyan-400">Sentinel</span></span>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="document.getElementById('onboarding-modal').classList.remove('hidden')"
+                class="px-4 py-2 bg-navy-700 text-cyan-400 text-[10px] font-bold border border-cyan-400/30 rounded-lg uppercase">Parâmetros</button>
+            <button onclick="logout()" class="text-zinc-500 text-[10px] font-bold uppercase">Sair</button>
+        </div>
+    </nav>
 
-    <div id="onboarding-modal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div
-            class="glass p-8 rounded-2xl w-full max-w-md border border-cyan-400/50 shadow-[0_0_50px_rgba(0,229,255,0.2)]">
-            <h2 class="text-2xl font-black text-white mb-2 text-center uppercase tracking-tighter">Sincronia Cognitiva
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase">Token Deriv</label>
-                    <input type="text" id="token-input"
-                        class="w-full bg-navy-900 border border-cyan-400/30 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-cyan-400">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase">ADX Alvo</label>
-                        <input type="number" id="adx-input" step="0.1" value="36.0"
-                            class="w-full bg-navy-900 border border-cyan-400/30 text-white px-4 py-3 rounded-xl focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-cyan-400/70 font-semibold mb-1 uppercase">Stake ($)</label>
-                        <input type="number" id="stake-input" value="10.0"
-                            class="w-full bg-navy-900 border border-cyan-400/30 text-white px-4 py-3 rounded-xl focus:outline-none">
-                    </div>
-                </div>
-                <button onclick="sincronizarComMotor()"
-                    class="w-full bg-cyan-500 text-navy-900 font-black py-4 rounded-xl shadow-lg transition-all">INICIAR
-                    SENTINEL</button>
+    <main class="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden">
+        <div class="col-span-3 flex flex-col gap-6">
+            <div class="glass p-6 rounded-2xl text-center border-cyan-400/20 shadow-2xl">
+                <h3 class="text-cyan-400 text-[10px] font-black uppercase mb-4">ADX Alvo</h3>
+                <div id="val-adx" class="text-6xl font-black text-white glow-text">--</div>
+            </div>
+            <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden border-cyan-400/20">
+                <h3 class="text-cyan-400 text-[10px] font-black uppercase mb-4 border-b border-cyan-400/10 pb-2">
+                    Telemetria</h3>
+                <div id="live-feed-content"
+                    class="flex-1 overflow-y-auto space-y-2 font-mono text-[9px] text-cyan-400/70"></div>
             </div>
         </div>
-    </div>
 
-    <div class="min-h-screen flex flex-col">
-        <nav
-            class="h-20 border-b border-cyan-400/10 flex items-center justify-between px-8 bg-navy-900/80 backdrop-blur-xl">
-            <div class="flex items-center gap-4">
-                <div
-                    class="w-10 h-10 border-2 border-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.4)]">
-                    <span class="text-cyan-400 font-black">A</span></div>
-                <div class="flex flex-col"><span class="text-xl font-black tracking-tight text-white glow-text">AXIOM
-                        <span class="text-cyan-400">SENTINEL</span></span></div>
-            </div>
-            <div class="flex items-center gap-6">
-                <button onclick="document.getElementById('onboarding-modal').classList.remove('hidden')"
-                    class="px-4 py-2 bg-navy-700 text-cyan-400 text-[10px] font-bold border border-cyan-400/30 rounded-lg uppercase">Ajustar
-                    Parâmetros</button>
-                <button onclick="logout()" class="text-zinc-500 text-[10px] font-black uppercase">TERMINAL EXIT</button>
-            </div>
-        </nav>
-
-        <main class="p-6 flex flex-col gap-6 lg:h-[calc(100vh-80px)]">
-            <div class="grid grid-cols-12 gap-6 flex-1">
-                <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
-                    <div class="glass p-6 rounded-2xl text-center border-cyan-400/20 shadow-2xl">
-                        <h3 class="text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Scanning ADX
-                        </h3>
-                        <div id="val-adx" class="text-6xl font-black text-white mb-2 glow-text">--</div>
-                    </div>
-                    <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden border-cyan-400/20">
-                        <h3
-                            class="text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 border-b border-cyan-400/10 pb-3">
-                            Telemetria</h3>
-                        <div id="live-feed-content" class="flex-1 overflow-y-auto space-y-3 font-mono text-[10px] pr-2">
-                        </div>
-                    </div>
+        <div class="col-span-6 glass rounded-2xl relative overflow-hidden shadow-2xl">
+            <div id="scanner-view" class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10">
+                <div class="w-16 h-16 border-2 border-t-cyan-400 border-transparent rounded-full animate-spin mb-4">
                 </div>
-
-                <div
-                    class="col-span-12 lg:col-span-6 glass rounded-2xl overflow-hidden relative border-cyan-400/20 shadow-2xl">
-                    <div id="scanner-view"
-                        class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10 transition-opacity">
-                        <video autoplay loop muted class="absolute inset-0 w-full h-full object-cover opacity-20">
-                            <source src="https://cdn.pixabay.com/video/2020/05/25/40156-425257917_tiny.mp4"
-                                type="video/mp4">
-                        </video>
-                        <div class="relative z-20 text-center">
-                            <div
-                                class="w-16 h-16 border-2 border-t-cyan-400 border-transparent rounded-full animate-spin mb-4 mx-auto">
-                            </div>
-                            <h4 class="text-cyan-400 font-mono text-[10px] tracking-[0.3em] animate-pulse uppercase">
-                                Varrendo Mercado...</h4>
-                        </div>
-                    </div>
-                    <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20"
-                        src=""></iframe>
-                </div>
-
-                <div class="col-span-12 lg:col-span-3 flex flex-col glass-purple rounded-2xl shadow-2xl">
-                    <div class="p-6 bg-purple_neon/10 border-b border-purple_neon/20 rounded-t-2xl text-center">
-                        <h3 class="text-purple_neon text-[10px] font-black uppercase mb-2 glow-purple">Status de
-                            Negociação</h3>
-                        <div id="lucro-acumulado" class="text-4xl font-black text-white">$0.00</div>
-                        <div id="lucro-dia" class="text-[12px] font-black text-neon uppercase mt-2">$0.00 (Hoje)</div>
-                    </div>
-                    <div class="flex-1 p-4 overflow-y-auto" id="trade-history-table"></div>
-                </div>
+                <h4 class="text-cyan-400 font-mono text-[10px] animate-pulse">VARRENDO MERCADO...</h4>
             </div>
-        </main>
+            <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20" src=""></iframe>
+        </div>
+
+        <div class="col-span-3 flex flex-col glass rounded-2xl shadow-2xl border-purple-500/20">
+            <div class="p-6 bg-purple-500/10 border-b border-purple-500/20 text-center">
+                <h3 class="text-purple-400 text-[10px] font-black uppercase mb-2">Banca Deriv</h3>
+                <div id="lucro-acumulado" class="text-4xl font-black text-white">$0.00</div>
+                <div id="lucro-dia" class="text-[12px] font-black text-neon uppercase mt-2">$0.00 (HOJE)</div>
+            </div>
+            <div id="trade-history-table" class="flex-1 p-4 overflow-y-auto space-y-2"></div>
+        </div>
+    </main>
+
+    <div id="onboarding-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md">
+        <div class="glass p-8 rounded-2xl w-full max-w-md">
+            <h2 class="text-2xl font-black text-white mb-6 text-center">AJUSTE AXIOM</h2>
+            <div class="space-y-4">
+                <input type="text" id="token-input" placeholder="Token Deriv"
+                    class="w-full bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="adx-input" step="0.1" value="27.0"
+                        class="bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
+                    <input type="number" id="stake-input" value="10.0"
+                        class="bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
+                </div>
+                <button onclick="sincronizar()"
+                    class="w-full bg-cyan-500 text-navy-900 font-black py-4 rounded-xl">SALVAR E INICIAR</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -177,62 +120,62 @@
             const { data: { session } } = await axiom.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
             currentUser = session.user;
-            await loadConfigs();
+            await loadData();
             initRealtime();
         });
 
-        async function loadConfigs() {
+        async function loadData() {
             const { data: config } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
             if (config) {
                 document.getElementById('val-adx').innerText = config.adx_minimo;
                 document.getElementById('lucro-acumulado').innerText = `$${config.saldo_atual.toFixed(2)}`;
-                document.getElementById('lucro-dia').innerText = `$${config.lucro_dia.toFixed(2)} (Hoje)`;
-                if (!config.token_deriv) document.getElementById('onboarding-modal').classList.remove('hidden');
+                document.getElementById('lucro-dia').innerText = `$${config.lucro_dia.toFixed(2)} (HOJE)`;
             }
             const { data: logs } = await axiom.from('trade_logs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(5);
-            if (logs) logs.forEach(log => updateHistory(log.profit, log.symbol, log.type, false));
+            if (logs) logs.forEach(log => addHistory(log));
         }
 
-        async function sincronizarComMotor() {
+        async function sincronizar() {
             const token = document.getElementById('token-input').value;
             const adx = parseFloat(document.getElementById('adx-input').value);
             const stake = parseFloat(document.getElementById('stake-input').value);
-            await axiom.from('user_configs').upsert({ user_id: currentUser.id, token_deriv: token, adx_minimo: adx, stake: stake, is_active: true }, { onConflict: 'user_id' });
+            await axiom.from('user_configs').upsert({ user_id: currentUser.id, token_deriv: token, adx_minimo: adx, stake: stake }, { onConflict: 'user_id' });
             location.reload();
         }
 
         function initRealtime() {
-            axiom.channel('db_changes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_logs', filter: `user_id=eq.${currentUser.id}` }, (p) => {
-                const trade = p.new;
-                if (trade.status === 'OPEN') {
+            // Trades e Gráfico
+            axiom.channel('trades').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_logs' }, (p) => {
+                const t = p.new;
+                if (t.status === 'OPEN') {
                     document.getElementById('scanner-view').classList.add('hidden');
                     document.getElementById('market-chart').classList.remove('hidden');
-                    document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${trade.symbol}`;
-                } else if (trade.status === 'CLOSED') {
+                    document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${t.symbol}`;
+                } else if (t.status === 'CLOSED') {
                     setTimeout(() => { document.getElementById('scanner-view').classList.remove('hidden'); document.getElementById('market-chart').classList.add('hidden'); }, 5000);
-                    updateHistory(trade.profit, trade.symbol, trade.type, true);
+                    addHistory(t);
                 }
             }).subscribe();
 
-            axiom.channel('config_updates').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_configs', filter: `user_id=eq.${currentUser.id}` }, (p) => {
-                const conf = p.new;
-                document.getElementById('lucro-acumulado').innerText = `$${conf.saldo_atual.toFixed(2)}`;
-                document.getElementById('lucro-dia').innerText = `$${conf.lucro_dia.toFixed(2)} (Hoje)`;
+            // Saldo
+            axiom.channel('balance').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_configs' }, (p) => {
+                document.getElementById('lucro-acumulado').innerText = `$${p.new.saldo_atual.toFixed(2)}`;
+                document.getElementById('lucro-dia').innerText = `$${p.new.lucro_dia.toFixed(2)} (HOJE)`;
             }).subscribe();
         }
 
-        function updateHistory(profit, symbol, type, animate) {
-            const history = document.getElementById('trade-history-table');
-            if (history.children.length >= 5) history.lastElementChild.remove();
-            const isWin = profit >= 0;
-            const card = document.createElement('div');
-            card.className = `glass mb-2 p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} cursor-pointer hover:bg-white/5 transition animate-fade-in`;
-            card.innerHTML = `<div class="flex justify-between items-center"><div class="flex flex-col"><span class="text-[10px] text-zinc-400 font-black">${symbol}</span><span class="text-[11px] font-mono ${isWin ? 'text-neon' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'} (${type})</span></div><div class="text-xl font-black ${isWin ? 'text-neon' : 'text-red-400'}">${isWin ? '+' : ''}$${profit.toFixed(2)}</div></div>`;
-            card.onclick = () => { document.getElementById('scanner-view').classList.add('hidden'); document.getElementById('market-chart').classList.remove('hidden'); document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${symbol}`; };
-            history.prepend(card);
+        function addHistory(t) {
+            const list = document.getElementById('trade-history-table');
+            if (list.children.length >= 5) list.lastElementChild.remove();
+            const isWin = t.profit >= 0;
+            const div = document.createElement('div');
+            div.className = `glass p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} cursor-pointer animate-fade`;
+            div.innerHTML = `<div class="flex justify-between items-center"><div class="flex flex-col"><span class="text-[10px] text-zinc-400">${t.symbol}</span><span class="${isWin ? 'text-neon' : 'text-red-400'} text-[11px] font-black">${isWin ? 'WIN' : 'LOSS'}</span></div><span class="text-xl font-black">${isWin ? '+' : ''}$${t.profit.toFixed(2)}</span></div>`;
+            div.onclick = () => { document.getElementById('scanner-view').classList.add('hidden'); document.getElementById('market-chart').classList.remove('hidden'); document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${t.symbol}`; };
+            list.prepend(div);
         }
 
-        async function logout() { await axiom.auth.signOut(); window.location.href = 'login.html'; }
+        function logout() { axiom.auth.signOut(); window.location.href = 'login.html'; }
     </script>
 </body>
 
