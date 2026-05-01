@@ -4,32 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WayIA Axiom | Inteligência Sentinela</title>
+    <title>WayIA Axiom | Operação Soberana</title>
     <style>
         :root {
-            --primary: #E50914;
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-            --neon: #00E5FF;
+            /* Identidade Visual Deriv Pro + Axiom */
+            --primary: #00E5FF;
+            /* Azul Axiom Neon */
+            --bg: #0e0e10;
+            /* Grafite Profundo Institucional */
+            --surface: #15171a;
+            /* Painéis e Header */
+            --text-main: #ffffff;
+            --text-dim: #999999;
+            --success: #00ff88;
+            /* Verde Lucro Deriv */
+            --border: rgba(255, 255, 255, 0.05);
+            --glass: rgba(255, 255, 255, 0.02);
         }
 
-        /* RESET E CURSOR */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             cursor: crosshair;
+            /* Mantendo seu cursor técnico */
         }
 
         body {
             background-color: var(--bg);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
         }
 
-        /* BACKGROUND CINEMÁTICO */
+        /* Background Cinemático */
         .video-container {
             position: fixed;
             top: 0;
@@ -44,7 +52,7 @@
             min-width: 100%;
             min-height: 100%;
             object-fit: cover;
-            filter: saturate(1.2) brightness(0.3) contrast(1.1);
+            filter: grayscale(1) brightness(0.15);
         }
 
         .overlay {
@@ -53,183 +61,175 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+            background: linear-gradient(180deg, rgba(14, 14, 16, 0.7) 0%, var(--bg) 100%);
             z-index: -1;
         }
 
-        /* EFEITO DE SCANLINE */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 100;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        /* HEADER */
+        /* Header Estilo Plataforma Trading */
         header {
-            padding: 30px 60px;
+            padding: 15px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: 4px;
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 35px;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        .logo-text {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            font-size: 1.2rem;
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .market-badge {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
-        .logo span {
-            color: var(--primary);
-            text-shadow: 0 0 15px var(--primary);
-        }
-
-        .status-pulse {
-            display: flex;
-            align-items: center;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: #00ff88;
-        }
-
-        .pulse-dot {
-            height: 8px;
-            width: 8px;
-            background-color: #00ff88;
-            border-radius: 50%;
-            margin-right: 10px;
-            box-shadow: 0 0 10px #00ff88;
-            animation: pulse 2s infinite;
-        }
-
-        /* HERO SECTION */
+        /* Hero Section */
         .hero {
-            height: 75vh;
+            height: 80vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
+            padding: 0 10%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero span {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
         }
 
         .hero h1 {
-            font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 900;
-            line-height: 0.9;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.4) 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 25px;
         }
 
         .hero p {
             font-size: 1.1rem;
-            max-width: 700px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 40px;
-            letter-spacing: 1px;
-            font-weight: 300;
-            text-transform: uppercase;
+            max-width: 600px;
+            color: var(--text-dim);
+            margin-bottom: 45px;
+            line-height: 1.6;
         }
 
-        /* BOTÕES NOBREZA */
+        /* Botões Sólidos Deriv Style */
         .btn-box {
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
 
         .btn {
-            position: relative;
-            padding: 18px 45px;
+            padding: 14px 32px;
             font-weight: 700;
+            font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 2px;
             text-decoration: none;
-            color: #fff;
-            transition: 0.4s;
-            border: 1px solid var(--border);
-            background: var(--glass);
-            backdrop-filter: blur(5px);
-        }
-
-        .btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 0 30px var(--primary);
-            transform: translateY(-3px);
+            border-radius: 4px;
+            transition: 0.2s;
+            text-align: center;
         }
 
         .btn-primary {
             background: var(--primary);
-            border-color: var(--primary);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         }
 
-        /* GRID DE MÓDULOS */
+        .btn-primary:hover {
+            background: #00b8cc;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--border);
+            color: #fff;
+            background: var(--glass);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Grid de Módulos */
         .modules-grid {
-            padding: 60px;
+            background: var(--surface);
+            padding: 80px 10%;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            gap: 30px;
+            border-top: 1px solid var(--border);
         }
 
         .mod-card {
-            padding: 40px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            transition: 0.4s;
+            padding: 30px;
+            border-left: 3px solid var(--border);
+            transition: 0.3s;
         }
 
         .mod-card:hover {
-            border-color: var(--neon);
-            background: rgba(0, 229, 255, 0.05);
+            border-left-color: var(--primary);
+            background: rgba(255, 255, 255, 0.01);
         }
 
         .mod-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 12px;
-            color: var(--neon);
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
         }
 
         .mod-card p {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.6;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.4;
-            }
-
-            100% {
-                opacity: 1;
-            }
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.5;
         }
 
         footer {
-            padding: 60px;
+            padding: 40px;
             text-align: center;
             font-size: 0.7rem;
-            opacity: 0.3;
-            letter-spacing: 4px;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
@@ -244,49 +244,48 @@
     <div class="overlay"></div>
 
     <header>
-        <div class="logo">WayIA <span>Axiom</span></div>
-        <div class="status-pulse">
-            <span class="pulse-dot"></span>
-            Sentinel v5.2 Active
+        <div class="logo-box">
+            <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png"
+                class="logo-img" alt="WayIA Axiom">
+            <div class="logo-text">WAYIA <span>AXIOM</span></div>
+        </div>
+        <div class="status-box">
+            <div class="market-badge">Operational Turn Active</div>
+            <div style="font-size: 12px; color: var(--text-dim);">Sentinel v12.2 Online</div>
         </div>
     </header>
 
     <main class="hero">
-        <p>Axiom Neural Engine // Conexão Estabelecida</p>
-        <h1>PROJETADO PARA <br> DOMINAR.</h1>
-        <p>Aonde tu pisas é Terra Santa. O Sentinel antecipa a realidade matemática do mercado sintético.</p>
+        <span>SISTEMA DE ALTA FREQUÊNCIA</span>
+        <h1>A INTELIGÊNCIA <br>QUE GOVERNA O MERCADO.</h1>
+        <p>Aonde tu pisas é Terra Santa. Antecipe movimentos matemáticos com precisão institucional e soberania
+            tecnológica.</p>
 
         <div class="btn-box">
             <a href="dashboard.html" class="btn btn-primary">Ativar Sentinel</a>
-            <a href="#protocolo" class="btn">Protocolo</a>
+            <a href="#protocolo" class="btn btn-secondary">Documentação</a>
         </div>
     </main>
 
-    <div class="modules-grid" id="protocolo">
+    <section class="modules-grid" id="protocolo">
         <div class="mod-card">
-            <h3>01. A LIMPEZA</h3>
-            <p>Preparação vibracional. Alinhamento quântico de metas antes da primeira operação.</p>
+            <h3>01. ANÁLISE NEURAL</h3>
+            <p>O cérebro Axiom processa ticks em milissegundos, eliminando o ruído emocional humano.</p>
         </div>
         <div class="mod-card">
-            <h3>02. O PROTOCOLO</h3>
-            <p>Configuração do Cérebro (VPS + n8n). Monitoramento de bilhões de dados sem fadiga.</p>
+            <h3>02. VPS LOBBY</h3>
+            <p>Conexão direta de baixa latência para execução imediata de contratos nos turnos vigentes.</p>
         </div>
-        <div class="mod-card :cursor-fix">
-            <h3>03. MASTER AX</h3>
-            <p>A técnica Sniper. O filtro ADX 36.1 que separa a sorte da execução profissional.</p>
+        <div class="mod-card">
+            <h3>03. MODO SNIPER</h3>
+            <p>Filtros de ADX e Coice agressivos para garantir que apenas o melhor sinal seja executado.</p>
         </div>
-    </div>
+    </section>
 
     <footer>
-        WAYIA FLOW // ANTIGRAVITY PROJECT // 2026
+        WAYIA FLOW // ANTIGRAVITY PROJECT // © 2026 SOBERANIA FINANCEIRA
     </footer>
 
-    <script>
-        async function sincronizarAxiomPorto() {
-            // Sincronia de alto nível iniciada
-            console.log("Axiom: Sincronia cognitiva pronta.");
-        }
-    </script>
 </body>
 
 </html>
