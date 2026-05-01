@@ -8,9 +8,7 @@
     <style>
         :root {
             --primary: #00E5FF;
-            /* Azul Axiom Neon */
             --bg: #0e0e10;
-            /* Grafite Profundo Institucional */
             --surface: #15171a;
             --text-main: #ffffff;
             --text-dim: #999999;
@@ -33,7 +31,7 @@
             overflow-x: hidden;
         }
 
-        /* Background Cinemático */
+        /* Background */
         .video-container {
             position: fixed;
             top: 0;
@@ -61,7 +59,6 @@
             z-index: -1;
         }
 
-        /* Header com Botão Acessar / Login */
         header {
             padding: 10px 40px;
             display: flex;
@@ -76,7 +73,7 @@
         }
 
         .logo-img {
-            height: 65px;
+            height: 60px;
             filter: drop-shadow(0 0 10px var(--primary));
         }
 
@@ -128,39 +125,47 @@
             }
         }
 
-        /* Hero Section */
-        .hero {
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        /* Hero Split Layout */
+        .hero-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* Dividido em 50% / 50% */
+            align-items: center;
+            min-height: 85vh;
             padding: 0 10%;
             max-width: 1400px;
             margin: 0 auto;
+            gap: 40px;
         }
 
-        .hero span {
+        .hero-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-text span {
             color: var(--primary);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            letter-spacing: 6px;
+            letter-spacing: 5px;
             text-transform: uppercase;
             margin-bottom: 20px;
         }
 
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+        /* Headline Reduzida para acomodar o Avatar */
+        .hero-text h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 800;
-            line-height: 1.1;
+            line-height: 1.2;
             margin-bottom: 25px;
             text-transform: uppercase;
         }
 
-        .hero p {
-            font-size: 1.15rem;
-            max-width: 650px;
+        .hero-text p {
+            font-size: 1.1rem;
             color: var(--text-dim);
-            margin-bottom: 45px;
+            margin-bottom: 40px;
             line-height: 1.6;
         }
 
@@ -170,9 +175,9 @@
         }
 
         .btn {
-            padding: 16px 36px;
+            padding: 14px 30px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
             text-decoration: none;
             border-radius: 4px;
@@ -192,13 +197,29 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
+        /* Área Reservada para o Avatar */
+        .avatar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
 
-        /* Grid de Tecnologia Comercial */
+        /* Espaço placeholder para o vídeo do avatar */
+        .avatar-placeholder {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1/1;
+            /* background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%); Placeholder visual */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Grid de Tecnologia */
         .features {
-            padding: 100px 10%;
+            padding: 80px 10%;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 40px;
@@ -206,37 +227,41 @@
         }
 
         .f-card {
-            padding: 40px;
+            padding: 30px;
             border-left: 1px solid var(--border);
-            transition: 0.4s;
-        }
-
-        .f-card:hover {
-            border-left: 1px solid var(--primary);
-            background: rgba(255, 255, 255, 0.01);
         }
 
         .f-card h3 {
             color: var(--primary);
-            font-size: 0.9rem;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
         }
 
         .f-card p {
             color: var(--text-dim);
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         footer {
-            padding: 50px;
+            padding: 40px;
             text-align: center;
             color: var(--text-dim);
             font-size: 10px;
             letter-spacing: 4px;
             border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 968px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .btn-box {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -263,33 +288,40 @@
         </div>
     </header>
 
-    <main class="hero">
-        <span>Engenharia de Alta Performance</span>
-        <h1>A ENGENHARIA POR TRÁS <br>DA SOBERANIA FINANCEIRA.</h1>
-        <p>Pare de seguir sinais. Ative um <b>Ecossistema Autônomo</b> de inteligência institucional projetado para
-            governar o mercado enquanto você vive.</p>
+    <main class="hero-container">
+        <section class="hero-text">
+            <span>WayFlow Neural v12.2</span>
+            <h1>A ENGENHARIA POR TRÁS <br>DA SOBERANIA FINANCEIRA.</h1>
+            <p>Pare de seguir sinais. Ative um <b>Ecossistema Autônomo</b> institucional projetado para governar o
+                mercado enquanto você vive.</p>
 
-        <div class="btn-box">
-            <a href="login.html" class="btn btn-primary">Ativar Tecnologia</a>
-            <a href="login.html" class="btn btn-secondary">Área Restrita</a>
-        </div>
+            <div class="btn-box">
+                <a href="login.html" class="btn btn-primary">Ativar Tecnologia</a>
+                <a href="login.html" class="btn btn-secondary">Área Restrita</a>
+            </div>
+        </section>
+
+        <!-- COLUNA DO AVATAR -->
+        <section class="avatar-container">
+            <div class="avatar-placeholder">
+                <!-- O vídeo ou imagem do seu avatar entrará aqui -->
+            </div>
+        </section>
     </main>
 
     <section class="features">
         <div class="f-card">
             <h3>01. INFRAESTRUTURA SENTINEL</h3>
-            <p>Execução algorítmica de baixa latência hospedada em servidores dedicados. Poder computacional absoluto
-                focado em precisão matemática.</p>
+            <p>Execução algorítmica de baixa latência hospedada em servidores dedicados. Poder computacional focado em
+                precisão matemática.</p>
         </div>
         <div class="f-card">
             <h3>02. INTELIGÊNCIA HÍBRIDA</h3>
-            <p>Rastreamento global de liquidez com transição automática entre Forex e Ativos Sintéticos. O sistema opera
-                onde o lucro está.</p>
+            <p>Rastreamento global de liquidez com transição automática entre Forex e Ativos Sintéticos.</p>
         </div>
         <div class="f-card">
             <h3>03. PROTOCOLO SNIPER</h3>
-            <p>Blindagem de capital através de filtros de momentum agressivos. Tecnologia projetada para ignorar ruídos
-                e capturar soberania.</p>
+            <p>Blindagem de capital através de filtros de momentum agressivos para ignorar ruídos e capturar lucro.</p>
         </div>
     </section>
 
