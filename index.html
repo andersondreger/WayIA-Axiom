@@ -7,14 +7,15 @@
     <title>WayIA Axiom | Engenharia de Soberania</title>
     <style>
         :root {
-            --primary: #00E5FF;
+            /* Transição Cromática: Azul Axiom para Laranja Neon Comercial */
+            --primary: #FF6D00;
             --bg: #0e0e10;
             --surface: #15171a;
             --text-main: #ffffff;
             --text-dim: #999999;
             --success: #00ff88;
             --border: rgba(255, 255, 255, 0.05);
-            --glass: rgba(0, 229, 255, 0.05);
+            --glass: rgba(255, 109, 0, 0.05);
         }
 
         * {
@@ -77,6 +78,7 @@
             filter: drop-shadow(0 0 10px var(--primary));
         }
 
+        /* Botão Acessar / Login em Laranja Neon */
         .btn-login {
             background: var(--glass);
             color: var(--primary);
@@ -96,7 +98,7 @@
         .btn-login:hover {
             background: var(--primary);
             color: #000;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            box-shadow: 0 0 20px var(--primary);
         }
 
         .pulse {
@@ -129,7 +131,6 @@
         .hero-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            /* Dividido em 50% / 50% */
             align-items: center;
             min-height: 85vh;
             padding: 0 10%;
@@ -144,6 +145,7 @@
             justify-content: center;
         }
 
+        /* Substituído para Engenharia de Alta Frequência */
         .hero-text span {
             color: var(--primary);
             font-size: 0.8rem;
@@ -153,11 +155,10 @@
             margin-bottom: 20px;
         }
 
-        /* Headline Reduzida para acomodar o Avatar */
         .hero-text h1 {
             font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.1;
             margin-bottom: 25px;
             text-transform: uppercase;
         }
@@ -185,72 +186,35 @@
             text-align: center;
         }
 
+        /* Ambos os botões agora em Laranja Neon */
         .btn-primary {
             background: var(--primary);
             color: #000;
-            box-shadow: 0 5px 20px rgba(0, 229, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(255, 109, 0, 0.3);
         }
 
         .btn-secondary {
-            border: 1px solid var(--border);
-            color: #fff;
-            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: var(--glass);
         }
 
-        /* Área Reservada para o Avatar */
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
         .avatar-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
 
-        /* Espaço placeholder para o vídeo do avatar */
         .avatar-placeholder {
             width: 100%;
             max-width: 500px;
             aspect-ratio: 1/1;
-            /* background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%); Placeholder visual */
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Grid de Tecnologia */
-        .features {
-            padding: 80px 10%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-            background: var(--surface);
-        }
-
-        .f-card {
-            padding: 30px;
-            border-left: 1px solid var(--border);
-        }
-
-        .f-card h3 {
-            color: var(--primary);
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-        }
-
-        .f-card p {
-            color: var(--text-dim);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        footer {
-            padding: 40px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 10px;
-            letter-spacing: 4px;
-            border-top: 1px solid var(--border);
         }
 
         @media (max-width: 968px) {
@@ -290,44 +254,23 @@
 
     <main class="hero-container">
         <section class="hero-text">
-            <span>WayFlow Neural v12.2</span>
+            <span>Engenharia de Alta Frequência</span>
             <h1>A ENGENHARIA POR TRÁS <br>DA SOBERANIA FINANCEIRA.</h1>
             <p>Pare de seguir sinais. Ative um <b>Ecossistema Autônomo</b> institucional projetado para governar o
                 mercado enquanto você vive.</p>
 
             <div class="btn-box">
                 <a href="login.html" class="btn btn-primary">Ativar Tecnologia</a>
-                <a href="login.html" class="btn btn-secondary">Área Restrita</a>
+                <a href="login.html" class="btn btn-secondary">Acessar Gratuitamente</a>
             </div>
         </section>
 
-        <!-- COLUNA DO AVATAR -->
         <section class="avatar-container">
             <div class="avatar-placeholder">
-                <!-- O vídeo ou imagem do seu avatar entrará aqui -->
+                <!-- Espaço nobre reservado para o seu Avatar IA -->
             </div>
         </section>
     </main>
-
-    <section class="features">
-        <div class="f-card">
-            <h3>01. INFRAESTRUTURA SENTINEL</h3>
-            <p>Execução algorítmica de baixa latência hospedada em servidores dedicados. Poder computacional focado em
-                precisão matemática.</p>
-        </div>
-        <div class="f-card">
-            <h3>02. INTELIGÊNCIA HÍBRIDA</h3>
-            <p>Rastreamento global de liquidez com transição automática entre Forex e Ativos Sintéticos.</p>
-        </div>
-        <div class="f-card">
-            <h3>03. PROTOCOLO SNIPER</h3>
-            <p>Blindagem de capital através de filtros de momentum agressivos para ignorar ruídos e capturar lucro.</p>
-        </div>
-    </section>
-
-    <footer>
-        WAYIA AXIOM // INFRAESTRUTURA DE SOBERANIA FINANCEIRA // © 2026
-    </footer>
 
 </body>
 
