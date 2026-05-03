@@ -112,7 +112,7 @@
             line-height: 1.6;
         }
 
-        /* AJUSTE DE TRANSPARÊNCIA: NÚCLEO FLORIDA VITA */
+        /* AJUSTE DE VIVACIDADE: NÚCLEO FLORIDA VITA V14.3 */
         .visual-axiom-container {
             position: relative;
             height: 500px;
@@ -130,10 +130,10 @@
         .central-logo-wrapper {
             position: relative;
             z-index: 10;
-            width: 280px;
-            height: 280px;
+            width: 300px;
+            height: 300px;
             animation: float 6s ease-in-out infinite;
-            filter: drop-shadow(0 0 45px var(--primary));
+            filter: drop-shadow(0 0 50px var(--primary));
             background: transparent !important;
         }
 
@@ -142,17 +142,19 @@
             height: 100%;
             object-fit: contain;
             background: transparent !important;
+            filter: saturate(1.5) brightness(1.2);
+            /* Deixa a imagem mais viva */
         }
 
         @keyframes float {
 
             0%,
             100% {
-                transform: translateY(0) scale(1);
+                transform: translateY(0) scale(1) rotate(0deg);
             }
 
             50% {
-                transform: translateY(-20px) scale(1.05);
+                transform: translateY(-25px) scale(1.08) rotate(3deg);
             }
         }
 
@@ -221,12 +223,12 @@
             </div>
         </section>
 
-        <!-- VISUAL NEON DINÂMICO SEM QUADRADO BRANCO -->
+        <!-- VISUAL NEON DINÂMICO COM NOVA IMAGEM VIVA -->
         <section class="visual-axiom-container" onclick="ativarAxiom()">
             <canvas id="canvas-neural"></canvas>
             <div class="central-logo-wrapper">
-                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/favicon.png"
-                    alt="Axiom Core Florida Vita">
+                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/image_transparent_Craiyon__1_-removebg-preview%20-%20Copia.png"
+                    alt="Axiom Core High Definition">
             </div>
             <div id="statusText"
                 style="position:absolute; bottom:0; color:var(--primary); font-size:10px; letter-spacing:2px; font-weight:700;">
@@ -252,6 +254,7 @@
     <footer>WAYIA AXIOM // © 2026</footer>
 
     <script>
+        // MOTOR VISUAL NEON
         const canvas = document.getElementById('canvas-neural');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -313,6 +316,7 @@
         init();
         animate();
 
+        // MOTOR DE VOZ PRESERVADO
         const API_KEY = "AIzaSyDU-17YBfTpkxQWLZx73nkYRreU2HaZAk8";
         const statusText = document.getElementById('statusText');
 
