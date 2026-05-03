@@ -170,7 +170,56 @@
             box-shadow: 0 0 20px var(--primary);
         }
 
-        /* Grid de Features com Animação Irresistível */
+        /* --- ESTILIZAÇÃO DO AVATAR ASSISTENTE --- */
+        .avatar-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            transition: 0.5s;
+        }
+
+        .avatar-img {
+            width: 100%;
+            filter: drop-shadow(0 0 10px rgba(255, 109, 0, 0.1));
+            transition: all 0.5s ease;
+        }
+
+        /* Efeito quando o avatar está ouvindo ou falando */
+        .avatar-active {
+            filter: drop-shadow(0 0 30px var(--primary));
+            transform: scale(1.02);
+        }
+
+        .voice-status {
+            margin-top: 20px;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* Grid de Features */
         .features {
             padding: 100px 10%;
             display: grid;
@@ -189,41 +238,10 @@
             overflow: hidden;
         }
 
-        .f-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary));
-            transition: 0.5s;
-        }
-
         .f-card:hover {
             transform: translateY(-10px);
             border-color: var(--primary);
             background: rgba(255, 109, 0, 0.03);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .f-card:hover::before {
-            left: 100%;
-        }
-
-        .f-card h3 {
-            color: var(--primary);
-            font-size: 0.9rem;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(255, 109, 0, 0.3);
-        }
-
-        .f-card p {
-            color: var(--text-dim);
-            font-size: 0.95rem;
-            line-height: 1.6;
         }
 
         footer {
@@ -282,9 +300,11 @@
         </section>
 
         <section class="avatar-container">
-            <div class="avatar-placeholder">
-                <!-- COLUNA DO AVATAR RESERVADA -->
+            <div class="avatar-wrapper" id="axiomWrapper">
+                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/Axiom_avatar.png" 
+                     alt="Axiom Assistant" class="avatar-img" id="axiomAvatar">
             </div>
+            <div class="voice-status pulse" id="statusText">Diga "AXIOM" para interagir</div>
         </section>
     </main>
 
@@ -307,6 +327,58 @@
     <footer>
         WAYIA AXIOM // INFRAESTRUTURA DE SOBERANIA FINANCEIRA // © 2026
     </footer>
+
+    <!-- LÓGICA DE VOZ AXIOM -->
+    <script>
+        const avatar = document.getElementById('axiomAvatar');
+        const statusText = document.getElementById('statusText');
+
+        // Inicializa reconhecimento de voz
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                
+                if (transcript.includes('axiom')) {
+                    ativarAxiom();
+                }
+            };
+
+            recognition.onerror = () => recognition.start(); // Reinicia em caso de erro
+            recognition.onend = () => recognition.start();   // Mantém sempre ouvindo
+            
+            recognition.start();
+        }
+
+        function ativarAxiom() {
+            avatar.classList.add('avatar-active');
+            statusText.innerText = "Sistemas Online. Processando...";
+            
+            // Simulação de resposta vocal (Você pode integrar com sua URL do Supabase futuramente)
+            falar("Sistemas online, Anderson. Engenharia de alta frequência pronta para governar. Como posso ajudar?");
+        }
+
+        function falar(texto) {
+            const synth = window.speechSynthesis;
+            const utterThis = new SpeechSynthesisUtterance(texto);
+            utterThis.lang = 'pt-BR';
+            utterThis.pitch = 0.9; // Tom levemente mais grave/robótico
+            utterThis.rate = 1.0;
+
+            utterThis.onend = () => {
+                avatar.classList.remove('avatar-active');
+                statusText.innerText = 'Diga "AXIOM" para interagir';
+            };
+
+            synth.speak(utterThis);
+        }
+    </script>
 
 </body>
 
