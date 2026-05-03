@@ -84,14 +84,6 @@
             gap: 40px;
         }
 
-        .hero-text h1 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-        }
-
         .avatar-container {
             position: relative;
             display: flex;
@@ -105,7 +97,6 @@
             max-width: 500px;
             animation: breathing 4s ease-in-out infinite;
             filter: drop-shadow(0 0 10px rgba(255, 109, 0, 0.1));
-            transition: 0.5s;
         }
 
         @keyframes breathing {
@@ -123,17 +114,17 @@
 
         .speaking {
             animation: speaking-vibe 0.2s ease-in-out infinite !important;
+            box-shadow: 0 0 60px var(--primary);
             border-radius: 50%;
-            box-shadow: 0 0 50px var(--primary);
         }
 
         @keyframes speaking-vibe {
             0% {
-                transform: scale(1.03) rotate(1deg);
+                transform: scale(1.03) rotate(0.5deg);
             }
 
             100% {
-                transform: scale(1.03) rotate(-1deg);
+                transform: scale(1.03) rotate(-0.5deg);
             }
         }
 
@@ -150,14 +141,6 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             transition: 0.4s;
-        }
-
-        .f-card h3 {
-            color: var(--primary);
-            font-size: 0.9rem;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
         }
 
         footer {
@@ -179,8 +162,8 @@
         <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/logoatu-removebg-preview.png"
             class="logo-img">
         <a href="login.html"
-            style="text-decoration:none; color:var(--primary); border:1px solid var(--primary); padding:10px 20px; font-weight:700;">Acessar
-            / Login</a>
+            style="text-decoration:none; color:var(--primary); border:1px solid var(--primary); padding:10px 20px; font-weight:700;">ACESSAR
+            PORTAL</a>
     </header>
     <main class="hero-container">
         <section class="hero-text">
@@ -188,29 +171,28 @@
                 style="color:var(--primary); font-size:0.8rem; font-weight:700; letter-spacing:5px; text-transform:uppercase; margin-bottom:20px; display:block;">ENGENHARIA
                 DE ALTA FREQUÊNCIA</span>
             <h1>A ENGENHARIA POR TRÁS DA SOBERANIA FINANCEIRA.</h1>
-            <p>Pare de seguir sinais. Ative um <b>Ecossistema Autônomo</b> institucional projetado para governar o
-                mercado.</p>
+            <p>Ative o <b>Agente Axiom</b> e deixe a inteligência institucional trabalhar pela sua liberdade.</p>
         </section>
-        <section class="avatar-container" onclick="ativarAxiom()">
+        <section class="avatar-container" id="mainTrigger">
             <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/Axiom_avatar.png"
                 id="axiomAvatar" class="avatar-img">
             <div id="statusText"
                 style="margin-top:20px; color:var(--primary); font-size:10px; letter-spacing:2px; font-weight:700;">
-                CLIQUE PARA FALAR COM O AGENTE</div>
+                CLIQUE PARA DESPERTAR O AGENTE</div>
         </section>
     </main>
     <section class="features">
         <div class="f-card">
             <h3>01. INFRAESTRUTURA SENTINEL</h3>
-            <p>Baixa latência em servidores dedicados.</p>
+            <p>Execução calibrada em ADX 7.5 e Coice 1.2.</p>
         </div>
         <div class="f-card">
             <h3>02. INTELIGÊNCIA HÍBRIDA</h3>
-            <p>Rastreamento global de liquidez automático.</p>
+            <p>Rastreamento global de liquidez 24/7.</p>
         </div>
         <div class="f-card">
             <h3>03. PROTOCOLO SNIPER</h3>
-            <p>Filtros agressivos calibrados para ADX 7.5 e Coice 1.2.</p>
+            <p>Blindagem de capital institucional.</p>
         </div>
     </section>
     <footer>WAYIA AXIOM // © 2026</footer>
@@ -219,23 +201,31 @@
         const API_KEY = "AIzaSyDU-17YBfTpkxQWLZx73nkYRreU2HaZAk8";
         const avatar = document.getElementById('axiomAvatar');
         const statusText = document.getElementById('statusText');
+        const trigger = document.getElementById('mainTrigger');
 
-        function ativarAxiom() {
-            // "Acorda" o sistema de som
-            window.speechSynthesis.cancel();
-            const startSpeech = new SpeechSynthesisUtterance("");
-            window.speechSynthesis.speak(startSpeech);
+        // Pré-carregamento do motor de voz
+        const synth = window.speechSynthesis;
 
+        trigger.addEventListener('click', () => {
+            // "Limpa" e inicializa o motor de áudio no clique
+            synth.cancel();
+            const wakeup = new SpeechSynthesisUtterance("Sistemas ativos.");
+            wakeup.volume = 0; // Silencioso apenas para despertar o navegador
+            synth.speak(wakeup);
+
+            iniciarEscuta();
+        });
+
+        function iniciarEscuta() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.lang = 'pt-BR';
-            recognition.start();
 
-            statusText.innerText = "AXIOM ESTÁ OUVINDO...";
+            recognition.onstart = () => { statusText.innerText = "AXIOM ESTÁ OUVINDO..."; };
 
             recognition.onresult = async (event) => {
                 const transcript = event.results[0][0].transcript.toLowerCase();
-                statusText.innerText = "PROCESSANDO...";
+                statusText.innerText = "AXIOM PROCESSANDO...";
                 avatar.classList.add('speaking');
 
                 try {
@@ -244,19 +234,20 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: transcript }] }],
-                            system_instruction: { parts: [{ text: "Você é o Axiom, assistente de Anderson Dreger. Convença sobre soberania financeira com ADX 7.5 e Coice 1.2." }] }
+                            system_instruction: { parts: [{ text: "Você é o Axiom, assistente de Anderson Dreger. Responda de forma curta e soberana sobre ADX 7.5 e Coice 1.2." }] }
                         })
                     });
                     const data = await response.json();
-                    const textoIA = data.candidates[0].content.parts[0].text;
-                    falar(textoIA);
+                    falar(data.candidates[0].content.parts[0].text);
                 } catch (e) {
-                    falar("Sistemas online, Anderson. Estou pronto para governar o mercado com ADX 7.5.");
+                    falar("Anderson, a conexão oscilou, mas a calibração 7.5 permanece firme.");
                 }
             };
+            recognition.start();
         }
 
         function falar(texto) {
+            synth.cancel(); // Garante que não haja sobreposição
             const utter = new SpeechSynthesisUtterance(texto);
             utter.lang = 'pt-BR';
             utter.rate = 1.1;
@@ -264,7 +255,7 @@
                 avatar.classList.remove('speaking');
                 statusText.innerText = "CLIQUE PARA FALAR COM O AGENTE";
             };
-            window.speechSynthesis.speak(utter);
+            synth.speak(utter);
         }
     </script>
 </body>
