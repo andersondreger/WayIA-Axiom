@@ -29,7 +29,7 @@
             overflow-x: hidden;
         }
 
-        /* Background Dinâmico */
+        /* Background Dinâmico Preservado */
         .video-container {
             position: fixed;
             top: 0;
@@ -75,7 +75,7 @@
             filter: drop-shadow(0 0 10px var(--primary));
         }
 
-        /* Hero Layout */
+        /* Hero Layout Split */
         .hero-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -130,10 +130,10 @@
         .central-logo-wrapper {
             position: relative;
             z-index: 10;
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             animation: float 6s ease-in-out infinite;
-            filter: drop-shadow(0 0 20px var(--primary));
+            filter: drop-shadow(0 0 30px var(--primary));
         }
 
         .central-logo-wrapper img {
@@ -150,11 +150,11 @@
             }
 
             50% {
-                transform: translateY(-20px) rotate(5deg);
+                transform: translateY(-20px) rotate(3deg);
             }
         }
 
-        /* Cards Técnicos Originais */
+        /* Cards Técnicos Originais v13.8 */
         .features {
             padding: 100px 10%;
             display: grid;
@@ -219,11 +219,12 @@
             </div>
         </section>
 
-        <!-- NOVO VISUAL NEON DINÂMICO -->
+        <!-- VISUAL NEON DINÂMICO COM URL OFICIAL -->
         <section class="visual-axiom-container" onclick="ativarAxiom()">
             <canvas id="canvas-neural"></canvas>
             <div class="central-logo-wrapper">
-                <img src="image_transparent_Craiyon (1).png" alt="Axiom Core">
+                <img src="https://xzlotpwqpdjwzqerdyfb.supabase.co/storage/v1/object/public/WayIA/image_transparent_Craiyon%20(1).png"
+                    alt="Axiom Core">
             </div>
             <div id="statusText"
                 style="position:absolute; bottom:0; color:var(--primary); font-size:10px; letter-spacing:2px; font-weight:700;">
@@ -249,7 +250,7 @@
     <footer>WAYIA AXIOM // © 2026</footer>
 
     <script>
-        // --- MOTOR VISUAL NEON AXIOM ---
+        // --- MOTOR VISUAL NEON PRESERVADO ---
         const canvas = document.getElementById('canvas-neural');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -265,9 +266,9 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.speedY = Math.random() * 0.8 - 0.4;
             }
             update() {
                 this.x += this.speedX;
@@ -284,7 +285,7 @@
         }
 
         function init() {
-            for (let i = 0; i < 40; i++) particles.push(new Particle());
+            for (let i = 0; i < 45; i++) particles.push(new Particle());
         }
 
         function animate() {
@@ -296,9 +297,9 @@
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 100) {
-                        ctx.strokeStyle = `rgba(255, 109, 0, ${1 - distance / 100})`;
-                        ctx.lineWidth = 0.5;
+                    if (distance < 110) {
+                        ctx.strokeStyle = `rgba(255, 109, 0, ${1 - distance / 110})`;
+                        ctx.lineWidth = 0.6;
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
