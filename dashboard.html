@@ -4,178 +4,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXIOM SENTINEL | Wedding Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>WayIA - Axiom Sentinel Dashboard</title>
+    <!-- Tailwind CSS para design de elite -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cliente Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
-            background: #050E1D;
-            color: #fff;
+            background-color: #050505;
+            color: #e5e5e5;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
         }
 
-        .glass {
-            background: rgba(10, 25, 47, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 229, 255, 0.1);
+        .glass-card {
+            background: rgba(15, 15, 15, 0.8);
+            border: 1px solid #1f1f1f;
+            backdrop-filter: blur(10px);
         }
 
-        .glow-text {
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+        .win-glow {
+            color: #10b981;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
         }
 
-        .animate-fade {
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .loss-glow {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
         }
     </style>
 </head>
 
-<body class="antialiased h-screen flex flex-col">
-    <nav class="h-20 border-b border-cyan-400/10 flex items-center justify-between px-8 bg-navy-900/80">
+<body class="p-4 md:p-8">
+
+    <!-- HEADER SOBERANO -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter text-white uppercase italic">Axiom Sentinel <span
+                    class="text-blue-600">v22.0</span></h1>
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">Ecossistema WayIA - Engenharia de
+                Produção</p>
+        </div>
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 border-2 border-cyan-400 rounded-full flex items-center justify-center glow-text">A
+            <div id="status-badge"
+                class="bg-blue-900/20 text-blue-500 px-4 py-1 rounded-full text-[10px] border border-blue-500/30 uppercase font-bold animate-pulse">
+                Monitorando Turno: Ativo
             </div>
-            <span class="text-xl font-black text-white glow-text uppercase">Axiom <span
-                    class="text-cyan-400">Sentinel</span></span>
+            <button onclick="testarVoz()" class="bg-gray-800 hover:bg-gray-700 p-2 rounded-lg transition-all">
+                🔊
+            </button>
         </div>
-        <div class="flex gap-4">
-            <button onclick="document.getElementById('onboarding-modal').classList.remove('hidden')"
-                class="px-4 py-2 bg-navy-700 text-cyan-400 text-[10px] font-bold border border-cyan-400/30 rounded-lg uppercase">Parâmetros</button>
-            <button onclick="logout()" class="text-zinc-500 text-[10px] font-bold uppercase">Sair</button>
-        </div>
-    </nav>
+    </header>
 
-    <main class="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden">
-        <div class="col-span-3 flex flex-col gap-6">
-            <div class="glass p-6 rounded-2xl text-center border-cyan-400/20 shadow-2xl">
-                <h3 class="text-cyan-400 text-[10px] font-black uppercase mb-4">ADX Alvo</h3>
-                <div id="val-adx" class="text-6xl font-black text-white glow-text">--</div>
-            </div>
-            <div class="glass p-6 rounded-2xl flex-1 flex flex-col overflow-hidden border-cyan-400/20">
-                <h3 class="text-cyan-400 text-[10px] font-black uppercase mb-4 border-b border-cyan-400/10 pb-2">
-                    Telemetria</h3>
-                <div id="live-feed-content"
-                    class="flex-1 overflow-y-auto space-y-2 font-mono text-[9px] text-cyan-400/70"></div>
-            </div>
+    <!-- CARDS DE PERFORMANCE -->
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="glass-card p-6 rounded-2xl">
+            <p class="text-gray-500 text-xs uppercase font-bold mb-1">Lucro Acumulado</p>
+            <h2 id="lucro-total" class="text-3xl font-black text-white">$ 0.00</h2>
         </div>
-
-        <div class="col-span-6 glass rounded-2xl relative overflow-hidden shadow-2xl">
-            <div id="scanner-view" class="absolute inset-0 flex flex-col items-center justify-center bg-[#030a13] z-10">
-                <div class="w-16 h-16 border-2 border-t-cyan-400 border-transparent rounded-full animate-spin mb-4">
-                </div>
-                <h4 class="text-cyan-400 font-mono text-[10px] animate-pulse">VARRENDO MERCADO...</h4>
-            </div>
-            <iframe id="market-chart" class="absolute inset-0 w-full h-full border-none hidden z-20" src=""></iframe>
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-600">
+            <p class="text-gray-500 text-xs uppercase font-bold mb-1">Taxa de Assertividade</p>
+            <h2 id="win-rate" class="text-3xl font-black text-white">0%</h2>
         </div>
-
-        <div class="col-span-3 flex flex-col glass rounded-2xl shadow-2xl border-purple-500/20">
-            <div class="p-6 bg-purple-500/10 border-b border-purple-500/20 text-center">
-                <h3 class="text-purple-400 text-[10px] font-black uppercase mb-2">Banca Deriv</h3>
-                <div id="lucro-acumulado" class="text-4xl font-black text-white">$0.00</div>
-                <div id="lucro-dia" class="text-[12px] font-black text-neon uppercase mt-2">$0.00 (HOJE)</div>
-            </div>
-            <div id="trade-history-table" class="flex-1 p-4 overflow-y-auto space-y-2"></div>
+        <div class="glass-card p-6 rounded-2xl">
+            <p class="text-gray-500 text-xs uppercase font-bold mb-1">Operações (Total)</p>
+            <h2 id="total-trades" class="text-3xl font-black text-white">0</h2>
         </div>
     </main>
 
-    <div id="onboarding-modal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md">
-        <div class="glass p-8 rounded-2xl w-full max-w-md">
-            <h2 class="text-2xl font-black text-white mb-6 text-center">AJUSTE AXIOM</h2>
-            <div class="space-y-4">
-                <input type="text" id="token-input" placeholder="Token Deriv"
-                    class="w-full bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="adx-input" step="0.1" value="27.0"
-                        class="bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
-                    <input type="number" id="stake-input" value="10.0"
-                        class="bg-navy-900 border border-cyan-400/30 text-white p-3 rounded-xl outline-none">
-                </div>
-                <button onclick="sincronizar()"
-                    class="w-full bg-cyan-500 text-navy-900 font-black py-4 rounded-xl">SALVAR E INICIAR</button>
-            </div>
+    <!-- TABELA DE LOGS EM TEMPO REAL -->
+    <section class="glass-card rounded-2xl overflow-hidden">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-gray-300">Logs de Operação em Tempo Real</h3>
+            <span class="text-[10px] bg-gray-800 px-2 py-1 rounded text-gray-400">SERVER: VPS-MATELANDIA</span>
         </div>
-    </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="text-[10px] uppercase text-gray-500 bg-black/50">
+                    <tr>
+                        <th class="px-6 py-4">Horário</th>
+                        <th class="px-6 py-4">Ativo</th>
+                        <th class="px-6 py-4 text-center">Resultado</th>
+                        <th class="px-6 py-4">Lucro</th>
+                        <th class="px-6 py-4">Métricas</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-corpo" class="text-sm divide-y divide-gray-800">
+                    <!-- Trades inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </section>
 
+    <!-- LÓGICA DE INTELIGÊNCIA -->
     <script>
-        const sbUrl = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
-        const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMTcwMjEsImV4cCI6MjA4Nzg5MzAyMX0.a17_2kF4vBSRI84W7R-tAUl-D-ZXEey6BwEi3d2aMuU';
-        const axiom = window.supabase.createClient(sbUrl, sbKey);
-        let currentUser = null;
+        // CONFIGURAÇÕES SUPABASE (Suas Chaves)
+        const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
+        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
+        const supabase = window.supabase.createClient(_URL, _KEY);
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await axiom.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
-            currentUser = session.user;
-            await loadData();
-            initRealtime();
-        });
-
-        async function loadData() {
-            const { data: config } = await axiom.from('user_configs').select('*').eq('user_id', currentUser.id).single();
-            if (config) {
-                document.getElementById('val-adx').innerText = config.adx_minimo;
-                document.getElementById('lucro-acumulado').innerText = `$${config.saldo_atual.toFixed(2)}`;
-                document.getElementById('lucro-dia').innerText = `$${config.lucro_dia.toFixed(2)} (HOJE)`;
-            }
-            const { data: logs } = await axiom.from('trade_logs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(5);
-            if (logs) logs.forEach(log => addHistory(log));
+        // FUNÇÃO DE VOZ DO ECOSSISTEMA
+        function falar(texto) {
+            const synth = window.speechSynthesis;
+            const utterThis = new SpeechSynthesisUtterance(texto);
+            utterThis.lang = 'pt-BR';
+            utterThis.rate = 1.1;
+            synth.speak(utterThis);
         }
 
-        async function sincronizar() {
-            const token = document.getElementById('token-input').value;
-            const adx = parseFloat(document.getElementById('adx-input').value);
-            const stake = parseFloat(document.getElementById('stake-input').value);
-            await axiom.from('user_configs').upsert({ user_id: currentUser.id, token_deriv: token, adx_minimo: adx, stake: stake }, { onConflict: 'user_id' });
-            location.reload();
+        function testarVoz() { falar("Sistema de voz Axiom Sentinel ativado."); }
+
+        // BUSCAR DADOS INICIAIS
+        async function renderizarDashboard() {
+            const { data: trades, error } = await supabase
+                .from('trade_history')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) return console.error("Erro Supabase:", error);
+
+            // Cálculos
+            const total = trades.length;
+            const wins = trades.filter(t => t.resultado === 'WIN').length;
+            const lucroTotal = trades.reduce((acc, t) => acc + t.valor, 0);
+            const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+
+            // Update UI
+            document.getElementById('lucro-total').innerText = `$ ${lucroTotal.toFixed(2)}`;
+            document.getElementById('win-rate').innerText = `${winRate}%`;
+            document.getElementById('total-trades').innerText = total;
+
+            // Render Tabela
+            const corpo = document.getElementById('tabela-corpo');
+            corpo.innerHTML = '';
+            trades.slice(0, 12).forEach(t => {
+                const dataHora = new Date(t.created_at).toLocaleTimeString('pt-BR');
+                const isWin = t.resultado === 'WIN';
+                corpo.innerHTML += `
+                    <tr class="hover:bg-white/[0.02] transition-colors">
+                        <td class="px-6 py-4 text-gray-500 font-mono text-xs">${dataHora}</td>
+                        <td class="px-6 py-4 font-bold text-white">${t.ativo}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black ${isWin ? 'bg-green-900/20 text-green-500 border border-green-500/30' : 'bg-red-900/20 text-red-500 border border-red-500/30'}">
+                                ${t.resultado}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 font-mono ${isWin ? 'text-green-500' : 'text-red-500'}">
+                            ${isWin ? '+' : ''}${t.valor.toFixed(2)}
+                        </td>
+                        <td class="px-6 py-4 text-[10px] text-gray-500 uppercase">
+                            ADX: <span class="text-blue-400">${t.adx}</span> | COICE: <span class="text-blue-400">${t.coice}</span>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        function initRealtime() {
-            // Trades e Gráfico
-            axiom.channel('trades').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_logs' }, (p) => {
-                const t = p.new;
-                if (t.status === 'OPEN') {
-                    document.getElementById('scanner-view').classList.add('hidden');
-                    document.getElementById('market-chart').classList.remove('hidden');
-                    document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${t.symbol}`;
-                } else if (t.status === 'CLOSED') {
-                    setTimeout(() => { document.getElementById('scanner-view').classList.remove('hidden'); document.getElementById('market-chart').classList.add('hidden'); }, 5000);
-                    addHistory(t);
-                }
-            }).subscribe();
+        // REALTIME SUBSCRIPTION (Ouvir o Axiom na VPS)
+        supabase.channel('custom-all-channel')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, (payload) => {
+                const novoTrade = payload.new;
+                renderizarDashboard();
+                falar(`Axiom Sentinel informa: Novo ${novoTrade.resultado} no ativo ${novoTrade.ativo}.`);
+            })
+            .subscribe();
 
-            // Saldo
-            axiom.channel('balance').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_configs' }, (p) => {
-                document.getElementById('lucro-acumulado').innerText = `$${p.new.saldo_atual.toFixed(2)}`;
-                document.getElementById('lucro-dia').innerText = `$${p.new.lucro_dia.toFixed(2)} (HOJE)`;
-            }).subscribe();
-        }
-
-        function addHistory(t) {
-            const list = document.getElementById('trade-history-table');
-            if (list.children.length >= 5) list.lastElementChild.remove();
-            const isWin = t.profit >= 0;
-            const div = document.createElement('div');
-            div.className = `glass p-3 rounded-xl border ${isWin ? 'border-neon/30' : 'border-red-500/30'} cursor-pointer animate-fade`;
-            div.innerHTML = `<div class="flex justify-between items-center"><div class="flex flex-col"><span class="text-[10px] text-zinc-400">${t.symbol}</span><span class="${isWin ? 'text-neon' : 'text-red-400'} text-[11px] font-black">${isWin ? 'WIN' : 'LOSS'}</span></div><span class="text-xl font-black">${isWin ? '+' : ''}$${t.profit.toFixed(2)}</span></div>`;
-            div.onclick = () => { document.getElementById('scanner-view').classList.add('hidden'); document.getElementById('market-chart').classList.remove('hidden'); document.getElementById('market-chart').src = `https://tradingview.binary.com?symbol=${t.symbol}`; };
-            list.prepend(div);
-        }
-
-        function logout() { axiom.auth.signOut(); window.location.href = 'login.html'; }
+        // Início
+        window.onload = renderizarDashboard;
     </script>
 </body>
 
