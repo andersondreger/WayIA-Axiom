@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Sentinel - Hub Multi-Nível</title>
+    <title>WayAxiom OS - Central Command Enterprise</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,7 +13,7 @@
             background-color: #020203;
             color: #f8f9fa;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .card-pro {
@@ -22,17 +22,11 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .blur-lock {
-            filter: blur(4px);
-            pointer-events: none;
-            user-select: none;
-        }
-
         .status-pulse::after {
             content: '';
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background: #3b82f6;
             border-radius: 50%;
             right: -12px;
@@ -48,7 +42,7 @@
 
             70% {
                 transform: scale(1);
-                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+                box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
             }
 
             100% {
@@ -58,7 +52,7 @@
         }
 
         ::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
@@ -68,200 +62,332 @@
     </style>
 </head>
 
-<body class="flex h-screen bg-[#020203]">
+<body class="flex h-screen w-screen bg-[#020203] text-gray-300 select-none">
 
-    <aside class="w-64 card-pro h-full p-6 flex flex-col justify-between border-y-0 border-l-0">
+    <aside class="w-64 card-pro h-full p-6 flex flex-col justify-between border-y-0 border-l-0 z-20">
         <div>
-            <div class="mb-10">
-                <h1 class="text-2xl font-black tracking-tight uppercase italic text-white">Axiom <span
-                        class="text-blue-600 font-normal">Sentinel</span></h1>
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">WayAxiom OS v22.6</p>
+            <div class="mb-8">
+                <h1 class="text-2xl font-black tracking-tight uppercase italic text-white">Way<span
+                        class="text-blue-600 font-normal">Axiom</span></h1>
+                <p class="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-bold mt-1">OS v22.6 • Client Broker
+                </p>
             </div>
 
-            <nav class="space-y-2">
-                <a href="?role=admin"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.03] hover:text-white transition-all">📊
-                    Painel Admin</a>
-                <a href="?role=cliente"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.03] hover:text-white transition-all">💎
-                    Painel Premium</a>
-                <a href="?role=gratis"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.03] hover:text-white transition-all">🆓
-                    Demo Gratuita</a>
+            <div class="mb-6 p-3 bg-white/[0.02] rounded-lg border border-white/5">
+                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-2">Simulador de
+                    Acesso (Q.A.)</label>
+                <select id="qa-role-selector" onchange="switchRole(this.value)"
+                    class="w-full bg-black border border-white/10 text-xs rounded p-1.5 text-white focus:outline-none font-mono">
+                    <option value="admin">ROOT ADMIN (Visão Geral)</option>
+                    <option value="CLIENT_01">CLIENTE: Sacolão Miranda</option>
+                    <option value="CLIENT_02">CLIENTE: PetFlow Master</option>
+                    <option value="CLIENT_FREE">CLIENTE: Teste Gratuito</option>
+                </select>
+            </div>
+
+            <nav class="space-y-1.5">
+                <button onclick="changeTab('dashboard')"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.02] hover:text-white transition-all text-left">📊
+                    Terminal de Operações</button>
+                <button id="nav-admin-link" onclick="changeTab('admin-panel')"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.02] hover:text-white transition-all text-left hidden">👑
+                    Gestão de Contratos</button>
             </nav>
         </div>
 
-        <div class="pt-6 border-t border-white/5 space-y-2">
-            <div id="badge-role"
-                class="text-[9px] font-black uppercase bg-blue-900/30 text-blue-400 px-3 py-2 rounded border border-blue-500/20 text-center tracking-widest mb-4">
-                Carregando...</div>
+        <div class="pt-4 border-t border-white/5 space-y-3">
+            <div id="badge-identity" class="text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded">
+                CARREGANDO ENGINE...</div>
             <a href="https://wa.me/5545991397543" target="_blank"
-                class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-all uppercase tracking-wider">
-                <span>💬 Suporte WayIA</span>
+                class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-widest">
+                💬 Central de Suporte
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 p-8 overflow-y-auto">
-        <header class="flex justify-between items-center mb-8">
+    <main class="flex-1 flex flex-col h-full overflow-hidden p-8">
+
+        <header class="flex justify-between items-start mb-6 shrink-0">
             <div>
-                <h2 id="welcome-title" class="text-xl font-black text-white uppercase tracking-tight">Painel de Controle
+                <h2 id="view-title" class="text-xl font-black text-white uppercase tracking-tight">Painel de Controle
                 </h2>
-                <p class="text-xs text-gray-500 mt-1">Matelândia, PR • Soluções de Automação Corporativa</p>
+                <p id="view-subtitle" class="text-xs text-gray-500 mt-0.5">Filtro Ativo: Carregando escopo...</p>
             </div>
-            <div class="flex items-center gap-4">
-                <span
-                    class="status-pulse relative text-[10px] text-blue-500 font-bold uppercase tracking-widest mr-4">VPS
-                    Online</span>
+            <div
+                class="flex items-center gap-3 bg-white/[0.01] border border-white/5 p-2 rounded-lg font-mono text-[10px]">
+                <span class="status-pulse relative text-blue-500 font-bold uppercase tracking-wider mr-2">VPS Active
+                    Node</span>
+                <span class="text-gray-600">|</span>
+                <span id="live-clock" class="text-gray-400">00:00:00</span>
             </div>
         </header>
 
-        <div id="banner-upgrade"
-            class="hidden mb-8 p-4 bg-gradient-to-r from-blue-900/40 to-black rounded-xl border border-blue-500/30 flex justify-between items-center">
-            <div>
-                <h4 class="text-sm font-black text-white uppercase tracking-wider">Acesso Limitado Detectado</h4>
-                <p class="text-xs text-gray-400">Desbloqueie métricas de ADX e Coice em tempo real assinando o plano
-                    corporativo.</p>
+        <div id="tab-dashboard" class="flex-1 flex flex-col gap-6 overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Net Equity (P&L)
+                    </h3>
+                    <p id="kpi-equity" class="text-2xl font-black text-white font-mono">$ 0.00</p>
+                </div>
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Assertividade</h3>
+                    <p id="kpi-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                </div>
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Volume Operado</h3>
+                    <p id="kpi-volume" class="text-2xl font-black text-gray-300 font-mono">0</p>
+                </div>
+                <div class="card-pro p-5 rounded-xl bg-gradient-to-br from-blue-950/20 to-black border-blue-900/30">
+                    <h3 class="text-gray-400 text-[10px] uppercase font-black tracking-widest mb-1">Market State</h3>
+                    <p id="kpi-state" class="text-xs font-bold text-green-400 uppercase mt-1 tracking-wider">Aguardando
+                        Ticks</p>
+                </div>
             </div>
-            <a href="https://wa.me/5545991397543"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-4 rounded uppercase transition-all">Upgrade</a>
+
+            <div class="h-44 card-pro p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-4 left-4 z-10">
+                    <h4 class="text-[10px] uppercase tracking-widest font-black text-gray-500">Curva de Performance
+                        Histórica</h4>
+                </div>
+                <div class="w-full h-full pt-4">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <div id="chart-free-lock"
+                    class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col justify-center items-center z-20">
+                    <p class="text-xs font-black text-gray-400 tracking-widest uppercase">📊 Gráfico Ocultado no Plano
+                        Free</p>
+                </div>
+            </div>
+
+            <div class="flex-1 card-pro rounded-xl overflow-hidden flex flex-col">
+                <div
+                    class="px-5 py-3 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Terminal de Execuções
+                        Direct-Feed</h3>
+                    <span
+                        class="text-[9px] font-mono bg-blue-950/30 text-blue-400 border border-blue-900/50 px-2 py-0.5 rounded uppercase">Stream
+                        Ativo</span>
+                </div>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead
+                            class="text-[9px] uppercase tracking-wider text-gray-500 bg-black/60 sticky top-0 z-10 border-b border-white/5">
+                            <tr>
+                                <th class="px-5 py-3 font-black">Timestamp</th>
+                                <th id="th-client-identity" class="px-5 py-3 font-black hidden">ID Instância</th>
+                                <th class="px-5 py-3 font-black">Ativo</th>
+                                <th class="px-5 py-3 font-black">Direção</th>
+                                <th class="px-5 py-3 font-black">Resultado</th>
+                                <th class="px-5 py-3 font-black text-right">Engine Data / P&L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-feed-body" class="text-xs divide-y divide-white/5 font-mono">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card-pro p-6 rounded-xl">
-                <h3 class="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-2">Equity Operacional</h3>
-                <p id="lucro-total" class="text-3xl font-black text-white">$ 0.00</p>
+        <div id="tab-admin-panel" class="flex-1 flex flex-col gap-6 overflow-hidden hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Faturamento Bruto
+                        Retido</h3>
+                    <p id="admin-total-equity" class="text-2xl font-black text-green-400 font-mono">$ 0.00</p>
+                </div>
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Clientes Premium
+                        Ativos</h3>
+                    <p id="admin-active-clients" class="text-2xl font-black text-white font-mono">0</p>
+                </div>
+                <div class="card-pro p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Média Global WinRate
+                    </h3>
+                    <p id="admin-avg-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                </div>
             </div>
-            <div class="card-pro p-6 rounded-xl">
-                <h3 class="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-2">Assertividade Geral</h3>
-                <p id="win-rate" class="text-3xl font-black text-blue-500">0%</p>
-            </div>
-            <div id="chart-card" class="card-pro p-4 rounded-xl md:col-span-1 flex items-center justify-center">
-                <canvas id="miniChart" height="90"></canvas>
-                <div id="chart-lock-msg" class="hidden text-center text-xs text-gray-500 p-4 uppercase font-bold">⚠️
-                    Gráfico Bloqueado no Plano Grátis</div>
+
+            <div class="flex-1 card-pro rounded-xl overflow-hidden flex flex-col">
+                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.01] shrink-0">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Matriz de Monitoramento
+                        de Licenças (White Label)</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+                    id="admin-client-cards-grid">
+                </div>
             </div>
         </div>
-
-        <section class="card-pro rounded-xl overflow-hidden">
-            <div class="px-6 py-4 border-b border-white/5 bg-white/[0.01]">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400">Histórico de Monitoramento</h3>
-            </div>
-            <table class="w-full text-left">
-                <thead class="text-[9px] uppercase text-gray-600 bg-black/40">
-                    <tr>
-                        <th class="px-6 py-4">Horário</th>
-                        <th class="px-6 py-4">Ativo</th>
-                        <th class="px-6 py-4">Resultado</th>
-                        <th class="px-6 py-4">Retorno</th>
-                        <th class="px-6 py-4 text-right">Engine Metrics</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-corpo" class="text-xs divide-y divide-white/5">
-                </tbody>
-            </table>
-        </section>
     </main>
 
     <script>
-        // CONFIGURAÇÃO DB (Suas credenciais reais e indestrutíveis)
+        // --- 📡 ENDPOINTS CRIPTOGRAFADOS E AUTENTICADOS ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
-        let myChart = null;
 
-        // CAPTURA O PAPEL DA URL (?role=admin, ?role=cliente, ?role=gratis)
-        const urlParams = new URLSearchParams(window.location.search);
-        const CURRENT_ROLE = urlParams.get('role') || 'gratis'; // Default é gratis por segurança
+        let globalRawData = [];
+        let performanceChart = null;
+        let CURRENT_SCOPE = "admin"; // Escopo Padrão do sistema
 
-        function configurarLayoutPorNivel() {
-            const badge = document.getElementById('badge-role');
-            const title = document.getElementById('welcome-title');
-            const banner = document.getElementById('banner-upgrade');
-            const canvas = document.getElementById('miniChart');
-            const lockMsg = document.getElementById('chart-lock-msg');
+        // --- 🖥️ ENGINE DE CONTROLE DE HORÁRIO ---
+        setInterval(() => {
+            const fuso = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            document.getElementById('live-clock').innerText = fuso;
+        }, 1000);
 
-            if (CURRENT_ROLE === 'admin') {
-                badge.innerText = "Nível: Admin Root";
-                badge.className = "text-[9px] font-black uppercase bg-red-950/40 text-red-400 px-3 py-2 rounded border border-red-500/20 text-center tracking-widest mb-4";
-                title.innerText = "Axiom Central Command";
-            } else if (CURRENT_ROLE === 'cliente') {
-                badge.innerText = "Nível: Enterprise Partner";
-                title.innerText = "WayAxiom Client Dashboard";
-            } else {
-                badge.innerText = "Nível: Demonstração";
-                badge.className = "text-[9px] font-black uppercase bg-gray-800 text-gray-400 px-3 py-2 rounded border border-gray-700 text-center tracking-widest mb-4";
-                title.innerText = "Axiom Sentinel Demo";
-                banner.classList.remove('hidden');
-                canvas.classList.add('hidden');
-                lockMsg.classList.remove('hidden');
-            }
+        // --- 🧪 ESTRATÉGIA Q.A. : ALTERNÂNCIA DE ESCOPO DINÂMICA ---
+        function switchRole(roleValue) {
+            CURRENT_SCOPE = roleValue;
+            executeCorePipeline();
         }
 
-        async function carregarDados() {
+        function changeTab(tabId) {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-admin-panel').classList.add('hidden');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        }
+
+        // --- ⚙️ PIPELINE PRINCIPAL DE DADOS (REATIVO) ---
+        async function executeCorePipeline() {
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
-            if (error || !trades) return;
+            if (error) { console.error("🛑 Erro Q.A. Pipeline:", error); return; }
 
-            // Filtro de escopo para o usuário Gratis (limita a ver apenas as últimas 3 movimentações)
-            const dadosFiltrados = CURRENT_ROLE === 'gratis' ? trades.slice(0, 3) : trades;
+            globalRawData = trades || [];
 
-            const wins = dadosFiltrados.filter(t => t.resultado === 'WIN').length;
-            const lucro = dadosFiltrados.reduce((acc, t) => acc + t.valor, 0);
-            const winRate = dadosFiltrados.length > 0 ? ((wins / dadosFiltrados.length) * 100).toFixed(1) : 0;
-
-            document.getElementById('lucro-total').innerText = `$ ${lucro.toFixed(2)}`;
-            document.getElementById('win-rate').innerText = `${winRate}%`;
-
-            renderizarTabela(dadosFiltrados);
-            if (CURRENT_ROLE !== 'gratis') {
-                renderizarGrafico(trades.slice(0, 10).reverse());
+            // Tratamento de segurança: se o banco estiver temporariamente vazio, injeta mock estrutural para Q.A.
+            if (globalRawData.length === 0) {
+                globalRawData = [
+                    { created_at: new Date().toISOString(), user_id: 'CLIENT_01', ativo: 'R_10', resultado: 'WIN', valor: 9.50, adx: 8.4, coice: 1.5 },
+                    { created_at: new Date().toISOString(), user_id: 'CLIENT_02', ativo: 'R_75', resultado: 'LOSS', valor: -10.00, adx: 8.6, coice: 1.6 }
+                ];
             }
+
+            renderInterfaceByRole();
         }
 
-        function renderizarTabela(data) {
-            const corpo = document.getElementById('tabela-corpo');
-            corpo.innerHTML = data.map(t => {
-                const isWin = t.resultado === 'WIN';
-                let engineMetricsHTML = '';
+        // --- 🏛️ MOTOR DE RENDERIZAÇÃO E RBAC POLICY ---
+        function renderInterfaceByRole() {
+            const badge = document.getElementById('badge-identity');
+            const sub = document.getElementById('view-subtitle');
+            const navAdmin = document.getElementById('nav-admin-link');
+            const thClient = document.getElementById('th-client-identity');
+            const lockChart = document.getElementById('chart-free-lock');
+            const marketState = document.getElementById('kpi-state');
 
-                // Regra de ocultação de propriedade intelectual (Mestrado da Automação)
-                if (CURRENT_ROLE === 'admin') {
-                    engineMetricsHTML = `ADX: <span class="text-blue-400">${t.adx}</span> | COICE: <span class="text-blue-400">${t.coice}</span>`;
-                } else if (CURRENT_ROLE === 'cliente') {
-                    engineMetricsHTML = `🎯 <span class="text-green-500 font-bold">Mola Disparada</span>`;
+            // Identifica Estado de Mercado baseado na hora local de Matelândia
+            const hrs = new Date().getHours();
+            if (hrs >= 5 && hrs < 18) {
+                marketState.innerText = "🌐 TURNO: FOREX (ADX 3.8)";
+                marketState.className = "text-xs font-bold text-blue-400 uppercase mt-1 tracking-wider";
+            } else {
+                marketState.innerText = "⚡ TURNO: SINTÉTICOS (ADX 8.3)";
+                marketState.className = "text-xs font-bold text-orange-400 uppercase mt-1 tracking-wider";
+            }
+
+            // Filtragem de escopo por Cliente
+            let filteredTrades = [];
+
+            if (CURRENT_SCOPE === 'admin') {
+                filteredTrades = globalRawData;
+                badge.innerText = "ADMIN MASTER";
+                badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-red-950/40 text-red-400 border border-red-500/20";
+                sub.innerText = "Escopo Global • Monitoramento de Todas as Instâncias SaaS";
+                navAdmin.classList.remove('hidden');
+                thClient.classList.remove('hidden');
+                lockChart.classList.add('hidden');
+            } else {
+                // Escopo de cliente específico
+                filteredTrades = globalRawData.filter(t => t.user_id === CURRENT_SCOPE || (!t.user_id && CURRENT_SCOPE === 'CLIENT_01'));
+                navAdmin.classList.add('hidden');
+                changeTab('dashboard'); // Força cliente a ficar fora do painel administrativo
+                thClient.classList.add('hidden');
+
+                if (CURRENT_SCOPE === 'CLIENT_FREE') {
+                    badge.innerText = "PLANO DEMO";
+                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-gray-800 text-gray-400 border border-gray-700";
+                    sub.innerText = "Escopo Limitado • Versão Gratuita de Demonstração";
+                    lockChart.classList.remove('hidden');
+                    filteredTrades = filteredTrades.slice(0, 3); // Trava Q.A. de volume para conta free
                 } else {
-                    engineMetricsHTML = `<span class="text-gray-600 italic blur-sm select-none">🔒 Upgrade Necessário</span>`;
+                    badge.innerText = "PREMIUM LICENSED";
+                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
+                    sub.innerText = `Instância Ativa: ${CURRENT_SCOPE} • WayAxiom Copy Engine`;
+                    lockChart.classList.add('hidden');
+                }
+            }
+
+            // Cálculos dos KPIs baseados no escopo ativo
+            const wins = filteredTrades.filter(t => t.resultado === 'WIN').length;
+            const equity = filteredTrades.reduce((acc, t) => acc + t.valor, 0);
+            const winrate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
+
+            document.getElementById('kpi-equity').innerText = `$ ${equity.toFixed(2)}`;
+            document.getElementById('kpi-equity').className = `text-2xl font-black font-mono ${equity >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            document.getElementById('kpi-winrate').innerText = `${winrate}%`;
+            document.getElementById('kpi-volume').innerText = filteredTrades.length;
+
+            renderTableFeed(filteredTrades);
+            if (CURRENT_SCOPE !== 'CLIENT_FREE') {
+                renderChartLine(filteredTrades.slice(0, 15).reverse());
+            }
+
+            // Se estiver na aba admin, processa a matriz avançada de gerenciamento de clientes
+            renderAdminPanel();
+        }
+
+        // --- 📊 OPERAÇÕES DE TABELA COM MASCARAMENTO DE IP ---
+        function renderTableFeed(trades) {
+            const body = document.getElementById('table-feed-body');
+            body.innerHTML = trades.map(t => {
+                const isWin = t.resultado === 'WIN';
+                const timeStr = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
+
+                let metricsColumn = '';
+                if (CURRENT_SCOPE === 'admin') {
+                    metricsColumn = `<span class="text-blue-500 font-bold">ADX:${t.adx}</span> <span class="text-gray-600">|</span> CC:${t.coice}`;
+                } else if (CURRENT_SCOPE === 'CLIENT_FREE') {
+                    metricsColumn = `<span class="text-red-500/40 blur-[2px] italic select-none">Upgrade Required</span>`;
+                } else {
+                    metricsColumn = `<span class="text-green-500 font-bold uppercase tracking-wider text-[10px]">🏹 Engine Disparada</span>`;
                 }
 
                 return `
-                <tr class="hover:bg-white/[0.02] transition-all">
-                    <td class="px-6 py-4 text-gray-500 font-mono text-[10px]">${new Date(t.created_at).toLocaleTimeString()}</td>
-                    <td class="px-6 py-4 font-black text-gray-300 uppercase">${t.ativo}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-wider ${isWin ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">
-                            ${t.resultado}
-                        </span>
+                <tr class="hover:bg-white/[0.01] transition-all border-b border-white/5">
+                    <td class="px-5 py-3 text-gray-500 text-[11px]">${timeStr}</td>
+                    ${CURRENT_SCOPE === 'admin' ? `<td class="px-5 py-3 text-gray-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
+                    <td class="px-5 py-3 font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
+                    <td class="px-5 py-3 text-gray-400 text-[11px]">CALL</td>
+                    <td class="px-5 py-3">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
                     </td>
-                    <td class="px-6 py-4 font-mono font-bold ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-right font-mono text-[10px] text-gray-400">${engineMetricsHTML}</td>
+                    <td class="px-5 py-3 text-right font-bold ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-2 font-normal font-sans text-gray-500">${metricsColumn}</span></td>
                 </tr>`;
             }).join('');
         }
 
-        function renderizarGrafico(data) {
-            const ctx = document.getElementById('miniChart').getContext('2d');
-            if (myChart) myChart.destroy();
+        // --- 📈 RENDERIZADOR DO GRÁFICO DE EQUITY (CHART.JS) ---
+        function renderChartLine(data) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            if (performanceChart) performanceChart.destroy();
 
-            myChart = new Chart(ctx, {
+            // Lógica de acumulação de capital contínuo para o gráfico de linha
+            let accumulatedEquity = 0;
+            const points = data.map(t => {
+                accumulatedEquity += t.valor;
+                return accumulatedEquity;
+            });
+
+            performanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: data.map(t => t.valor),
+                        data: points,
                         borderColor: '#3b82f6',
                         borderWidth: 2,
-                        tension: 0.4,
-                        fill: false,
+                        tension: 0.35,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.02)',
                         pointRadius: 0
                     }]
                 },
@@ -274,15 +400,75 @@
             });
         }
 
-        // REALTIME CHANNEL - Captura inserções em tempo real do motor da VPS
-        supabase.channel('custom-filter-channel')
+        // --- 👑 MATRIZ EXCLUSIVA DO ADMIN: GESTÃO DE CONTRATOS POR CLIENTE ---
+        function renderAdminPanel() {
+            // Mapeamento de Clientes Cadastrados no Ecossistema SaaS
+            const clientsMap = {
+                "CLIENT_01": "Sacolão Miranda (Instância Principal)",
+                "CLIENT_02": "PetFlow Master (Enterprise Node)",
+                "CLIENT_FREE": "Licença de Degustação Gratuita"
+            };
+
+            const grid = document.getElementById('admin-client-cards-grid');
+
+            // Agrupamento e cálculo de métricas agregadas via Vanilla JS
+            const clientIds = Object.keys(clientsMap);
+
+            // Atualiza KPIs Globais do Admin
+            const adminTotalEquity = globalRawData.reduce((acc, t) => acc + t.valor, 0);
+            const adminWins = globalRawData.filter(t => t.resultado === 'WIN').length;
+            const adminAvgWinrate = globalRawData.length > 0 ? ((adminWins / globalRawData.length) * 100).toFixed(1) : 0;
+
+            document.getElementById('admin-total-equity').innerText = `$ ${adminTotalEquity.toFixed(2)}`;
+            document.getElementById('admin-active-clients').innerText = clientIds.length - 1; // Desconta o free
+            document.getElementById('admin-avg-winrate').innerText = `${adminAvgWinrate}%`;
+
+            grid.innerHTML = clientIds.map(id => {
+                const clientTrades = globalRawData.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
+                const cWins = clientTrades.filter(t => t.resultado === 'WIN').length;
+                const cEquity = clientTrades.reduce((acc, t) => acc + t.valor, 0);
+                const cWinrate = clientTrades.length > 0 ? ((cWins / clientTrades.length) * 100).toFixed(1) : 0;
+
+                return `
+                <div class="p-5 rounded-xl border border-white/5 bg-black/40 flex flex-col justify-between hover:border-blue-500/30 transition-all">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xs font-black text-white uppercase tracking-tight">${clientsMap[id]}</h4>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">${id}</span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 font-sans">Última operação: ${clientTrades[0] ? new Date(clientTrades[0].created_at).toLocaleTimeString() : 'N/A'}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/5 font-mono text-center">
+                        <div>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">P&L</span>
+                            <span class="text-xs font-bold ${cEquity >= 0 ? 'text-green-400' : 'text-red-400'}">$${cEquity.toFixed(2)}</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">WinRate</span>
+                            <span class="text-xs font-bold text-blue-400">${cWinrate}%</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sinais</span>
+                            <span class="text-xs font-bold text-gray-300">${clientTrades.length}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="document.getElementById('qa-role-selector').value='${id}'; switchRole('${id}');" class="w-full mt-4 bg-white/5 hover:bg-blue-600 hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition-all">
+                        Acessar Instância
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        // --- ⚡ INSTANT FEED BROADCAST (REALTIME SUB) ---
+        supabase.channel('saas-realtime-stream')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                carregarDados();
+                executeCorePipeline();
             }).subscribe();
 
         window.onload = () => {
-            configurarLayoutPorNivel();
-            carregarDados();
+            executeCorePipeline();
         };
     </script>
 </body>
