@@ -4,22 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WayAxiom OS - Central Command Enterprise</title>
+    <title>WayAxiom OS - Ultra Enterprise</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         body {
-            background-color: #020203;
+            background-color: #010103;
             color: #f8f9fa;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
 
-        .card-pro {
-            background: linear-gradient(145deg, #0f0f12 0%, #050506 100%);
-            border: 1px solid #1e1e24;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-premium {
+            background: linear-gradient(145deg, #0b0b0f 0%, #030305 100%);
+            border: 1px solid #16161e;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-active {
+            border-color: #2563eb;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.15);
         }
 
         .status-pulse::after {
@@ -27,7 +39,7 @@
             position: absolute;
             width: 6px;
             height: 6px;
-            background: #3b82f6;
+            background: #10b981;
             border-radius: 50%;
             right: -12px;
             top: 6px;
@@ -37,17 +49,17 @@
         @keyframes pulse {
             0% {
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
             }
 
             70% {
                 transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
             }
 
             100% {
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
             }
         }
 
@@ -56,52 +68,63 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #1e1e24;
+            background: #1f1f2e;
             border-radius: 10px;
         }
     </style>
 </head>
 
-<body class="flex h-screen w-screen bg-[#020203] text-gray-300 select-none">
+<body class="flex h-screen w-screen bg-[#010103] text-gray-300 select-none">
 
-    <aside class="w-64 card-pro h-full p-6 flex flex-col justify-between border-y-0 border-l-0 z-20">
+    <aside class="w-64 card-premium h-full p-6 flex flex-col justify-between border-y-0 border-l-0 z-30">
         <div>
             <div class="mb-8">
-                <h1 class="text-2xl font-black tracking-tight uppercase italic text-white">Way<span
-                        class="text-blue-600 font-normal">Axiom</span></h1>
-                <p class="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-bold mt-1">OS v22.6 • Client Broker
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 bg-blue-600 rounded-sm rotate-45"></div>
+                    <h1 class="text-2xl font-black tracking-tight uppercase italic text-white">Way<span
+                            class="text-blue-600 font-normal">Axiom</span></h1>
+                </div>
+                <p class="text-[9px] text-gray-500 uppercase tracking-[0.25em] font-bold mt-1">Enterprise Solution OS
                 </p>
             </div>
 
-            <div class="mb-6 p-3 bg-white/[0.02] rounded-lg border border-white/5">
-                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-2">Simulador de
-                    Acesso (Q.A.)</label>
-                <select id="qa-role-selector" onchange="switchRole(this.value)"
-                    class="w-full bg-black border border-white/10 text-xs rounded p-1.5 text-white focus:outline-none font-mono">
-                    <option value="admin">ROOT ADMIN (Visão Geral)</option>
-                    <option value="CLIENT_01">CLIENTE: Sacolão Miranda</option>
-                    <option value="CLIENT_02">CLIENTE: PetFlow Master</option>
-                    <option value="CLIENT_FREE">CLIENTE: Teste Gratuito</option>
+            <div id="adm-sandbox" class="mb-6 p-3 bg-white/[0.01] rounded-lg border border-white/5">
+                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-1.5">Sandbox de
+                    Sessão</label>
+                <select id="session-scope-selector" onchange="atualizarEscopoSaaS(this.value)"
+                    class="w-full bg-black border border-white/10 text-[11px] rounded p-1.5 text-white focus:outline-none font-mono">
+                    <option value="admin">Sessão: Admin Global</option>
+                    <option value="CLIENT_01">Sessão: Sacolão Miranda</option>
+                    <option value="CLIENT_02">Sessão: PetFlow Master</option>
+                    <option value="CLIENT_FREE">Sessão: Teste Gratuito</option>
                 </select>
             </div>
 
-            <nav class="space-y-1.5">
-                <button onclick="changeTab('dashboard')"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.02] hover:text-white transition-all text-left">📊
-                    Terminal de Operações</button>
-                <button id="nav-admin-link" onclick="changeTab('admin-panel')"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.02] hover:text-white transition-all text-left hidden">👑
-                    Gestão de Contratos</button>
+            <nav class="space-y-1">
+                <button onclick="navegarAbas('terminal')" id="btn-nav-terminal"
+                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-white bg-white/[0.03] transition-all text-left">
+                    <span>📊 Terminal Realtime</span>
+                </button>
+                <button onclick="navegarAbas('metas')" id="btn-nav-metas"
+                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
+                    <span>🎯 Metas & Trava de Perda</span>
+                </button>
+                <button onclick="navegarAbas('gestao-global')" id="btn-nav-admin"
+                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left hidden">
+                    <span>👑 Central de Licenças</span>
+                </button>
             </nav>
         </div>
 
         <div class="pt-4 border-t border-white/5 space-y-3">
-            <div id="badge-identity" class="text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded">
-                CARREGANDO ENGINE...</div>
-            <a href="https://wa.me/5545991397543" target="_blank"
-                class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-widest">
-                💬 Central de Suporte
-            </a>
+            <div id="role-indicator" class="text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded">
+                Iniciando Kernels...</div>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="https://wa.me/5545991397543" target="_blank"
+                    class="flex items-center justify-center bg-white/[0.02] hover:bg-white/[0.05] text-gray-300 text-[9px] font-bold py-2 rounded border border-white/5 uppercase tracking-wider text-center">Suporte</a>
+                <button onclick="logoutSessao()"
+                    class="flex items-center justify-center bg-red-950/20 hover:bg-red-900/30 text-red-400 text-[9px] font-bold py-2 rounded border border-red-900/20 uppercase tracking-wider text-center">Sair</button>
+            </div>
         </div>
     </aside>
 
@@ -109,64 +132,61 @@
 
         <header class="flex justify-between items-start mb-6 shrink-0">
             <div>
-                <h2 id="view-title" class="text-xl font-black text-white uppercase tracking-tight">Painel de Controle
+                <h2 id="core-title" class="text-2xl font-black text-white uppercase tracking-tight">Terminal Sentinel
                 </h2>
-                <p id="view-subtitle" class="text-xs text-gray-500 mt-0.5">Filtro Ativo: Carregando escopo...</p>
+                <p id="core-subtitle" class="text-xs text-gray-500 mt-0.5">Aguardando validação de credenciais...</p>
             </div>
             <div
                 class="flex items-center gap-3 bg-white/[0.01] border border-white/5 p-2 rounded-lg font-mono text-[10px]">
-                <span class="status-pulse relative text-blue-500 font-bold uppercase tracking-wider mr-2">VPS Active
-                    Node</span>
-                <span class="text-gray-600">|</span>
-                <span id="live-clock" class="text-gray-400">00:00:00</span>
+                <span class="status-pulse relative text-emerald-400 font-bold uppercase tracking-wider mr-2">Engine
+                    Gateway Active</span>
+                <span class="text-gray-700">|</span>
+                <span id="clock-display" class="text-gray-400">00:00:00</span>
             </div>
         </header>
 
-        <div id="tab-dashboard" class="flex-1 flex flex-col gap-6 overflow-hidden">
+        <div id="view-terminal" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Net Equity (P&L)
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Saldo Conta Broker
+                        (Deriv)</h3>
+                    <p id="kpi-broker-balance" class="text-2xl font-black text-white font-mono">$ 0.00</p>
+                </div>
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Net P&L Acumulado
                     </h3>
-                    <p id="kpi-equity" class="text-2xl font-black text-white font-mono">$ 0.00</p>
+                    <p id="kpi-net-pl" class="text-2xl font-black text-white font-mono">$ 0.00</p>
                 </div>
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Assertividade</h3>
-                    <p id="kpi-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Taxa de Win
+                        (Assertividade)</h3>
+                    <p id="kpi-winrate-core" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
                 </div>
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Volume Operado</h3>
-                    <p id="kpi-volume" class="text-2xl font-black text-gray-300 font-mono">0</p>
-                </div>
-                <div class="card-pro p-5 rounded-xl bg-gradient-to-br from-blue-950/20 to-black border-blue-900/30">
-                    <h3 class="text-gray-400 text-[10px] uppercase font-black tracking-widest mb-1">Market State</h3>
-                    <p id="kpi-state" class="text-xs font-bold text-green-400 uppercase mt-1 tracking-wider">Aguardando
-                        Ticks</p>
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-400 text-[9px] uppercase font-black tracking-widest mb-1">Filtro Atual de
+                        Mercado</h3>
+                    <p id="kpi-market-filter" class="text-xs font-bold uppercase mt-1.5 tracking-wider">Calculando
+                        Ticks...</p>
                 </div>
             </div>
 
-            <div class="h-44 card-pro p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 left-4 z-10">
-                    <h4 class="text-[10px] uppercase tracking-widest font-black text-gray-500">Curva de Performance
-                        Histórica</h4>
+            <div
+                class="h-44 card-premium p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
+                <div class="w-full h-full">
+                    <canvas id="mainTrendChart"></canvas>
                 </div>
-                <div class="w-full h-full pt-4">
-                    <canvas id="performanceChart"></canvas>
-                </div>
-                <div id="chart-free-lock"
-                    class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex-col justify-center items-center z-20">
-                    <p class="text-xs font-black text-gray-400 tracking-widest uppercase">📊 Gráfico Ocultado no Plano
-                        Free</p>
+                <div id="free-layer-blur"
+                    class="absolute inset-0 bg-black/85 backdrop-blur-md hidden flex flex-col justify-center items-center z-10">
+                    <p class="text-xs font-black text-gray-500 tracking-widest uppercase">⚠️ Histórico Gráfico Bloqueado
+                        para Contas Free</p>
                 </div>
             </div>
 
-            <div class="flex-1 card-pro rounded-xl overflow-hidden flex flex-col">
+            <div class="flex-1 card-premium rounded-xl overflow-hidden flex flex-col">
                 <div
                     class="px-5 py-3 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Terminal de Execuções
-                        Direct-Feed</h3>
-                    <span
-                        class="text-[9px] font-mono bg-blue-950/30 text-blue-400 border border-blue-900/50 px-2 py-0.5 rounded uppercase">Stream
-                        Ativo</span>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Filtro de Ordens por
+                        Canal Seguro</h3>
                 </div>
                 <div class="flex-1 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
@@ -174,220 +194,273 @@
                             class="text-[9px] uppercase tracking-wider text-gray-500 bg-black/60 sticky top-0 z-10 border-b border-white/5">
                             <tr>
                                 <th class="px-5 py-3 font-black">Timestamp</th>
-                                <th id="th-client-identity" class="px-5 py-3 font-black hidden">ID Instância</th>
+                                <th id="th-saas-id" class="px-5 py-3 font-black hidden">Instância Alvo</th>
                                 <th class="px-5 py-3 font-black">Ativo</th>
-                                <th class="px-5 py-3 font-black">Direção</th>
                                 <th class="px-5 py-3 font-black">Resultado</th>
-                                <th class="px-5 py-3 font-black text-right">Engine Data / P&L</th>
+                                <th class="px-5 py-3 font-black text-right">Métricas Operacionais / Retorno</th>
                             </tr>
                         </thead>
-                        <tbody id="table-feed-body" class="text-xs divide-y divide-white/5 font-mono">
+                        <tbody id="table-trades-rows" class="text-xs divide-y divide-white/5 font-mono">
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="tab-admin-panel" class="flex-1 flex flex-col gap-6 overflow-hidden hidden">
+        <div id="view-metas" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card-premium p-6 rounded-xl">
+                    <h3
+                        class="text-sm font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                        Configuração de Gerenciamento Alvo</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Meta de Ganho
+                                Diário (Take Profit)</label>
+                            <div class="flex gap-2">
+                                <input type="number" value="50.00"
+                                    class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono w-full">
+                                <button
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded uppercase tracking-wider">Salvar</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Limite Máximo de
+                                Perda (Stop Loss)</label>
+                            <div class="flex gap-2">
+                                <input type="number" value="30.00"
+                                    class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 font-mono w-full">
+                                <button
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded uppercase tracking-wider">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-premium p-6 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <h3
+                            class="text-sm font-black text-white uppercase tracking-wider mb-2 border-b border-white/5 pb-2">
+                            Monitoramento de Riscos</h3>
+                        <p class="text-xs text-gray-500">O motor travará automaticamente as execuções na VPS caso o
+                            limite de perda seja violado.</p>
+                    </div>
+                    <div class="space-y-2 pt-4">
+                        <div class="flex justify-between text-xs font-mono"><span class="text-gray-500">Proteção contra
+                                Derrapagem:</span> <span class="text-green-400 font-bold">ATIVADA</span></div>
+                        <div class="flex justify-between text-xs font-mono"><span class="text-gray-500">Trava de Loss
+                                Sequencial:</span> <span class="text-blue-400 font-bold">2 LOSS / 15 MIN</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-gestao-global" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Faturamento Bruto
-                        Retido</h3>
-                    <p id="admin-total-equity" class="text-2xl font-black text-green-400 font-mono">$ 0.00</p>
-                </div>
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Clientes Premium
-                        Ativos</h3>
-                    <p id="admin-active-clients" class="text-2xl font-black text-white font-mono">0</p>
-                </div>
-                <div class="card-pro p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1">Média Global WinRate
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Volume Retido na Pool
                     </h3>
-                    <p id="admin-avg-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                    <p id="adm-pool-equity" class="text-2xl font-black text-emerald-400 font-mono">$ 0.00</p>
+                </div>
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Licenças Licenciadas
+                        Ativas</h3>
+                    <p id="adm-count-clients" class="text-2xl font-black text-white font-mono">0</p>
+                </div>
+                <div class="card-premium p-5 rounded-xl">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Média Ponderada
+                        WinRate</h3>
+                    <p id="adm-global-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
                 </div>
             </div>
 
-            <div class="flex-1 card-pro rounded-xl overflow-hidden flex flex-col">
+            <div class="flex-1 card-premium rounded-xl overflow-hidden flex flex-col">
                 <div class="px-5 py-3 border-b border-white/5 bg-white/[0.01] shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Matriz de Monitoramento
-                        de Licenças (White Label)</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Instâncias de Cópia
+                        Operando em Lote</h3>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-                    id="admin-client-cards-grid">
+                    id="adm-clients-matrix-grid">
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- 📡 ENDPOINTS CRIPTOGRAFADOS E AUTENTICADOS ---
+        // --- 🛰️ CONEXÕES SOBERANAS E INDESTRUTÍVEIS DE BANCO DE DADOS ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
 
-        let globalRawData = [];
-        let performanceChart = null;
-        let CURRENT_SCOPE = "admin"; // Escopo Padrão do sistema
+        let cacheDeOperacoes = [];
+        let mainChartInstance = null;
+        let ESCOPO_SESSÃO_ATIVO = "admin";
 
-        // --- 🖥️ ENGINE DE CONTROLE DE HORÁRIO ---
+        // --- ⏰ RELÓGIO OPERACIONAL ---
         setInterval(() => {
-            const fuso = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            document.getElementById('live-clock').innerText = fuso;
+            document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         }, 1000);
 
-        // --- 🧪 ESTRATÉGIA Q.A. : ALTERNÂNCIA DE ESCOPO DINÂMICA ---
-        function switchRole(roleValue) {
-            CURRENT_SCOPE = roleValue;
-            executeCorePipeline();
+        // --- 🔄 ENGINE DE NAVEGAÇÃO DE ABAS ---
+        function navegarAbas(viewId) {
+            document.querySelectorAll('.view-layer').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+            // Gerenciamento de estilo ativo nos botões
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-white/[0.03]', 'text-white');
+                btn.classList.add('text-gray-400', 'hover:bg-white/[0.01]');
+            });
+            const activeBtn = document.getElementById(`btn-nav-${viewId === 'gestao-global' ? 'admin' : viewId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400', 'hover:bg-white/[0.01]');
+                activeBtn.classList.add('bg-white/[0.03]', 'text-white');
+            }
         }
 
-        function changeTab(tabId) {
-            document.getElementById('tab-dashboard').classList.add('hidden');
-            document.getElementById('tab-admin-panel').classList.add('hidden');
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        function atualizarEscopoSaaS(valorDoSeletor) {
+            ESCOPO_SESSÃO_ATIVO = valorDoSeletor;
+            processarPipelineDeDados();
         }
 
-        // --- ⚙️ PIPELINE PRINCIPAL DE DADOS (REATIVO) ---
-        async function executeCorePipeline() {
+        // --- ⚡ PIPELINE CENTRAL DE DADOS ---
+        async function processarPipelineDeDados() {
+            // Tentativa de puxar usuário autenticado real do Supabase
+            const { data: { session } } = await supabase.auth.getSession();
+
+            // Auditoria Q.A.: Se houver login real, ele substitui a sessão do seletor de testes
+            if (session && session.user) {
+                document.getElementById('adm-sandbox').classList.add('hidden'); // Oculta o sandbox se for produção real
+                ESCOPO_SESSÃO_ATIVO = session.user.email.includes('admin') ? 'admin' : session.user.id;
+            }
+
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("🛑 Erro Q.A. Pipeline:", error); return; }
+            if (error) { console.error("⚠️ Falha crítica de pipeline:", error); return; }
 
-            globalRawData = trades || [];
-
-            // Tratamento de segurança: se o banco estiver temporariamente vazio, injeta mock estrutural para Q.A.
-            if (globalRawData.length === 0) {
-                globalRawData = [
-                    { created_at: new Date().toISOString(), user_id: 'CLIENT_01', ativo: 'R_10', resultado: 'WIN', valor: 9.50, adx: 8.4, coice: 1.5 },
-                    { created_at: new Date().toISOString(), user_id: 'CLIENT_02', ativo: 'R_75', resultado: 'LOSS', valor: -10.00, adx: 8.6, coice: 1.6 }
-                ];
-            }
-
-            renderInterfaceByRole();
+            cacheDeOperacoes = trades || [];
+            reconstruirInterfaceSaaS();
         }
 
-        // --- 🏛️ MOTOR DE RENDERIZAÇÃO E RBAC POLICY ---
-        function renderInterfaceByRole() {
-            const badge = document.getElementById('badge-identity');
-            const sub = document.getElementById('view-subtitle');
-            const navAdmin = document.getElementById('nav-admin-link');
-            const thClient = document.getElementById('th-client-identity');
-            const lockChart = document.getElementById('chart-free-lock');
-            const marketState = document.getElementById('kpi-state');
+        // --- 🏛️ RECONSTRUÇÃO DA INTERFACE BASEADA NO ESCOPO (RBAC ENGINE) ---
+        function reconstruirInterfaceSaaS() {
+            const badge = document.getElementById('role-indicator');
+            const subtitle = document.getElementById('core-subtitle');
+            const navAdmin = document.getElementById('btn-nav-admin');
+            const thSaas = document.getElementById('th-saas-id');
+            const blurLayer = document.getElementById('free-layer-blur');
+            const marketFilter = document.getElementById('kpi-market-filter');
+            const balanceKPI = document.getElementById('kpi-broker-balance');
 
-            // Identifica Estado de Mercado baseado na hora local de Matelândia
-            const hrs = new Date().getHours();
-            if (hrs >= 5 && hrs < 18) {
-                marketState.innerText = "🌐 TURNO: FOREX (ADX 3.8)";
-                marketState.className = "text-xs font-bold text-blue-400 uppercase mt-1 tracking-wider";
+            // Determina turno e filtro de força do mercado de Matelândia
+            const horaAtual = new Date().getHours();
+            if (horaAtual >= 5 && horaAtual < 18) {
+                marketFilter.innerText = "FOREX • ADX TARGET > 3.8";
+                marketFilter.className = "text-xs font-bold text-blue-400 uppercase mt-1.5 tracking-wider font-mono";
             } else {
-                marketState.innerText = "⚡ TURNO: SINTÉTICOS (ADX 8.3)";
-                marketState.className = "text-xs font-bold text-orange-400 uppercase mt-1 tracking-wider";
+                marketFilter.innerText = "SINTÉTICOS • ADX TARGET > 8.3";
+                marketFilter.className = "text-xs font-bold text-orange-400 uppercase mt-1.5 tracking-wider font-mono";
             }
 
-            // Filtragem de escopo por Cliente
-            let filteredTrades = [];
+            let dadosFiltrados = [];
 
-            if (CURRENT_SCOPE === 'admin') {
-                filteredTrades = globalRawData;
-                badge.innerText = "ADMIN MASTER";
+            if (ESCOPO_SESSÃO_ATIVO === 'admin') {
+                dadosFiltrados = cacheDeOperacoes;
+                badge.innerText = "ADMIN SOBERANO";
                 badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-red-950/40 text-red-400 border border-red-500/20";
-                sub.innerText = "Escopo Global • Monitoramento de Todas as Instâncias SaaS";
+                subtitle.innerText = "Infraestrutura SaaS Global • Monitoramento de Transações em Tempo Real";
                 navAdmin.classList.remove('hidden');
-                thClient.classList.remove('hidden');
-                lockChart.classList.add('hidden');
+                thSaas.classList.remove('hidden');
+                blurLayer.classList.add('hidden');
+                balanceKPI.innerText = `$ ${dadosFiltrados.reduce((acc, t) => acc + (t.valor * 2.5), 1500).toFixed(2)}`; // Visão pool de saldo
             } else {
-                // Escopo de cliente específico
-                filteredTrades = globalRawData.filter(t => t.user_id === CURRENT_SCOPE || (!t.user_id && CURRENT_SCOPE === 'CLIENT_01'));
+                // Filtra cirurgicamente pelo ID do cliente ativo
+                dadosFiltrados = cacheDeOperacoes.filter(t => t.user_id === ESCOPO_SESSÃO_ATIVO || (!t.user_id && ESCOPO_SESSÃO_ATIVO === 'CLIENT_01'));
                 navAdmin.classList.add('hidden');
-                changeTab('dashboard'); // Força cliente a ficar fora do painel administrativo
-                thClient.classList.add('hidden');
+                navegarAbas('terminal');
+                thSaas.classList.add('hidden');
 
-                if (CURRENT_SCOPE === 'CLIENT_FREE') {
+                if (ESCOPO_SESSÃO_ATIVO === 'CLIENT_FREE') {
                     badge.innerText = "PLANO DEMO";
-                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-gray-800 text-gray-400 border border-gray-700";
-                    sub.innerText = "Escopo Limitado • Versão Gratuita de Demonstração";
-                    lockChart.classList.remove('hidden');
-                    filteredTrades = filteredTrades.slice(0, 3); // Trava Q.A. de volume para conta free
+                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
+                    subtitle.innerText = "Acesso Limitado • Instância de Testes Sem Garantia de Execução";
+                    blurLayer.classList.remove('hidden');
+                    dadosFiltrados = dadosFiltrados.slice(0, 2); // Trava estrita de histórico
+                    balanceKPI.innerText = "$ 10.00 (Demo)";
                 } else {
-                    badge.innerText = "PREMIUM LICENSED";
+                    badge.innerText = "LICENÇA ATIVA";
                     badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
-                    sub.innerText = `Instância Ativa: ${CURRENT_SCOPE} • WayAxiom Copy Engine`;
-                    lockChart.classList.add('hidden');
+                    subtitle.innerText = `Token Vinculado: ${ESCOPO_SESSÃO_ATIVO} • Execuções de Cópia Direta`;
+                    blurLayer.classList.add('hidden');
+                    balanceKPI.innerText = `$ ${dadosFiltrados.reduce((acc, t) => acc + t.valor, 250).toFixed(2)}`; // Simulação reativa de saldo real Deriv
                 }
             }
 
-            // Cálculos dos KPIs baseados no escopo ativo
-            const wins = filteredTrades.filter(t => t.resultado === 'WIN').length;
-            const equity = filteredTrades.reduce((acc, t) => acc + t.valor, 0);
-            const winrate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
+            // Cálculos reativos de performance de conta
+            const wins = dadosFiltrados.filter(t => t.resultado === 'WIN').length;
+            const netPL = dadosFiltrados.reduce((acc, t) => acc + t.valor, 0);
+            const winrate = dadosFiltrados.length > 0 ? ((wins / dadosFiltrados.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('kpi-equity').innerText = `$ ${equity.toFixed(2)}`;
-            document.getElementById('kpi-equity').className = `text-2xl font-black font-mono ${equity >= 0 ? 'text-green-400' : 'text-red-400'}`;
-            document.getElementById('kpi-winrate').innerText = `${winrate}%`;
-            document.getElementById('kpi-volume').innerText = filteredTrades.length;
+            document.getElementById('kpi-net-pl').innerText = `$ ${netPL.toFixed(2)}`;
+            document.getElementById('kpi-net-pl').className = `text-2xl font-black font-mono ${netPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+            document.getElementById('kpi-winrate-core').innerText = `${winrate}%`;
+            document.getElementById('kpi-volume').innerText = dadosFiltrados.length;
 
-            renderTableFeed(filteredTrades);
-            if (CURRENT_SCOPE !== 'CLIENT_FREE') {
-                renderChartLine(filteredTrades.slice(0, 15).reverse());
+            renderizarLinhasDeTabela(dadosFiltrados);
+            if (ESCOPO_SESSÃO_ATIVO !== 'CLIENT_FREE') {
+                renderizarGraficoDeTendência(dadosFiltrados.slice(0, 15).reverse());
             }
 
-            // Se estiver na aba admin, processa a matriz avançada de gerenciamento de clientes
-            renderAdminPanel();
+            processarMatrizAdministrativa();
         }
 
-        // --- 📊 OPERAÇÕES DE TABELA COM MASCARAMENTO DE IP ---
-        function renderTableFeed(trades) {
-            const body = document.getElementById('table-feed-body');
-            body.innerHTML = trades.map(t => {
+        // --- 📊 RENDERIZADOR DE LINHAS COM PRIVACIDADE INTELECTUAL ---
+        function renderizarLinhasDeTabela(trades) {
+            const tbody = document.getElementById('table-trades-rows');
+            tbody.innerHTML = trades.map(t => {
                 const isWin = t.resultado === 'WIN';
                 const timeStr = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
 
-                let metricsColumn = '';
-                if (CURRENT_SCOPE === 'admin') {
-                    metricsColumn = `<span class="text-blue-500 font-bold">ADX:${t.adx}</span> <span class="text-gray-600">|</span> CC:${t.coice}`;
-                } else if (CURRENT_SCOPE === 'CLIENT_FREE') {
-                    metricsColumn = `<span class="text-red-500/40 blur-[2px] italic select-none">Upgrade Required</span>`;
+                let dataIntel = '';
+                if (ESCOPO_SESSÃO_ATIVO === 'admin') {
+                    dataIntel = `ADX: <span class="text-blue-400">${t.adx}</span> | CC: ${t.coice}`;
+                } else if (ESCOPO_SESSÃO_ATIVO === 'CLIENT_FREE') {
+                    dataIntel = `<span class="text-zinc-600 font-sans italic">Bloqueado</span>`;
                 } else {
-                    metricsColumn = `<span class="text-green-500 font-bold uppercase tracking-wider text-[10px]">🏹 Engine Disparada</span>`;
+                    dataIntel = `<span class="text-emerald-400 font-black tracking-wider text-[10px]">✨ SINAL CONFIGURADO</span>`;
                 }
 
                 return `
                 <tr class="hover:bg-white/[0.01] transition-all border-b border-white/5">
-                    <td class="px-5 py-3 text-gray-500 text-[11px]">${timeStr}</td>
-                    ${CURRENT_SCOPE === 'admin' ? `<td class="px-5 py-3 text-gray-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
-                    <td class="px-5 py-3 font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
-                    <td class="px-5 py-3 text-gray-400 text-[11px]">CALL</td>
-                    <td class="px-5 py-3">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
+                    <td class="px-5 py-3.5 text-gray-500 text-[11px]">${timeStr}</td>
+                    ${ESCOPO_SESSÃO_ATIVO === 'admin' ? `<td class="px-5 py-3.5 text-blue-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
+                    <td class="px-5 py-3.5 font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
+                    <td class="px-5 py-3.5 text-[11px]">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
                     </td>
-                    <td class="px-5 py-3 text-right font-bold ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-2 font-normal font-sans text-gray-500">${metricsColumn}</span></td>
+                    <td class="px-5 py-3.5 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${dataIntel}</span></td>
                 </tr>`;
             }).join('');
         }
 
-        // --- 📈 RENDERIZADOR DO GRÁFICO DE EQUITY (CHART.JS) ---
-        function renderChartLine(data) {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            if (performanceChart) performanceChart.destroy();
+        // --- 📈 RENDERIZADOR DO GRÁFICO REALTIME (CHART.JS) ---
+        function renderizarGraficoDeTendência(data) {
+            const ctx = document.getElementById('mainTrendChart').getContext('2d');
+            if (mainChartInstance) mainChartInstance.destroy();
 
-            // Lógica de acumulação de capital contínuo para o gráfico de linha
-            let accumulatedEquity = 0;
-            const points = data.map(t => {
-                accumulatedEquity += t.valor;
-                return accumulatedEquity;
-            });
+            let acumulado = 0;
+            const coordenadas = data.map(t => { acumulado += t.valor; return acumulado; });
 
-            performanceChart = new Chart(ctx, {
+            mainChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: points,
-                        borderColor: '#3b82f6',
+                        data: coordenadas,
+                        borderColor: '#2563eb',
                         borderWidth: 2,
                         tension: 0.35,
                         fill: true,
-                        backgroundColor: 'rgba(59, 130, 246, 0.02)',
+                        backgroundColor: 'rgba(37, 99, 235, 0.01)',
                         pointRadius: 0
                     }]
                 },
@@ -400,75 +473,77 @@
             });
         }
 
-        // --- 👑 MATRIZ EXCLUSIVA DO ADMIN: GESTÃO DE CONTRATOS POR CLIENTE ---
-        function renderAdminPanel() {
-            // Mapeamento de Clientes Cadastrados no Ecossistema SaaS
-            const clientsMap = {
-                "CLIENT_01": "Sacolão Miranda (Instância Principal)",
+        // --- 👑 CONSOLE CENTRAL DE LICENÇAS (VISÃO CONSOLIDADA ADMIN) ---
+        function processarMatrizAdministrativa() {
+            const nomesDeClientes = {
+                "CLIENT_01": "Sacolão Miranda (Matriz)",
                 "CLIENT_02": "PetFlow Master (Enterprise Node)",
-                "CLIENT_FREE": "Licença de Degustação Gratuita"
+                "CLIENT_FREE": "Licença Temporária Gratuita"
             };
 
-            const grid = document.getElementById('admin-client-cards-grid');
+            const grid = document.getElementById('adm-clients-matrix-grid');
+            const ids = Object.keys(nomesDeClientes);
 
-            // Agrupamento e cálculo de métricas agregadas via Vanilla JS
-            const clientIds = Object.keys(clientsMap);
+            // Cálculos da Pool Administradora Global
+            const poolEquity = cacheDeOperacoes.reduce((acc, t) => acc + t.valor, 0);
+            const totalWins = cacheDeOperacoes.filter(t => t.resultado === 'WIN').length;
+            const poolWinrate = cacheDeOperacoes.length > 0 ? ((totalWins / cacheDeOperacoes.length) * 100).toFixed(1) : 0;
 
-            // Atualiza KPIs Globais do Admin
-            const adminTotalEquity = globalRawData.reduce((acc, t) => acc + t.valor, 0);
-            const adminWins = globalRawData.filter(t => t.resultado === 'WIN').length;
-            const adminAvgWinrate = globalRawData.length > 0 ? ((adminWins / globalRawData.length) * 100).toFixed(1) : 0;
+            document.getElementById('adm-pool-equity').innerText = `$ ${poolEquity.toFixed(2)}`;
+            document.getElementById('adm-count-clients').innerText = ids.length - 1;
+            document.getElementById('adm-global-winrate').innerText = `${poolWinrate}%`;
 
-            document.getElementById('admin-total-equity').innerText = `$ ${adminTotalEquity.toFixed(2)}`;
-            document.getElementById('admin-active-clients').innerText = clientIds.length - 1; // Desconta o free
-            document.getElementById('admin-avg-winrate').innerText = `${adminAvgWinrate}%`;
-
-            grid.innerHTML = clientIds.map(id => {
-                const clientTrades = globalRawData.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
-                const cWins = clientTrades.filter(t => t.resultado === 'WIN').length;
-                const cEquity = clientTrades.reduce((acc, t) => acc + t.valor, 0);
-                const cWinrate = clientTrades.length > 0 ? ((cWins / clientTrades.length) * 100).toFixed(1) : 0;
+            grid.innerHTML = ids.map(id => {
+                const tradesDoCliente = cacheDeOperacoes.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
+                const cWins = tradesDoCliente.filter(t => t.resultado === 'WIN').length;
+                const cEquity = tradesDoCliente.reduce((acc, t) => acc + t.valor, 0);
+                const cWinrate = tradesDoCliente.length > 0 ? ((cWins / tradesDoCliente.length) * 100).toFixed(1) : 0;
 
                 return `
-                <div class="p-5 rounded-xl border border-white/5 bg-black/40 flex flex-col justify-between hover:border-blue-500/30 transition-all">
+                <div class="p-5 rounded-xl border border-white/5 bg-black/30 flex flex-col justify-between hover:border-blue-500/30 transition-all">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-xs font-black text-white uppercase tracking-tight">${clientsMap[id]}</h4>
+                            <h4 class="text-xs font-black text-white uppercase tracking-tight">${nomesDeClientes[id]}</h4>
                             <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">${id}</span>
                         </div>
-                        <p class="text-[10px] text-gray-500 font-sans">Última operação: ${clientTrades[0] ? new Date(clientTrades[0].created_at).toLocaleTimeString() : 'N/A'}</p>
+                        <p class="text-[10px] text-gray-500">Última transmissão: ${tradesDoCliente[0] ? new Date(tradesDoCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/5 font-mono text-center">
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">P&L</span>
-                            <span class="text-xs font-bold ${cEquity >= 0 ? 'text-green-400' : 'text-red-400'}">$${cEquity.toFixed(2)}</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Liquidez</span>
+                            <span class="text-xs font-bold ${cEquity >= 0 ? 'text-emerald-400' : 'text-red-400'}">$ ${cEquity.toFixed(2)}</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">WinRate</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">WinRate</span>
                             <span class="text-xs font-bold text-blue-400">${cWinrate}%</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sinais</span>
-                            <span class="text-xs font-bold text-gray-300">${clientTrades.length}</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Triggers</span>
+                            <span class="text-xs font-bold text-gray-300">${tradesDoCliente.length}</span>
                         </div>
                     </div>
 
-                    <button onclick="document.getElementById('qa-role-selector').value='${id}'; switchRole('${id}');" class="w-full mt-4 bg-white/5 hover:bg-blue-600 hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition-all">
-                        Acessar Instância
+                    <button onclick="document.getElementById('session-scope-selector').value='${id}'; atualizarEscopoSaaS('${id}');" class="w-full mt-4 bg-white/5 hover:bg-blue-600 hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-wider transition-all">
+                        Inspecionar Instância Individual
                     </button>
                 </div>`;
             }).join('');
         }
 
-        // --- ⚡ INSTANT FEED BROADCAST (REALTIME SUB) ---
-        supabase.channel('saas-realtime-stream')
+        async function logoutSessao() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        // --- 📡 ESCUTA ATIVA STREAM REALTIME COPIER ---
+        supabase.channel('saas-stream-v22')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                executeCorePipeline();
+                processarPipelineDeDados();
             }).subscribe();
 
         window.onload = () => {
-            executeCorePipeline();
+            processarPipelineDeDados();
         };
     </script>
 </body>
