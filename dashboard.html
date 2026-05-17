@@ -4,242 +4,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Sentinel - Sovereign Node v4.0</title>
+    <title>NÓ SOBERANO AXIOM v4.0 - Central Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;900&display=swap"
         rel="stylesheet">
     <style>
-        /* 1. FUNDO BRUTALISTA COM ILUMINAÇÃO DRAMÁTICA (Inspirado nas referências) */
         body {
-            background-color: #010103;
+            background-color: #030305;
             background-image:
-                radial-gradient(circle at 10% 10%, rgba(255, 107, 0, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
-                url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3Y%3Cg fill-rule="evenodd"%3Y%3Cg fill="%23FFFFFF" fill-opacity="0.01"%3Y%3Cpath d="M0 40h40V0H0v40zM20 20h20v20H20V20zM0 0h20v20H0V0z"/%3Y%3C/g%3Y%3C/g%3Y%3C/svg%3Y');
-            color: #f8f9fa;
+                radial-gradient(circle at 50% 0%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+                url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3Y%3Cg fill-rule="evenodd"%3Y%3Cg fill="%23FFFFFF" fill-opacity="0.005"%3Y%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3Y%3C/g%3Y%3C/g%3Y%3C/svg%3Y');
+            color: #e2e8f0;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
+        }
+
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
         }
 
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .font-poppins {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* 2. CARDS HOLOGRÁFICOS E FLUTUANTES */
-        .card-sovereign {
-            background: rgba(11, 11, 15, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+        /* CARDS VIDRO FUMÊ (Glassmorphism da Imagem 2) */
+        .glass-card {
+            background: linear-gradient(135deg, rgba(15, 15, 22, 0.85) 0%, rgba(8, 8, 12, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .card-sovereign:hover {
-            border-color: rgba(255, 107, 0, 0.3);
-            box-shadow: 0 20px 50px rgba(255, 107, 0, 0.1);
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.3), transparent);
+            border-radius: 12px 12px 0 0;
         }
 
-        /* 3. BOTÕES TÁTICOS (Segmentados das referências) */
-        .btn-tactical {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #94a3b8;
+        /* MEDIDOR CIRCULAR BRILHANTE */
+        .gauge-container {
+            position: relative;
+            width: 130px;
+            height: 75px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .gauge-body {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 14px solid rgba(255, 255, 255, 0.03);
+            border-bottom-color: transparent !important;
+            border-left-color: transparent !important;
+            transform: rotate(-135deg);
+            position: absolute;
+        }
+
+        .gauge-fill {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 14px solid #ff6b00;
+            border-bottom-color: transparent !important;
+            border-left-color: transparent !important;
+            transform: rotate(-135deg);
+            position: absolute;
+            filter: drop-shadow(0 0 8px #ff6b00);
+            transition: transform 1s ease-out;
+        }
+
+        /* CHIP TÁTICO */
+        .tactical-select {
+            background: #09090d;
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            color: #fff;
+            font-family: 'JetBrains Mono';
             font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 10px 16px;
+            padding: 4px 10px;
             border-radius: 6px;
-            transition: all 0.2s ease;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .btn-tactical:hover {
-            background: rgba(255, 107, 0, 0.05);
-            border-color: rgba(255, 107, 0, 0.2);
-            color: #fff;
+        .tactical-select:hover {
+            border-color: #ff6b00;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
         }
 
-        .btn-tactical.active {
-            background: rgba(255, 107, 0, 0.1);
-            border-color: #FF6B00;
-            color: #fff;
-            box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
-        }
-
-        /* 4. STATUS E DECORAÇÃO SNIPER */
         .status-pulse::after {
             content: '';
             position: absolute;
             width: 6px;
             height: 6px;
-            background: #FF6B00;
+            background: #10b981;
             border-radius: 50%;
             right: -12px;
-            top: 7px;
+            top: 6px;
             animation: pulse 2s infinite;
-            box-shadow: 0 0 10px #FF6B00;
+            box-shadow: 0 0 8px #10b981;
         }
 
         @keyframes pulse {
             0% {
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.7);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
             }
 
             70% {
                 transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(255, 107, 0, 0);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
             }
 
             100% {
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
             }
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 107, 0, 0.2);
-            border-radius: 10px;
         }
     </style>
 </head>
 
-<body class="flex h-screen w-screen text-gray-300 select-none">
+<body class="flex h-screen w-screen p-4 gap-4 overflow-hidden">
 
-    <aside class="w-64 h-full p-6 flex flex-col justify-between border-r border-white/5 z-30">
-        <div>
-            <div class="mb-10 text-center">
-                <div class="flex items-center justify-center gap-2 mb-2">
-                    <div class="h-4 w-4 bg-[#FF6B00] rounded-sm rotate-45 box-shadow: 0 0 10px #FF6B00"></div>
-                    <h1 class="text-2xl font-black font-poppins tracking-tight uppercase italic text-white">Way<span
-                            class="text-[#FF6B00] font-normal">Axiom</span></h1>
+    <aside class="w-72 glass-card h-full p-5 flex flex-col justify-between shrink-0">
+        <div class="space-y-6">
+            <div class="border-b border-white/5 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-4 w-4 bg-[#ff6b00] rounded shadow-[0_0_10px_#ff6b00]"></div>
+                    <h1 class="text-xl font-cyber font-black tracking-wider text-white">NÓ SOBERANO</h1>
                 </div>
-                <p class="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">SENTINEL NODE OS v4.0</p>
+                <p class="text-[10px] font-mono text-[#ff6b00] uppercase tracking-widest mt-1">AXIOM COMMAND v4.0</p>
             </div>
 
-            <div id="sandbox-auditoria" class="mb-8 p-3 card-sovereign bg-white/[0.01]">
-                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-2">Escopo de
-                    Sessão</label>
-                <select id="scope-selector" onchange="alterarEscopoSaaS(this.value)"
-                    class="w-full bg-black border border-white/10 text-[11px] rounded p-1.5 text-white focus:outline-none font-mono">
-                    <option value="admin">Sessão: Admin Master</option>
-                    <option value="CLIENT_01">Sessão: Sacolão Miranda</option>
-                    <option value="CLIENT_02">Sessão: PetFlow Master</option>
-                    <option value="CLIENT_FREE">Sessão: Teste Gratuito</option>
+            <div class="p-3 bg-black/40 rounded-lg border border-white/5 space-y-2">
+                <label class="text-[9px] font-mono uppercase text-gray-500 font-bold block">Filtro de Instância
+                    SaaS</label>
+                <select id="instance-switcher" onchange="atualizarEscopoFiltro(this.value)"
+                    class="w-full tactical-select">
+                    <option value="admin">GUARDIAN ACCESS (ROOT)</option>
+                    <option value="CLIENT_01">CLIENT: Sacolão Miranda</option>
+                    <option value="CLIENT_02">CLIENT: PetFlow Master</option>
+                    <option value="CLIENT_FREE">CLIENT: Sandbox Demo</option>
                 </select>
             </div>
 
-            <nav class="space-y-2">
-                <button onclick="trocarAba('terminal')" id="btn-terminal"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white bg-white/[0.03] transition-all text-left">
-                    <span>📊 Terminal Realtime</span>
+            <nav class="space-y-1.5">
+                <button onclick="alternarAbas('principal')" id="btn-menu-principal"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase font-cyber tracking-wider text-white bg-white/[0.03] border-l-2 border-[#ff6b00]">
+                    <span>🎯 Resumo de Disciplina</span>
                 </button>
-                <button onclick="trocarAba('disciplina')" id="btn-disciplina"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
-                    <span>🎯 Risco e Disciplina</span>
-                </button>
-                <button onclick="trocarAba('onboarding')" id="btn-onboarding"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
-                    <span>🔗 Parceria Deriv</span>
-                </button>
-                <button onclick="trocarAba('gestao')" id="btn-admin"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left hidden">
-                    <span>👑 Central de Licenças</span>
+                <button onclick="alternarAbas('licencas')" id="btn-menu-licencas"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase font-cyber tracking-wider text-gray-400 hover:text-white transition-all hidden">
+                    <span>👑 Gestão de Licenças</span>
                 </button>
             </nav>
         </div>
 
-        <div class="pt-6 border-t border-white/5 space-y-4">
-            <div id="badge-soberano"
-                class="text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/20">
-                NÓ SOBERANO</div>
+        <div class="space-y-3 pt-4 border-t border-white/5">
+            <div id="badge-status-escopo"
+                class="text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-[#ff6b00]/10 text-[#ff6b00] border border-[#ff6b00]/20">
+                INICIALIZANDO...</div>
+            <a href="https://track.deriv.com/_16GbgDTBVBN6W2e/1/" target="_blank"
+                class="w-full block text-center bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[10px] py-2.5 rounded border border-white/10 uppercase tracking-widest transition-all">Broker
+                Account</a>
             <a href="https://wa.me/5545991397543" target="_blank"
-                class="flex items-center justify-center gap-2 w-full bg-[#FF6B00] hover:bg-orange-700 text-white text-[10px] font-black py-2.5 rounded-lg transition-all uppercase tracking-widest text-center shadow-[0_0_15px_rgba(255,107,0,0.2)]">
-                Suporte Enterprise
-            </a>
+                class="w-full block text-center bg-[#ff6b00] hover:bg-orange-700 text-white font-cyber text-[11px] font-black py-2.5 rounded shadow-[0_0_15px_rgba(255,107,0,0.2)] uppercase tracking-widest transition-all">Suporte
+                Enterprise</a>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden p-8 z-10">
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
 
-        <header class="flex justify-between items-start mb-6 shrink-0 border-b border-white/5 pb-4">
+        <header class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
             <div>
-                <h2 id="view-title" class="text-3xl font-black text-white uppercase tracking-tight font-poppins">
-                    Terminal Sentinel</h2>
-                <p id="view-subtitle" class="text-xs text-gray-500 mt-1">Conectando ao Nó Soberano v4.0...</p>
+                <h2 id="header-main-title" class="text-xl font-cyber font-black tracking-tight text-white uppercase">NÓ
+                    DE COMANDO DE MATELÂNDIA // PARANÁ</h2>
+                <p id="header-main-subtitle" class="text-xs text-gray-500 mt-0.5">Mapeador Realtime Direct-Feed de
+                    Operações</p>
             </div>
-            <div class="flex items-center gap-3 bg-black border border-white/5 p-3 rounded-xl font-mono text-[10px]">
-                <span
-                    class="status-pulse relative text-[#FF6B00] font-bold uppercase tracking-wider mr-2 shadow-[0_0_10px_rgba(255,107,0,0.5)]">VPS
-                    Active Node</span>
+            <div
+                class="flex items-center gap-4 font-mono text-[11px] bg-black border border-white/5 px-4 py-2 rounded-xl">
+                <span class="status-pulse relative text-emerald-400 font-bold uppercase tracking-wider mr-2">Core Live
+                    Stream</span>
                 <span class="text-gray-700">|</span>
                 <span id="relogio-tatico" class="text-gray-400">00:00:00</span>
             </div>
         </header>
 
-        <div id="view-terminal" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer">
+        <div id="aba-principal" class="flex-1 flex flex-col gap-4 overflow-hidden tab-content">
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Net Equity (P&L)
-                    </h3>
-                    <p id="kpi-pl" class="text-3xl font-black text-white font-mono">$ 0.00</p>
-                </div>
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Win Rate Geral
-                    </h3>
-                    <p id="kpi-winrate" class="text-3xl font-black text-blue-500 font-mono">0.0%</p>
-                </div>
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Banca Broker
-                        (Deriv)</h3>
-                    <p id="kpi-banca" class="text-3xl font-black text-gray-300 font-mono">$ 0.00</p>
-                </div>
-                <div class="card-sovereign p-5 bg-gradient-to-br from-[#FF6B00]/10 to-black">
-                    <h3 class="text-white text-[10px] uppercase font-black tracking-widest mb-1.5">Market State (Target)
-                    </h3>
-                    <p id="kpi-state" class="text-xs font-bold text-[#FF6B00] uppercase mt-2 tracking-wider font-mono">
-                        Calculando Ticks...</p>
-                </div>
-            </div>
 
-            <div
-                class="h-44 card-sovereign p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-[10px] text-gray-500"></i>
-                    <h4 class="text-[10px] uppercase tracking-widest font-black text-gray-500">Curva de Capital
-                        Acumulado</h4>
+                <div class="glass-card p-4 flex flex-col justify-between items-center text-center">
+                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase mb-2">Monitor
+                        de Disciplina</h3>
+                    <div class="gauge-container">
+                        <div class="gauge-body"></div>
+                        <div id="gauge-fill-node" class="gauge-fill"></div>
+                        <div class="absolute inset-0 flex items-end justify-center pb-1">
+                            <span id="gauge-text-node" class="text-2xl font-cyber font-black text-white">0%</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-full h-full pt-2">
-                    <canvas id="chartPerformance"></canvas>
-                </div>
-                <div id="chart-lock-demo"
-                    class="absolute inset-0 bg-black/90 backdrop-blur-md hidden flex-col justify-center items-center z-20">
-                    <i class="fa-solid fa-lock text-3xl text-gray-700 mb-2"></i>
-                    <p class="text-xs font-black text-gray-500 tracking-widest uppercase">Gráfico Oculto na Versão Demo
-                    </p>
-                </div>
-            </div>
 
-            <div class="flex-1 card-sovereign overflow-hidden flex flex-col">
+                <div class="glass-card p-4 flex flex-col justify-between">
+                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase">Taxa de
+                        Desempenho</h3>
+                    <div class="flex justify-between items-end mt-2">
+                        <p id="kpi-desempenho" class="text-3xl font-cyber font-black text-white">-67,0%</p>
+                        <span class="text-[10px] font-mono text-gray-600">Média Móvel</span>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 flex flex-col justify-between">
+                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase">Risco :
+                        Retorno</h3>
+                    <div class="flex justify-between items-end mt-2">
+                        <p class="text-3xl font-cyber font-black text-emerald-400">0,48</p>
+                        <span class="text-[10px] font-mono text-emerald-500/50">Otimizado</span>
+                    </div>
+                </div>
+
                 <div
-                    class="px-5 py-3 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Direct-Feed Tático v22.8
-                    </h3>
-                    <span
-                        class="text-[9px] font-mono bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/30 px-2 py-0.5 rounded uppercase shadow-[0_0_5px_rgba(255,107,0,0.2)]">Stream
-                        Ativo</span>
+                    class="glass-card p-4 flex flex-col justify-between bg-gradient-to-r from-orange-950/10 to-transparent">
+                    <h3 class="text-gray-400 text-[10px] font-cyber font-black tracking-widest uppercase mb-2">Metas
+                        Diárias Axiom</h3>
+                    <div class="space-y-1.5 font-mono text-[11px]">
+                        <div class="flex justify-between"><span class="text-gray-500">Stop Loss:</span><span
+                                class="text-red-400 font-bold">$ 50.00</span></div>
+                        <div class="w-full bg-white/5 h-1 rounded overflow-hidden">
+                            <div class="bg-red-500 h-full shadow-[0_0_5px_#ef4444]" style="width: 100%"></div>
+                        </div>
+                        <div class="flex justify-between mt-1"><span class="text-gray-500">Take Profit:</span><span
+                                class="text-emerald-400 font-bold">$ 100.00</span></div>
+                        <div class="w-full bg-white/5 h-1 rounded overflow-hidden">
+                            <div class="bg-emerald-500 h-full shadow-[0_0_5px_#10b981]" style="width: 44%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-44 glass-card p-4 shrink-0 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 bg-[#ff6b00] rounded-full"></span>
+                    <h4 class="text-[10px] font-cyber uppercase tracking-widest font-black text-gray-500">Gráfico de
+                        Performance (Curva de Equity Realtime)</h4>
+                </div>
+                <div class="w-full h-full pt-4">
+                    <canvas id="canvasPerformanceChart"></canvas>
+                </div>
+                <div id="demo-blur-lock"
+                    class="absolute inset-0 bg-black/95 backdrop-blur-md hidden flex-col justify-center items-center z-20">
+                    <p class="text-xs font-cyber font-black text-gray-500 tracking-widest uppercase">📊 Gráfico Oculto
+                        no Escopo Demonstrativo</p>
+                </div>
+            </div>
+
+            <div class="flex-1 glass-card overflow-hidden flex flex-col">
+                <div
+                    class="px-5 py-2.5 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
+                    <h3 class="text-[10px] font-cyber font-black uppercase tracking-widest text-gray-400">Histórico de
+                        Disparos Sniper</h3>
+                    <p id="kpi-state-turno" class="text-[10px] font-mono text-[#ff6b00] uppercase font-bold">Aguardando
+                        Ticks...</p>
                 </div>
                 <div class="flex-1 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
@@ -247,111 +285,42 @@
                             class="text-[9px] uppercase tracking-wider text-gray-500 bg-black sticky top-0 z-10 border-b border-white/5">
                             <tr>
                                 <th class="px-5 py-3 font-black">Timestamp</th>
-                                <th id="th-scop-id" class="px-5 py-3 font-black hidden">Token Instância</th>
+                                <th id="th-instancia-id" class="px-5 py-3 font-black hidden">ID Alvo</th>
                                 <th class="px-5 py-3 font-black">Ativo</th>
+                                <th class="px-5 py-3 font-black">Direção</th>
                                 <th class="px-5 py-3 font-black">Resultado</th>
-                                <th class="px-5 py-3 font-black text-right">Sniper Data / Retorno</th>
+                                <th class="px-5 py-3 font-black text-right">P&L Retorno</th>
                             </tr>
                         </thead>
-                        <tbody id="table-orders-body" class="text-xs divide-y divide-white/5 font-mono">
+                        <tbody id="table-trades-feed" class="text-xs divide-y divide-white/5 font-mono">
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="view-disciplina" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card-sovereign p-6 rounded-xl">
-                    <h3
-                        class="text-sm font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 font-poppins">
-                        Configuração de Gerenciamento Alvo</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Meta de Ganho
-                                Diário (Take Profit)</label>
-                            <div class="flex gap-2">
-                                <input type="number" value="100.00"
-                                    class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF6B00] font-mono w-full">
-                                <button onclick="alert('TP Configurado.')" class="btn-tactical active">Definir</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Limite Máximo de
-                                Perda (Stop Loss)</label>
-                            <div class="flex gap-2">
-                                <input type="number" value="50.00"
-                                    class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF6B00] font-mono w-full">
-                                <button onclick="alert('SL Configurado.')" class="btn-tactical active">Definir</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-sovereign p-6 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <h3
-                            class="text-sm font-black text-white uppercase tracking-wider mb-2 border-b border-white/5 pb-2 font-poppins">
-                            Parâmetros de Linha de Defesa</h3>
-                        <p class="text-xs text-gray-500">O robô emite comandos automáticos de interrupção na VPS caso os
-                            limites integrados abaixo sejam detectados.</p>
-                    </div>
-                    <div class="space-y-3 pt-4 font-mono text-center grid grid-cols-3 gap-2">
-                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Slippage</span>
-                            <span class="text-xs font-bold text-emerald-400">ATIVO</span>
-                        </div>
-                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Exaustão</span>
-                            <span class="text-xs font-bold text-[#FF6B00]">v22.8</span>
-                        </div>
-                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sequential</span>
-                            <span class="text-xs font-bold text-blue-400">2/15min</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-onboarding"
-            class="flex-1 card-sovereign p-8 flex flex-col justify-center items-center text-center gap-6 view-layer hidden">
-            <i class="fa-solid fa-link-slash text-5xl text-gray-700"></i>
-            <div class="max-w-md">
-                <h3 class="text-lg font-black text-white uppercase tracking-wider font-poppins mb-2">Conecte sua
-                    Infraestrutura de Corretagem</h3>
-                <p class="text-sm text-gray-500">Para vincular as ordens automatizadas sniper do Axiom v22.8 à sua
-                    conta, crie seu cadastro na corretora parceira oficial através do link verificado abaixo.</p>
-            </div>
-            <a href="https://track.deriv.com/_16GbgDTBVBN6W2e/1/" target="_blank"
-                class="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-700 text-white text-[10px] font-black py-3 px-6 rounded-lg transition-all uppercase tracking-widest text-center shadow-[0_0_15px_rgba(255,107,0,0.2)]">
-                Criar Conta Oficial Deriv <span class="ml-2">↗</span>
-            </a>
-        </div>
-
-        <div id="view-gestao" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
+        <div id="aba-licencas" class="flex-1 flex flex-col gap-4 overflow-hidden tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Liquidez Pool Admin
-                    </h3>
-                    <p id="adm-kpi-equity" class="text-2xl font-black text-emerald-400 font-mono">$ 0.00</p>
+                <div class="glass-card p-5">
+                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Liquidez
+                        Pool Geral</h3>
+                    <p id="adm-pool-liquidez" class="text-2xl font-cyber font-black text-emerald-400">$ 0.00</p>
                 </div>
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Instâncias Premium
-                        Ativas</h3>
-                    <p id="adm-kpi-clients" class="text-2xl font-black text-white font-mono">0</p>
+                <div class="glass-card p-5">
+                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Contas
+                        Licenciadas</h3>
+                    <p id="adm-pool-contas" class="text-2xl font-cyber font-black text-white">0</p>
                 </div>
-                <div class="card-sovereign p-5">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Média Global
-                        WinRate</h3>
-                    <p id="adm-kpi-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                <div class="glass-card p-5">
+                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Média
+                        Assertividade</h3>
+                    <p id="adm-pool-winrate" class="text-2xl font-cyber font-black text-blue-500">0.0%</p>
                 </div>
             </div>
-
-            <div class="flex-1 card-sovereign overflow-hidden flex flex-col">
+            <div class="flex-1 glass-card overflow-hidden flex flex-col">
                 <div class="px-5 py-3 border-b border-white/5 bg-white/[0.01] shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Matriz Multi-Tenant de
-                        Monitoramento de Instâncias</h3>
+                    <h3 class="text-[10px] font-cyber font-black uppercase tracking-widest text-gray-400">Matriz
+                        Operacional Multi-Tenant</h3>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4" id="adm-matrix-grid">
                 </div>
@@ -360,178 +329,193 @@
     </main>
 
     <script>
-        // --- 🛰️ CONEXÕES SOBERANAS AO BANCO DE DADOS ---
+        // --- 🛰️ CREDENCIAIS REAIS E INDESTRUTÍVEIS DO ECOSSISTEMA ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
 
-        let rawCache = [];
-        let trendChart = null;
-        let ESCOPO_SESSAO = "admin"; // Default Q.A.
+        let localCacheData = [];
+        let performanceChartInstance = null;
+        let ESCOPO_ATUAL = "admin";
 
-        // --- 🖥️ ENGINE DE RELÓGIO TÁTICO ---
+        // --- ⏰ RELÓGIO DE ALTA PRECISÃO ---
         setInterval(() => {
-            const horaSaoPaulo = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-            document.getElementById('relogio-tatico').innerText = horaSaoPaulo;
+            document.getElementById('relogio-tatico').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         }, 1000);
 
-        // --- 🔄 CONTROLE DE ESCOPO E NAVEGAÇÃO ---
-        function trocarAba(viewId) {
-            document.querySelectorAll('.view-layer').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+        // --- 🔄 ALTERNADOR DE VISUALIZAÇÃO DE ABAS ---
+        function alternarAbas(viewId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`aba-${viewId}`).classList.remove('hidden');
 
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-white/[0.03]', 'text-white');
-                btn.classList.add('text-gray-400', 'hover:bg-white/[0.01]');
+                btn.classList.remove('bg-white/[0.03]', 'text-white', 'border-l-2', 'border-[#ff6b00]');
+                btn.classList.add('text-gray-400');
             });
-            const navId = viewId === 'gestao' ? 'admin' : viewId;
-            document.getElementById(`btn-${navId}`).classList.remove('text-gray-400', 'hover:bg-white/[0.01]');
-            document.getElementById(`btn-${navId}`).classList.add('bg-white/[0.03]', 'text-white');
+            const activeBtn = document.getElementById(`btn-menu-${viewId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('bg-white/[0.03]', 'text-white', 'border-l-2', 'border-[#ff6b00]');
+            }
         }
 
-        function alterarEscopoSaaS(valorSelecionado) {
-            ESCOPO_SESSAO = valorSelecionado;
-            executarPipelineCore();
+        function atualizarEscopoFiltro(novoEscopo) {
+            ESCOPO_ATUAL = novoEscopo;
+            executarPipelineDados();
         }
 
-        // --- ⚡ PIPELINE CENTRAL DE DADOS REALTIME ---
-        async function executarPipelineCore() {
-            // Mapeamento de Sessão Real do Supabase Auth
+        // --- ⚡ PIPELINE REATIVO EM TEMPO REAL ---
+        async function ejecutarPipelineDados() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session && session.user) {
                 document.getElementById('sandbox-auditoria').classList.add('hidden');
-                ESCOPO_SESSAO = session.user.email.includes('admin') ? 'admin' : session.user.id;
+                ESCOPO_ATUAL = session.user.email.includes('admin') ? 'admin' : session.user.id;
             }
 
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("🛑 Falha no Pipeline Tático:", error); return; }
+            if (error) { console.error("🛑 Falha tática de extração de dados:", error); return; }
 
-            rawCache = trades || [];
-            if (rawCache.length === 0) {
-                rawCache = [{ created_at: new Date().toISOString(), user_id: 'CLIENT_01', ativo: 'R_100', resultado: 'WIN', valor: 9.50, adx: 8.9, coice: 1.62 }];
-            }
-
-            renderizarAmbienteRole();
+            localCacheData = trades || [];
+            reconstruirCabineSoberana();
         }
 
-        // --- 🏛️ MOTOR DE RENDERIZAÇÃO TÁTICA (RBAC & ESTÉTICA SOVEREIGN) ---
-        function renderizarAmbienteRole() {
-            const badge = document.getElementById('badge-soberano');
-            const subtitle = document.getElementById('view-subtitle');
-            const navAdmin = document.getElementById('btn-admin');
-            const thScorpe = document.getElementById('th-scop-id');
-            const lockChart = document.getElementById('chart-lock-demo');
-            const targetKPI = document.getElementById('kpi-state');
+        // --- 🏛️ RECONSTRUÇÃO DA INTERFACE BASEADA NO ESCOPO (RBAC & IMAGE 2 DESIGN) ---
+        function reconstruirCabineSoberana() {
+            const badge = document.getElementById('badge-status-escopo');
+            const sub = document.getElementById('header-main-subtitle');
+            const navAdmin = document.getElementById('btn-menu-licencas');
+            const thInstancia = document.getElementById('th-instancia-id');
+            const blurLayer = document.getElementById('demo-blur-lock');
+            const turnoKPI = document.getElementById('kpi-state-turno');
             const balanceKPI = document.getElementById('kpi-banca');
 
-            // Determina turno e alvo de mola baseado na hora de Matelândia
-            const horaActual = new Date().getHours();
-            if (horaActual >= 5 && horaActual < 18) {
-                targetKPI.innerText = "🌐 FOREX (ADX > 3.8)";
-                targetKPI.className = "text-xs font-bold text-blue-400 uppercase mt-2 tracking-wider font-mono";
+            // Identificação de Turno Operacional
+            const horaLocal = new Date().getHours();
+            if (horaLocal >= 5 && horaLocal < 18) {
+                turnoKPI.innerText = "🌐 TURNO ACTIVE: FOREX (ADX > 3.8)";
+                turnoKPI.className = "text-[10px] font-mono text-blue-400 uppercase font-bold";
             } else {
-                targetKPI.innerText = "⚡ SINTÉTICOS (ADX > 8.5)";
-                targetKPI.className = "text-xs font-bold text-[#FF6B00] uppercase mt-2 tracking-wider font-mono shadow-[0_0_10px_rgba(255,107,0,0.3)]";
+                turnoKPI.innerText = "⚡ TURNO ACTIVE: SINTÉTICOS (ADX > 8.5)";
+                turnoKPI.className = "text-[10px] font-mono text-[#ff6b00] uppercase font-bold shadow-[0_0_8px_rgba(255,107,0,0.2)]";
             }
 
-            let filteredTrades = [];
-            if (ESCOPO_SESSAO === 'admin') {
-                filteredTrades = rawCache;
-                badge.innerText = "ADMIN MASTER NODE";
-                badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-red-950/40 text-red-400 border border-red-500/20";
-                subtitle.innerText = "Comando Geral SaaS • Monitoramento de Todas as Licenças";
-                navAdmin.classList.remove('hidden');
-                thScorpe.classList.remove('hidden');
-                lockChart.classList.add('hidden');
-                balanceKPI.innerText = `$ ${filteredTrades.reduce((acc, t) => acc + (t.valor * 2), 2500).toFixed(2)}`;
-            } else {
-                filteredTrades = rawCache.filter(t => t.user_id === ESCOPO_SESSAO || (!t.user_id && ESCOPO_SESSAO === 'CLIENT_01'));
-                navAdmin.classList.add('hidden');
-                thScorpe.classList.add('hidden');
+            let dadosEscopo = [];
 
-                if (ESCOPO_SESSAO === 'CLIENT_FREE') {
-                    badge.innerText = "LICENÇA TEMPORÁRIA";
-                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
-                    subtitle.innerText = "Nó de Demonstração • Histórico e Telemetria Ocultados";
-                    lockChart.classList.remove('hidden');
-                    filteredTrades = filteredTrades.slice(0, 2);
+            if (ESCOPO_ATUAL === 'admin') {
+                dadosEscopo = localCacheData;
+                badge.innerText = "GUARDIAN ADMIN";
+                badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-red-950/40 text-red-400 border border-red-500/20";
+                sub.innerText = "Escopo Consolidado Global • Monitoramento Total de Licenças Corporativas";
+                navAdmin.classList.remove('hidden');
+                thInstancia.classList.remove('hidden');
+                blurLayer.classList.add('hidden');
+                balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + (t.valor * 2.3), 5000).toFixed(2)}`;
+            } else {
+                dadosEscopo = localCacheData.filter(t => t.user_id === ESCOPO_ATUAL || (!t.user_id && ESCOPO_ATUAL === 'CLIENT_01'));
+                navAdmin.classList.add('hidden');
+                alternarAbas('principal');
+                thInstancia.classList.add('hidden');
+
+                if (ESCOPO_ATUAL === 'CLIENT_FREE') {
+                    badge.innerText = "SANDBOX DEMO";
+                    badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
+                    sub.innerText = "Modo de Demonstração Limitado • Adquira uma Licença Premium";
+                    blurLayer.classList.remove('hidden');
+                    dadosEscopo = dadosEscopo.slice(0, 2); // Trava Q.A.
                     balanceKPI.innerText = "$ 10.00 (Demo)";
                 } else {
-                    badge.innerText = "LICENÇA PREMIUM";
-                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
-                    subtitle.innerText = `ID Licença: ${ESCOPO_SESSAO} • Status Online`;
-                    lockChart.classList.add('hidden');
-                    balanceKPI.innerText = `$ ${filteredTrades.reduce((acc, t) => acc + t.valor, 500).toFixed(2)}`;
+                    badge.innerText = "PREMIUM LICENSED";
+                    badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
+                    sub.innerText = `Licença Ativa ID: ${ESCOPO_ATUAL} • Sincronismo de Sinais Realtime`;
+                    blurLayer.classList.add('hidden');
+                    balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + t.valor, 1000).toFixed(2)}`;
                 }
             }
 
-            const wins = filteredTrades.filter(t => t.resultado === 'WIN').length;
-            const plAcumulado = filteredTrades.reduce((acc, t) => acc + t.valor, 0);
-            const winRate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
+            // Atualização dos Widgets Dinâmicos da Imagem 2
+            const wins = dadosEscopo.filter(t => t.resultado === 'WIN').length;
+            const netPL = dadosEscopo.reduce((acc, t) => acc + t.valor, 0);
+            const winrate = dadosEscopo.length > 0 ? ((wins / dadosEscopo.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('kpi-pl').innerText = `$ ${plAcumulado.toFixed(2)}`;
-            document.getElementById('kpi-pl').className = `text-3xl font-black font-mono ${plAcumulado >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-            document.getElementById('kpi-winrate').innerText = `${winRate}%`;
+            document.getElementById('kpi-desempenho').innerText = `${netPL >= 0 ? '+' : ''}${winrate}%`;
+            document.getElementById('kpi-desempenho').className = `text-3xl font-cyber font-black ${netPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+            document.getElementById('kpi-pl').innerText = `$ ${netPL.toFixed(2)}`;
+            document.getElementById('kpi-pl').className = `text-3xl font-cyber font-black ${netPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+            document.getElementById('kpi-winrate').innerText = `${winrate}%`;
 
-            renderizarLinhasTabela(filteredTrades);
-            if (ESCOPO_SESSAO !== 'CLIENT_FREE') {
-                renderizarGraficoHolografico(filteredTrades.slice(0, 15).reverse());
+            // Atualiza Medidor Físico (Gauge)
+            const fillElement = document.getElementById('gauge-fill-node');
+            document.getElementById('gauge-text-node').innerText = `${winrate}%`;
+            // Lógica de rotação física do círculo SVG baseado na assertividade real
+            const rotationValue = -135 + (winrate * 1.8);
+            fillElement.style.transform = `rotate(${rotationValue}deg)`;
+            fillElement.style.borderColor = netPL >= 0 ? '#10b981' : '#ef4444';
+            fillElement.style.filter = netPL >= 0 ? 'drop-shadow(0 0 8px #10b981)' : 'drop-shadow(0 0 8px #ef4444)';
+
+            renderizarLinhasFeedTatico(dadosEscopo);
+            if (ESCOPO_ATUAL !== 'CLIENT_FREE') {
+                renderizarGraficoNeon(dadosEscopo.slice(0, 15).reverse());
             }
 
-            processarMatrizAdminLicencas();
+            processarCentralDeLicencasSaaS();
         }
 
-        // --- 📊 TABELA DE EXECUÇÕES COM MASCARAMENTO SNIPER (IP Protect) ---
-        function renderizarLinhasTabela(trades) {
-            const body = document.getElementById('table-orders-body');
+        // --- 📊 RENDERIZADOR DO FILTRO DE TABELA SNIPER ---
+        function renderizarLinhasFeedTatico(trades) {
+            const body = document.getElementById('table-trades-feed');
             body.innerHTML = trades.map(t => {
                 const isWin = t.resultado === 'WIN';
-                const timeStmp = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
+                const horaStr = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
+                const direcaoStr = t.valor >= 0 ? 'CALL 📈' : 'PUT 📉';
 
-                let dataColumn = '';
-                if (ESCOPO_SESSAO === 'admin') {
-                    dataColumn = `ADX: <span class="text-blue-400">${t.adx}</span> <span class="text-gray-700">|</span> CC: <span class="text-gray-300">${t.coice}</span>`;
-                } else if (ESCOPO_SESSAO === 'CLIENT_FREE') {
-                    dataColumn = `<span class="text-gray-700 blur-[3px] select-none italic">🔒 Upgrade Required</span>`;
+                let intelColumn = '';
+                if (ESCOPO_ATUAL === 'admin') {
+                    intelColumn = `ADX: <span class="text-blue-400 font-bold">${t.adx}</span> <span class="text-gray-700">|</span> CC: ${t.coice}`;
+                } else if (ESCOPO_ATUAL === 'CLIENT_FREE') {
+                    intelColumn = `<span class="text-zinc-700 blur-[2px] italic select-none">Upgrade Necessário</span>`;
                 } else {
-                    dataColumn = `<span class="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">✨ GATILHO SNIPER</span>`;
+                    intelColumn = `<span class="text-emerald-400 font-black uppercase tracking-widest text-[9px]">🏹 EXECUÇÃO CONCLUÍDA</span>`;
                 }
 
                 return `
                 <tr class="hover:bg-white/[0.01] transition-all border-b border-white/5">
-                    <td class="px-5 py-3.5 text-gray-500 text-[11px]">${timeStmp}</td>
-                    ${ESCOPO_SESSÃO_ATIVO === 'admin' ? `<td class="px-5 py-3 text-blue-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
-                    <td class="px-5 py-3.5 font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
-                    <td class="px-5 py-3.5 text-[11px]">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_5px_rgba(16,185,129,0.2)]' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
+                    <td class="px-5 py-3.5 text-gray-500 text-[11px] font-mono">${horaStr}</td>
+                    ${ESCOPO_ATUAL === 'admin' ? `<td class="px-5 py-3 text-blue-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
+                    <td class="px-5 py-3.5 font-cyber font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
+                    <td class="px-5 py-3.5 text-gray-400 font-bold font-sans text-[11px]">${direcaoStr}</td>
+                    <td class="px-5 py-3.5">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-cyber font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.2)]' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
                     </td>
-                    <td class="px-5 py-3.5 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${dataColumn}</span></td>
+                    <td class="px-5 py-3.5 text-right font-cyber font-black ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${intelColumn}</span></td>
                 </tr>`;
             }).join('');
         }
 
-        // --- 📈 GRÁFICO HOLOGRÁFICO NEON (CHART.JS) ---
-        function renderizarGraficoHolografico(data) {
-            const ctx = document.getElementById('chartPerformance').getContext('2d');
-            if (trendChart) trendChart.destroy();
+        // --- 📈 GRÁFICO DE CAPITAL NEON FILTRADO (CHART.JS) ---
+        function renderizarGraficoNeon(data) {
+            const ctx = document.getElementById('canvasPerformanceChart').getContext('2d');
+            if (performanceChartInstance) performanceChartInstance.destroy();
 
-            let acumuladoValue = 0;
-            const points = data.map(t => { acumuladoValue += t.valor; return acumuladoValue; });
+            let acumuladorLíquido = 0;
+            const pontosDeFrequencia = data.map(t => { acumuladorLíquido += t.valor; return acumuladorLíquido; });
 
-            trendChart = new Chart(ctx, {
+            // Criação do gradiente dinâmico de brilho
+            const gradientNeon = ctx.createLinearGradient(0, 0, 0, 150);
+            gradientNeon.addColorStop(0, 'rgba(255, 107, 0, 0.15)');
+            gradientNeon.addColorStop(1, 'rgba(255, 107, 0, 0.00)');
+
+            performanceChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: points,
-                        borderColor: '#FF6B00',
-                        borderWidth: 2,
+                        data: pontosDeFrequencia,
+                        borderColor: '#ff6b00',
+                        borderWidth: 2.5,
                         tension: 0.35,
                         fill: true,
-                        backgroundColor: 'rgba(255, 107, 0, 0.01)',
-                        pointRadius: 0,
-                        shadowColor: '#FF6B00',
-                        shadowBlur: 10
+                        backgroundColor: gradientNeon,
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -543,72 +527,71 @@
             });
         }
 
-        // --- 👑 PAINEL ADMIN MASTER: GESTÃO MULTI-TENANT ---
-        function processarMatrizAdminLicencas() {
-            const mapaDeNomes = {
+        // --- 👑 GESTÃO MATRIZ DE LICENÇAS WHITE LABEL ---
+        function processarCentralDeLicencasSaaS() {
+            const dicionarioClientes = {
                 "CLIENT_01": "Sacolão Miranda (Instância 01)",
                 "CLIENT_02": "PetFlow Master (Enterprise Node)",
                 "CLIENT_FREE": "Licença Demonstrativa Gratuita"
             };
 
             const grid = document.getElementById('adm-matrix-grid');
-            const idsList = Object.keys(mapaDeNomes);
+            const listaIds = Object.keys(dicionarioClientes);
 
-            // KPIs Globais da Pool
-            const poolEquity = rawCache.reduce((acc, t) => acc + t.valor, 0);
-            const poolWins = rawCache.filter(t => t.resultado === 'WIN').length;
-            const poolWinrate = rawCache.length > 0 ? ((poolWins / rawCache.length) * 100).toFixed(1) : 0;
+            const poolEquity = localCacheData.reduce((acc, t) => acc + t.valor, 0);
+            const poolWins = localCacheData.filter(t => t.resultado === 'WIN').length;
+            const poolWinrate = localCacheData.length > 0 ? ((poolWins / localCacheData.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('adm-kpi-equity').innerText = `$ ${poolEquity.toFixed(2)}`;
-            document.getElementById('adm-kpi-clients').innerText = idsList.length - 1;
-            document.getElementById('adm-kpi-winrate').innerText = `${poolWinrate}%`;
+            document.getElementById('adm-pool-liquidez').innerText = `$ ${poolEquity.toFixed(2)}`;
+            document.getElementById('adm-pool-contas').innerText = listaIds.length - 1;
+            document.getElementById('adm-pool-winrate').innerText = `${poolWinrate}%`;
 
-            grid.innerHTML = idsList.map(id => {
-                const tradesCliente = rawCache.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
-                const cWins = tradesCliente.filter(t => t.resultado === 'WIN').length;
-                const cEquity = tradesCliente.reduce((acc, t) => acc + t.valor, 0);
-                const cWinrate = tradesCliente.length > 0 ? ((cWins / tradesCliente.length) * 100).toFixed(1) : 0;
+            grid.innerHTML = listaIds.map(id => {
+                const tradesDoCliente = localCacheData.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
+                const cWins = tradesDoCliente.filter(t => t.resultado === 'WIN').length;
+                const cEquity = tradesDoCliente.reduce((acc, t) => acc + t.valor, 0);
+                const cWinrate = tradesDoCliente.length > 0 ? ((cWins / tradesDoCliente.length) * 100).toFixed(1) : 0;
 
                 return `
-                <div class="p-5 rounded-xl border border-white/5 bg-black/30 flex flex-col justify-between hover:border-[#FF6B00]/40 hover:shadow-[0_0_15px_rgba(255,107,0,0.1)] transition-all">
+                <div class="p-5 rounded-xl border border-white/5 bg-black/40 flex flex-col justify-between hover:border-[#ff6b00]/40 transition-all hover:shadow-[0_0_15px_rgba(255,107,0,0.08)]">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-xs font-black text-white uppercase tracking-tight font-poppins">${mapaDeNomes[id]}</h4>
+                            <h4 class="text-xs font-black text-white uppercase tracking-tight font-cyber">${dicionarioClientes[id]}</h4>
                             <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">${id}</span>
                         </div>
-                        <p class="text-[10px] text-gray-500">Última ordem: ${tradesCliente[0] ? new Date(tradesCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
+                        <p class="text-[10px] text-gray-500 font-mono">Último sinal capitaneado: ${tradesDoCliente[0] ? new Date(tradesDoCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/5 font-mono text-center">
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Líquido</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Saldo P&L</span>
                             <span class="text-xs font-bold ${cEquity >= 0 ? 'text-emerald-400' : 'text-red-400'}">$ ${cEquity.toFixed(2)}</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">WinRate</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">WinRate</span>
                             <span class="text-xs font-bold text-blue-400">${cWinrate}%</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sniper</span>
-                            <span class="text-xs font-bold text-gray-300">${tradesCliente.length}</span>
+                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Sinais</span>
+                            <span class="text-xs font-bold text-gray-300">${tradesDoCliente.length}</span>
                         </div>
                     </div>
 
-                    <button onclick="document.getElementById('scope-selector').value='${id}'; alterarEscopoSaaS('${id}');" class="w-full mt-4 bg-white/5 hover:bg-[#FF6B00] hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(255,107,0,0.1)]">
-                        Inspecionar Instância Individual
+                    <button onclick="document.getElementById('instance-switcher').value='${id}'; atualizarEscopoFiltro('${id}');" class="w-full mt-4 bg-white/5 hover:bg-[#ff6b00] hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-widest font-cyber transition-all">
+                        Inspecionar Mola
                     </button>
                 </div>`;
             }).join('');
         }
 
-        // --- 📡 STREAM REALTIME BROADCAST v4 ---
+        // --- 📡 STREAM REALTIME SOBERANO CHANNEL ---
         supabase.channel('sovereign-stream-v4')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                executarPipelineCore();
+                ejecutarPipelineDados();
             }).subscribe();
 
         window.onload = () => {
-            executarPipelineCore();
+            ejecutarPipelineDados();
         };
     </script>
 </body>
