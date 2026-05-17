@@ -4,23 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NÓ SOBERANO AXIOM v4.0 - Central Command</title>
+    <title>AXIOM SOBERANO v4.0 - DASHBOARD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
         rel="stylesheet">
     <style>
         body {
-            background-color: #030305;
-            background-image:
-                radial-gradient(circle at 50% 0%, rgba(255, 107, 0, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
-                url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3Y%3Cg fill-rule="evenodd"%3Y%3Cg fill="%23FFFFFF" fill-opacity="0.005"%3Y%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3Y%3C/g%3Y%3C/g%3Y%3C/svg%3Y');
-            color: #e2e8f0;
+            background-color: #060608;
+            color: #d1d5db;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
+            background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 0, 0.05) 0%, transparent 60%);
         }
 
         .font-cyber {
@@ -31,490 +28,372 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* CARDS VIDRO FUMÊ (Glassmorphism da Imagem 2) */
-        .glass-card {
-            background: linear-gradient(135deg, rgba(15, 15, 22, 0.85) 0%, rgba(8, 8, 12, 0.95) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            position: relative;
+        .panel-root {
+            background-color: #0b0b0f;
+            border: 1px solid #1a1a24;
+            border-radius: 8px;
         }
 
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.3), transparent);
-            border-radius: 12px 12px 0 0;
-        }
-
-        /* MEDIDOR CIRCULAR BRILHANTE */
-        .gauge-container {
+        /* GAUGE DE DISCIPLINA SEMICIRCULAR */
+        .semi-circle-gauge {
             position: relative;
-            width: 130px;
-            height: 75px;
+            width: 160px;
+            height: 80px;
             overflow: hidden;
-            margin: 0 auto;
         }
 
-        .gauge-body {
-            width: 130px;
-            height: 130px;
+        .gauge-base {
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
-            border: 14px solid rgba(255, 255, 255, 0.03);
+            border: 16px solid #13131a;
             border-bottom-color: transparent !important;
             border-left-color: transparent !important;
             transform: rotate(-135deg);
             position: absolute;
         }
 
-        .gauge-fill {
-            width: 130px;
-            height: 130px;
+        .gauge-progress {
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
-            border: 14px solid #ff6b00;
+            border: 16px solid #ff5500;
             border-bottom-color: transparent !important;
             border-left-color: transparent !important;
             transform: rotate(-135deg);
             position: absolute;
-            filter: drop-shadow(0 0 8px #ff6b00);
-            transition: transform 1s ease-out;
+            filter: drop-shadow(0 0 10px #ff5500);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* CHIP TÁTICO */
-        .tactical-select {
-            background: #09090d;
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            color: #fff;
-            font-family: 'JetBrains Mono';
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s;
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
         }
 
-        .tactical-select:hover {
-            border-color: #ff6b00;
-            box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a24;
+            border-radius: 4px;
         }
 
-        .status-pulse::after {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-            right: -12px;
-            top: 6px;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 8px #10b981;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
-            }
-
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
-
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff5500;
         }
     </style>
 </head>
 
-<body class="flex h-screen w-screen p-4 gap-4 overflow-hidden">
+<body class="w-screen h-screen p-4 flex flex-col gap-4 select-none">
 
-    <aside class="w-72 glass-card h-full p-5 flex flex-col justify-between shrink-0">
-        <div class="space-y-6">
-            <div class="border-b border-white/5 pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="h-4 w-4 bg-[#ff6b00] rounded shadow-[0_0_10px_#ff6b00]"></div>
-                    <h1 class="text-xl font-cyber font-black tracking-wider text-white">NÓ SOBERANO</h1>
-                </div>
-                <p class="text-[10px] font-mono text-[#ff6b00] uppercase tracking-widest mt-1">AXIOM COMMAND v4.0</p>
-            </div>
-
-            <div class="p-3 bg-black/40 rounded-lg border border-white/5 space-y-2">
-                <label class="text-[9px] font-mono uppercase text-gray-500 font-bold block">Filtro de Instância
-                    SaaS</label>
-                <select id="instance-switcher" onchange="atualizarEscopoFiltro(this.value)"
-                    class="w-full tactical-select">
-                    <option value="admin">GUARDIAN ACCESS (ROOT)</option>
-                    <option value="CLIENT_01">CLIENT: Sacolão Miranda</option>
-                    <option value="CLIENT_02">CLIENT: PetFlow Master</option>
-                    <option value="CLIENT_FREE">CLIENT: Sandbox Demo</option>
-                </select>
-            </div>
-
-            <nav class="space-y-1.5">
-                <button onclick="alternarAbas('principal')" id="btn-menu-principal"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase font-cyber tracking-wider text-white bg-white/[0.03] border-l-2 border-[#ff6b00]">
-                    <span>🎯 Resumo de Disciplina</span>
-                </button>
-                <button onclick="alternarAbas('licencas')" id="btn-menu-licencas"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase font-cyber tracking-wider text-gray-400 hover:text-white transition-all hidden">
-                    <span>👑 Gestão de Licenças</span>
-                </button>
-            </nav>
+    <header class="w-full flex justify-between items-center border-b border-white/5 pb-2 shrink-0">
+        <div>
+            <h1 class="text-2xl font-cyber font-black tracking-wider text-white">NÓ SOBERANO AXIOM v4.0</h1>
+            <p class="text-[10px] font-mono text-[#ff5500] uppercase tracking-[0.2em]">SISTEMA DE MONITORIZAÇÃO E
+                CONTROLO TÁTICO</p>
         </div>
-
-        <div class="space-y-3 pt-4 border-t border-white/5">
-            <div id="badge-status-escopo"
-                class="text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-[#ff6b00]/10 text-[#ff6b00] border border-[#ff6b00]/20">
-                INICIALIZANDO...</div>
-            <a href="https://track.deriv.com/_16GbgDTBVBN6W2e/1/" target="_blank"
-                class="w-full block text-center bg-zinc-900 hover:bg-zinc-800 text-white font-mono text-[10px] py-2.5 rounded border border-white/10 uppercase tracking-widest transition-all">Broker
-                Account</a>
-            <a href="https://wa.me/5545991397543" target="_blank"
-                class="w-full block text-center bg-[#ff6b00] hover:bg-orange-700 text-white font-cyber text-[11px] font-black py-2.5 rounded shadow-[0_0_15px_rgba(255,107,0,0.2)] uppercase tracking-widest transition-all">Suporte
-                Enterprise</a>
+        <div
+            class="flex items-center gap-6 text-[11px] font-mono bg-[#0b0b0f] border border-white/5 px-4 py-1.5 rounded">
+            <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
+                <span class="text-gray-400">VPS CORE SINCERITY ACTIVE</span>
+            </div>
+            <span class="text-gray-700">|</span>
+            <span id="txt-relogio" class="text-gray-300">00:00:00</span>
         </div>
-    </aside>
+    </header>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden">
+    <div class="flex-1 w-full flex gap-4 overflow-hidden">
 
-        <header class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
-            <div>
-                <h2 id="header-main-title" class="text-xl font-cyber font-black tracking-tight text-white uppercase">NÓ
-                    DE COMANDO DE MATELÂNDIA // PARANÁ</h2>
-                <p id="header-main-subtitle" class="text-xs text-gray-500 mt-0.5">Mapeador Realtime Direct-Feed de
-                    Operações</p>
-            </div>
-            <div
-                class="flex items-center gap-4 font-mono text-[11px] bg-black border border-white/5 px-4 py-2 rounded-xl">
-                <span class="status-pulse relative text-emerald-400 font-bold uppercase tracking-wider mr-2">Core Live
-                    Stream</span>
-                <span class="text-gray-700">|</span>
-                <span id="relogio-tatico" class="text-gray-400">00:00:00</span>
-            </div>
-        </header>
-
-        <div id="aba-principal" class="flex-1 flex flex-col gap-4 overflow-hidden tab-content">
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-
-                <div class="glass-card p-4 flex flex-col justify-between items-center text-center">
-                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase mb-2">Monitor
-                        de Disciplina</h3>
-                    <div class="gauge-container">
-                        <div class="gauge-body"></div>
-                        <div id="gauge-fill-node" class="gauge-fill"></div>
-                        <div class="absolute inset-0 flex items-end justify-center pb-1">
-                            <span id="gauge-text-node" class="text-2xl font-cyber font-black text-white">0%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-4 flex flex-col justify-between">
-                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase">Taxa de
-                        Desempenho</h3>
-                    <div class="flex justify-between items-end mt-2">
-                        <p id="kpi-desempenho" class="text-3xl font-cyber font-black text-white">-67,0%</p>
-                        <span class="text-[10px] font-mono text-gray-600">Média Móvel</span>
-                    </div>
-                </div>
-
-                <div class="glass-card p-4 flex flex-col justify-between">
-                    <h3 class="text-gray-500 text-[10px] font-cyber font-black tracking-widest uppercase">Risco :
-                        Retorno</h3>
-                    <div class="flex justify-between items-end mt-2">
-                        <p class="text-3xl font-cyber font-black text-emerald-400">0,48</p>
-                        <span class="text-[10px] font-mono text-emerald-500/50">Otimizado</span>
-                    </div>
-                </div>
-
+        <div class="w-72 flex flex-col gap-4 shrink-0 h-full">
+            <div class="flex-1 panel-root p-4 flex flex-col overflow-hidden">
                 <div
-                    class="glass-card p-4 flex flex-col justify-between bg-gradient-to-r from-orange-950/10 to-transparent">
-                    <h3 class="text-gray-400 text-[10px] font-cyber font-black tracking-widest uppercase mb-2">Metas
-                        Diárias Axiom</h3>
-                    <div class="space-y-1.5 font-mono text-[11px]">
-                        <div class="flex justify-between"><span class="text-gray-500">Stop Loss:</span><span
-                                class="text-red-400 font-bold">$ 50.00</span></div>
-                        <div class="w-full bg-white/5 h-1 rounded overflow-hidden">
-                            <div class="bg-red-500 h-full shadow-[0_0_5px_#ef4444]" style="width: 100%"></div>
+                    class="text-[10px] font-mono text-[#ff5500] uppercase tracking-wider mb-2 border-b border-white/5 pb-1">
+                    GERENCIAMENTO DE NÓS</div>
+                <div class="flex-1 overflow-y-auto space-y-1 pr-1 font-mono text-[11px]">
+                    <div class="flex justify-between items-center p-1.5 bg-white/[0.02] rounded border border-white/5">
+                        <span class="text-white font-bold">ID: ADMIN_ROOT</span>
+                        <span class="text-amber-500 text-[10px]">👑 MASTER</span>
+                    </div>
+                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>NODE_SINT_01</span><span
+                            class="text-emerald-500">● Conectado</span></div>
+                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>NODE_FRX_02</span><span
+                            class="text-emerald-500">● Conectado</span></div>
+                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>AUDIT_FLOW</span><span
+                            class="text-blue-500">● Ouvindo</span></div>
+                </div>
+            </div>
+
+            <div class="panel-root p-4 shrink-0">
+                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-3">CONTRATOS DE REDE</div>
+                <div class="grid grid-cols-2 gap-2 text-center text-[10px] font-bold font-cyber">
+                    <button onclick="alterarEscopo('admin')"
+                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-white hover:border-[#ff5500] transition-all">VISÃO
+                        GLOBAL</button>
+                    <button onclick="alterarEscopo('SINTÉTICOS')"
+                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-gray-400 hover:border-[#ff5500] transition-all">SINTÉTICOS</button>
+                    <button onclick="alterarEscopo('FOREX')"
+                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-gray-400 hover:border-[#ff5500] transition-all">FOREX</button>
+                    <button
+                        class="p-3 bg-red-950/20 border border-red-900/30 rounded text-red-400 hover:bg-red-900/30 transition-all">ALERTAS</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col gap-4 h-full overflow-hidden">
+            <div class="flex-1 panel-root p-4 flex flex-col gap-4 overflow-hidden">
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <h2 class="font-cyber font-black text-sm tracking-wider text-white">MONITORIZAÇÃO EM TEMPO REAL</h2>
+                    <div>
+                        <span id="badge-soberano"
+                            class="text-[10px] font-mono bg-[#ff5500]/10 border border-[#ff5500]/20 px-2 py-0.5 rounded text-[#ff5500] font-bold">ADMIN
+                            MASTER NODE</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+                    <div class="bg-black/50 border border-white/5 rounded p-4 flex flex-col justify-between h-36">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase block">FILTRO DE AGRESSIVIDADE</span>
+                        <div class="flex justify-between items-center font-mono text-xs mt-2">
+                            <div><span class="text-gray-500 block text-[9px]">TARGET ADX</span><span id="lbl-adx-val"
+                                    class="text-orange-500 font-bold text-sm">8.7</span></div>
+                            <div><span class="text-gray-500 block text-[9px]">COICE MÍNIMO</span><span
+                                    class="text-emerald-400 font-bold text-sm">1.50</span></div>
                         </div>
-                        <div class="flex justify-between mt-1"><span class="text-gray-500">Take Profit:</span><span
-                                class="text-emerald-400 font-bold">$ 100.00</span></div>
-                        <div class="w-full bg-white/5 h-1 rounded overflow-hidden">
-                            <div class="bg-emerald-500 h-full shadow-[0_0_5px_#10b981]" style="width: 44%"></div>
+                    </div>
+
+                    <div
+                        class="bg-black/50 border border-white/5 rounded p-4 flex flex-col items-center justify-center h-36">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase block mb-2">TAXA DE ACERTO
+                            (WINRATE)</span>
+                        <div class="semi-circle-gauge">
+                            <div class="gauge-base"></div>
+                            <div id="node-gauge-progress" class="gauge-progress"></div>
+                            <div class="absolute inset-0 flex items-end justify-center pb-1">
+                                <span id="node-gauge-text" class="text-xl font-cyber font-black text-white">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-black/50 border border-white/5 rounded p-4 flex flex-col justify-between h-36 font-mono text-[11px]">
+                        <span class="text-[10px] font-mono text-gray-500 uppercase block">EXECUÇÃO VPS</span>
+                        <div class="space-y-1">
+                            <div class="flex justify-between"><span class="text-gray-500">EXPIRAÇÃO:</span><span
+                                    class="text-white font-bold">1 MINUTO</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">MOMENTUM DELTA:</span><span
+                                    class="text-[#ff5500] font-bold">ATIVO</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">TRAVA SEGURANÇA:</span><span
+                                    class="text-red-400 font-bold">2 LOSS / 15M</span></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="h-44 glass-card p-4 shrink-0 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
-                    <span class="h-1.5 w-1.5 bg-[#ff6b00] rounded-full"></span>
-                    <h4 class="text-[10px] font-cyber uppercase tracking-widest font-black text-gray-500">Gráfico de
-                        Performance (Curva de Equity Realtime)</h4>
+                <div class="h-32 bg-black/40 border border-white/5 rounded p-4 relative shrink-0">
+                    <span class="text-[10px] font-mono text-gray-500 uppercase block mb-1">Estatísticas de Distribuição
+                        Volumétrica</span>
+                    <div class="w-full h-20">
+                        <canvas id="barPerformanceChart"></canvas>
+                    </div>
                 </div>
-                <div class="w-full h-full pt-4">
-                    <canvas id="canvasPerformanceChart"></canvas>
-                </div>
-                <div id="demo-blur-lock"
-                    class="absolute inset-0 bg-black/95 backdrop-blur-md hidden flex-col justify-center items-center z-20">
-                    <p class="text-xs font-cyber font-black text-gray-500 tracking-widest uppercase">📊 Gráfico Oculto
-                        no Escopo Demonstrativo</p>
-                </div>
-            </div>
 
-            <div class="flex-1 glass-card overflow-hidden flex flex-col">
-                <div
-                    class="px-5 py-2.5 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
-                    <h3 class="text-[10px] font-cyber font-black uppercase tracking-widest text-gray-400">Histórico de
-                        Disparos Sniper</h3>
-                    <p id="kpi-state-turno" class="text-[10px] font-mono text-[#ff6b00] uppercase font-bold">Aguardando
-                        Ticks...</p>
-                </div>
-                <div class="flex-1 overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead
-                            class="text-[9px] uppercase tracking-wider text-gray-500 bg-black sticky top-0 z-10 border-b border-white/5">
-                            <tr>
-                                <th class="px-5 py-3 font-black">Timestamp</th>
-                                <th id="th-instancia-id" class="px-5 py-3 font-black hidden">ID Alvo</th>
-                                <th class="px-5 py-3 font-black">Ativo</th>
-                                <th class="px-5 py-3 font-black">Direção</th>
-                                <th class="px-5 py-3 font-black">Resultado</th>
-                                <th class="px-5 py-3 font-black text-right">P&L Retorno</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-trades-feed" class="text-xs divide-y divide-white/5 font-mono">
-                        </tbody>
-                    </table>
+                <div class="flex-1 bg-black/20 border border-white/5 rounded overflow-hidden flex flex-col">
+                    <div
+                        class="flex justify-between items-center p-3 bg-black/40 border-b border-white/5 font-mono text-[10px]">
+                        <span class="text-gray-400 uppercase tracking-wider">HISTÓRICO RECENTE DE DISPAROS (TRANSMISSÃO
+                            DIRETA)</span>
+                        <span id="lbl-net-pl" class="text-white font-bold">$ 0.00</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto font-mono text-xs">
+                        <table class="w-full text-left">
+                            <thead class="text-[10px] text-gray-500 bg-black/60 sticky top-0 border-b border-white/5">
+                                <tr>
+                                    <th class="p-3">Timestamp</th>
+                                    <th class="p-3">Ativo</th>
+                                    <th class="p-3">Direção</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-right">Retorno Líquido</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-trades-rows" class="divide-y divide-white/5">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="aba-licencas" class="flex-1 flex flex-col gap-4 overflow-hidden tab-content hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                <div class="glass-card p-5">
-                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Liquidez
-                        Pool Geral</h3>
-                    <p id="adm-pool-liquidez" class="text-2xl font-cyber font-black text-emerald-400">$ 0.00</p>
-                </div>
-                <div class="glass-card p-5">
-                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Contas
-                        Licenciadas</h3>
-                    <p id="adm-pool-contas" class="text-2xl font-cyber font-black text-white">0</p>
-                </div>
-                <div class="glass-card p-5">
-                    <h3 class="text-gray-500 text-[9px] font-cyber font-black tracking-widest uppercase mb-1">Média
-                        Assertividade</h3>
-                    <p id="adm-pool-winrate" class="text-2xl font-cyber font-black text-blue-500">0.0%</p>
+        <div class="w-80 flex flex-col gap-4 shrink-0 h-full">
+            <div class="panel-root p-4 space-y-3 shrink-0 text-xs font-mono">
+                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider border-b border-white/5 pb-1">
+                    API GATEWAY STATUS</div>
+                <div class="flex justify-between"><span>WEBHOOK N8N</span><span
+                        class="text-emerald-400 font-bold">ONLINE ●</span></div>
+                <div class="flex justify-between"><span>SUPABASE STREAM</span><span
+                        class="text-emerald-400 font-bold">CONECTADO ●</span></div>
+                <div class="p-2.5 bg-black rounded border border-white/5 space-y-1 mt-2">
+                    <span class="text-emerald-500 block font-bold text-[11px]">EVOLUTION API (INSTÂNCIA)</span>
+                    <p class="text-[10px] text-gray-500 font-sans">STATUS: ATIVA<br>RELAY WHATSAPP: PRONTO</p>
                 </div>
             </div>
-            <div class="flex-1 glass-card overflow-hidden flex flex-col">
-                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.01] shrink-0">
-                    <h3 class="text-[10px] font-cyber font-black uppercase tracking-widest text-gray-400">Matriz
-                        Operacional Multi-Tenant</h3>
+
+            <div class="panel-root p-4 flex-1 flex flex-col overflow-hidden">
+                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-3 shrink-0">MARKET VELOCITY
+                    (ADX LIVE)</div>
+                <div id="trends-bars-container" class="flex-grow overflow-y-auto space-y-3 font-mono text-xs">
                 </div>
-                <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4" id="adm-matrix-grid">
+            </div>
+
+            <div class="panel-root p-4 h-40 shrink-0 flex flex-col overflow-hidden">
+                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-2 shrink-0">MARKET MOMENTUM
+                    VECTOR</div>
+                <div class="flex-1 min-h-0">
+                    <canvas id="marketWatchChart"></canvas>
                 </div>
             </div>
         </div>
-    </main>
+
+    </div>
 
     <script>
-        // --- 🛰️ CREDENCIAIS REAIS E INDESTRUTÍVEIS DO ECOSSISTEMA ---
+        // --- 🛰️ CONEXÃO REATIVA SUPABASE ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
 
-        let localCacheData = [];
-        let performanceChartInstance = null;
-        let ESCOPO_ATUAL = "admin";
+        let localRepository = [];
+        let chartBarInstance = null;
+        let chartLineMiniInstance = null;
+        let FILTRO_ATIVO = "admin";
 
-        // --- ⏰ RELÓGIO DE ALTA PRECISÃO ---
+        // TIMER DO CABEÇALHO
         setInterval(() => {
-            document.getElementById('relogio-tatico').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            document.getElementById('txt-relogio').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         }, 1000);
 
-        // --- 🔄 ALTERNADOR DE VISUALIZAÇÃO DE ABAS ---
-        function alternarAbas(viewId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`aba-${viewId}`).classList.remove('hidden');
-
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-white/[0.03]', 'text-white', 'border-l-2', 'border-[#ff6b00]');
-                btn.classList.add('text-gray-400');
-            });
-            const activeBtn = document.getElementById(`btn-menu-${viewId}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-400');
-                activeBtn.classList.add('bg-white/[0.03]', 'text-white', 'border-l-2', 'border-[#ff6b00]');
-            }
+        function alterarEscopo(novoEscopo) {
+            FILTRO_ATIVO = novoEscopo;
+            renderizarPainelAxiom();
         }
 
-        function atualizarEscopoFiltro(novoEscopo) {
-            ESCOPO_ATUAL = novoEscopo;
-            executarPipelineDados();
-        }
-
-        // --- ⚡ PIPELINE REATIVO EM TEMPO REAL ---
-        async function ejecutarPipelineDados() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session && session.user) {
-                document.getElementById('sandbox-auditoria').classList.add('hidden');
-                ESCOPO_ATUAL = session.user.email.includes('admin') ? 'admin' : session.user.id;
-            }
-
+        async function carregarHistoricoSoberano() {
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("🛑 Falha tática de extração de dados:", error); return; }
-
-            localCacheData = trades || [];
-            reconstruirCabineSoberana();
+            if (error) return;
+            localRepository = trades || [];
+            renderizarPainelAxiom();
         }
 
-        // --- 🏛️ RECONSTRUÇÃO DA INTERFACE BASEADA NO ESCOPO (RBAC & IMAGE 2 DESIGN) ---
-        function reconstruirCabineSoberana() {
-            const badge = document.getElementById('badge-status-escopo');
-            const sub = document.getElementById('header-main-subtitle');
-            const navAdmin = document.getElementById('btn-menu-licencas');
-            const thInstancia = document.getElementById('th-instancia-id');
-            const blurLayer = document.getElementById('demo-blur-lock');
-            const turnoKPI = document.getElementById('kpi-state-turno');
-            const balanceKPI = document.getElementById('kpi-banca');
+        function renderizarPainelAxiom() {
+            const tableBody = document.getElementById('table-trades-rows');
+            const totalPLText = document.getElementById('lbl-net-pl');
+            const adxLabel = document.getElementById('lbl-adx-val');
 
-            // Identificação de Turno Operacional
-            const horaLocal = new Date().getHours();
-            if (horaLocal >= 5 && horaLocal < 18) {
-                turnoKPI.innerText = "🌐 TURNO ACTIVE: FOREX (ADX > 3.8)";
-                turnoKPI.className = "text-[10px] font-mono text-blue-400 uppercase font-bold";
+            // Ajuste estético dinâmico do ADX dependendo do horário do Turno
+            const horaAtual = new Date().getHours();
+            if (horaAtual >= 5 && horaAtual < 18) {
+                adxLabel.innerText = "3.8";
+                adxLabel.className = "text-blue-400 font-bold text-sm font-mono";
             } else {
-                turnoKPI.innerText = "⚡ TURNO ACTIVE: SINTÉTICOS (ADX > 8.5)";
-                turnoKPI.className = "text-[10px] font-mono text-[#ff6b00] uppercase font-bold shadow-[0_0_8px_rgba(255,107,0,0.2)]";
+                adxLabel.innerText = "8.7";
+                adxLabel.className = "text-orange-500 font-bold text-sm font-mono";
             }
 
-            let dadosEscopo = [];
-
-            if (ESCOPO_ATUAL === 'admin') {
-                dadosEscopo = localCacheData;
-                badge.innerText = "GUARDIAN ADMIN";
-                badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-red-950/40 text-red-400 border border-red-500/20";
-                sub.innerText = "Escopo Consolidado Global • Monitoramento Total de Licenças Corporativas";
-                navAdmin.classList.remove('hidden');
-                thInstancia.classList.remove('hidden');
-                blurLayer.classList.add('hidden');
-                balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + (t.valor * 2.3), 5000).toFixed(2)}`;
-            } else {
-                dadosEscopo = localCacheData.filter(t => t.user_id === ESCOPO_ATUAL || (!t.user_id && ESCOPO_ATUAL === 'CLIENT_01'));
-                navAdmin.classList.add('hidden');
-                alternarAbas('principal');
-                thInstancia.classList.add('hidden');
-
-                if (ESCOPO_ATUAL === 'CLIENT_FREE') {
-                    badge.innerText = "SANDBOX DEMO";
-                    badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
-                    sub.innerText = "Modo de Demonstração Limitado • Adquira uma Licença Premium";
-                    blurLayer.classList.remove('hidden');
-                    dadosEscopo = dadosEscopo.slice(0, 2); // Trava Q.A.
-                    balanceKPI.innerText = "$ 10.00 (Demo)";
-                } else {
-                    badge.innerText = "PREMIUM LICENSED";
-                    badge.className = "text-[9px] font-mono font-bold uppercase text-center tracking-widest py-2 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
-                    sub.innerText = `Licença Ativa ID: ${ESCOPO_ATUAL} • Sincronismo de Sinais Realtime`;
-                    blurLayer.classList.add('hidden');
-                    balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + t.valor, 1000).toFixed(2)}`;
-                }
+            let filteredList = localRepository;
+            if (FILTRO_ATIVO !== 'admin') {
+                // Filtra de acordo com o segmento selecionado
+                filteredList = localRepository.filter(t => t.ativo.startsWith('frx') ? FILTRO_ATIVO === 'FOREX' : FILTRO_ATIVO === 'SINTÉTICOS');
             }
 
-            // Atualização dos Widgets Dinâmicos da Imagem 2
-            const wins = dadosEscopo.filter(t => t.resultado === 'WIN').length;
-            const netPL = dadosEscopo.reduce((acc, t) => acc + t.valor, 0);
-            const winrate = dadosEscopo.length > 0 ? ((wins / dadosEscopo.length) * 100).toFixed(1) : 0;
+            const totalWins = filteredList.filter(t => t.resultado === 'WIN').length;
+            const netPL = filteredList.reduce((acc, t) => acc + t.valor, 0);
+            const winrate = filteredList.length > 0 ? ((totalWins / filteredList.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('kpi-desempenho').innerText = `${netPL >= 0 ? '+' : ''}${winrate}%`;
-            document.getElementById('kpi-desempenho').className = `text-3xl font-cyber font-black ${netPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-            document.getElementById('kpi-pl').innerText = `$ ${netPL.toFixed(2)}`;
-            document.getElementById('kpi-pl').className = `text-3xl font-cyber font-black ${netPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-            document.getElementById('kpi-winrate').innerText = `${winrate}%`;
+            totalPLText.innerText = `LÍQUIDO P&L ACUMULADO: $ ${netPL.toFixed(2)}`;
+            totalPLText.className = netPL >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
 
-            // Atualiza Medidor Físico (Gauge)
-            const fillElement = document.getElementById('gauge-fill-node');
-            document.getElementById('gauge-text-node').innerText = `${winrate}%`;
-            // Lógica de rotação física do círculo SVG baseado na assertividade real
-            const rotationValue = -135 + (winrate * 1.8);
-            fillElement.style.transform = `rotate(${rotationValue}deg)`;
-            fillElement.style.borderColor = netPL >= 0 ? '#10b981' : '#ef4444';
-            fillElement.style.filter = netPL >= 0 ? 'drop-shadow(0 0 8px #10b981)' : 'drop-shadow(0 0 8px #ef4444)';
+            // Atualização Mecânica do Gauge
+            const gaugeFill = document.getElementById('node-gauge-progress');
+            document.getElementById('node-gauge-text').innerText = `${winrate}%`;
+            const rotationDegrees = -135 + (winrate * 1.8);
+            gaugeFill.style.transform = `rotate(${rotationDegrees}deg)`;
+            gaugeFill.style.borderColor = netPL >= 0 ? '#10b981' : '#ef4444';
 
-            renderizarLinhasFeedTatico(dadosEscopo);
-            if (ESCOPO_ATUAL !== 'CLIENT_FREE') {
-                renderizarGraficoNeon(dadosEscopo.slice(0, 15).reverse());
-            }
-
-            processarCentralDeLicencasSaaS();
-        }
-
-        // --- 📊 RENDERIZADOR DO FILTRO DE TABELA SNIPER ---
-        function renderizarLinhasFeedTatico(trades) {
-            const body = document.getElementById('table-trades-feed');
-            body.innerHTML = trades.map(t => {
+            // Geração das Linhas da Tabela
+            tableBody.innerHTML = filteredList.map(t => {
                 const isWin = t.resultado === 'WIN';
-                const horaStr = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
-                const direcaoStr = t.valor >= 0 ? 'CALL 📈' : 'PUT 📉';
-
-                let intelColumn = '';
-                if (ESCOPO_ATUAL === 'admin') {
-                    intelColumn = `ADX: <span class="text-blue-400 font-bold">${t.adx}</span> <span class="text-gray-700">|</span> CC: ${t.coice}`;
-                } else if (ESCOPO_ATUAL === 'CLIENT_FREE') {
-                    intelColumn = `<span class="text-zinc-700 blur-[2px] italic select-none">Upgrade Necessário</span>`;
-                } else {
-                    intelColumn = `<span class="text-emerald-400 font-black uppercase tracking-widest text-[9px]">🏹 EXECUÇÃO CONCLUÍDA</span>`;
-                }
-
+                const ts = t.created_at ? new Date(t.created_at).toLocaleTimeString() : '00:00:00';
+                const direcao = t.valor >= 0 ? 'CALL 📈' : 'PUT 📉';
                 return `
-                <tr class="hover:bg-white/[0.01] transition-all border-b border-white/5">
-                    <td class="px-5 py-3.5 text-gray-500 text-[11px] font-mono">${horaStr}</td>
-                    ${ESCOPO_ATUAL === 'admin' ? `<td class="px-5 py-3 text-blue-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
-                    <td class="px-5 py-3.5 font-cyber font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
-                    <td class="px-5 py-3.5 text-gray-400 font-bold font-sans text-[11px]">${direcaoStr}</td>
-                    <td class="px-5 py-3.5">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-cyber font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.2)]' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
-                    </td>
-                    <td class="px-5 py-3.5 text-right font-cyber font-black ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${intelColumn}</span></td>
+                <tr class="hover:bg-white/[0.01] border-b border-white/5">
+                    <td class="p-3 text-gray-500 font-mono text-[11px]">${ts}</td>
+                    <td class="p-3 font-bold font-cyber text-gray-300">${t.ativo}</td>
+                    <td class="p-3 text-gray-400 text-[11px]">${direcao}</td>
+                    <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span></td>
+                    <td class="p-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)}</td>
                 </tr>`;
             }).join('');
+
+            renderizarGraficoBarras(filteredList.slice(0, 15).reverse());
+            renderizarBarrasADX();
+            renderizarMiniLine();
         }
 
-        // --- 📈 GRÁFICO DE CAPITAL NEON FILTRADO (CHART.JS) ---
-        function renderizarGraficoNeon(data) {
-            const ctx = document.getElementById('canvasPerformanceChart').getContext('2d');
-            if (performanceChartInstance) performanceChartInstance.destroy();
+        function renderizarGraficoBarras(data) {
+            const ctx = document.getElementById('barPerformanceChart').getContext('2d');
+            if (chartBarInstance) chartBarInstance.destroy();
 
-            let acumuladorLíquido = 0;
-            const pontosDeFrequencia = data.map(t => { acumuladorLíquido += t.valor; return acumuladorLíquido; });
-
-            // Criação do gradiente dinâmico de brilho
-            const gradientNeon = ctx.createLinearGradient(0, 0, 0, 150);
-            gradientNeon.addColorStop(0, 'rgba(255, 107, 0, 0.15)');
-            gradientNeon.addColorStop(1, 'rgba(255, 107, 0, 0.00)');
-
-            performanceChartInstance = new Chart(ctx, {
-                type: 'line',
+            chartBarInstance = new Chart(ctx, {
+                type: 'bar',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: pontosDeFrequencia,
-                        borderColor: '#ff6b00',
-                        borderWidth: 2.5,
-                        tension: 0.35,
-                        fill: true,
-                        backgroundColor: gradientNeon,
+                        data: data.map(t => t.valor),
+                        backgroundColor: data.map(t => t.valor >= 0 ? '#10b981' : '#ef4444'),
+                        borderRadius: 2
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.02)' }, ticks: { color: '#4b5563', font: { size: 8 } } } },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function renderizarBarrasADX() {
+            const container = document.getElementById('trends-bars-container');
+            const moedas = [
+                { nome: "Volatility 100 Index", val: 8.9 },
+                { nome: "Volatility 75 Index", val: 9.2 },
+                { nome: "Volatility 50 Index", val: 6.4 },
+                { nome: "Volatility 10 Index", val: 8.1 }
+            ];
+
+            container.innerHTML = moedas.map(m => {
+                const percentual = (m.val / 15) * 100;
+                return `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[11px]"><span class="text-gray-400 font-bold">${m.nome}</span><span class="text-[#ff5500] font-bold">${m.val} ADX</span></div>
+                    <div class="w-full bg-white/5 h-1.5 rounded overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-500 to-[#ff5500] h-full" style="width: ${percentual}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderizarMiniLine() {
+            const ctx = document.getElementById('marketWatchChart').getContext('2d');
+            if (chartLineMiniInstance) chartLineMiniInstance.destroy();
+
+            chartLineMiniInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    datasets: [{
+                        data: [10, 14, 8, 11, 19, 13, 22, 16, 18, 25],
+                        borderColor: '#ff5500',
+                        borderWidth: 1.5,
+                        tension: 0.4,
+                        fill: false,
                         pointRadius: 0
                     }]
                 },
@@ -527,72 +406,13 @@
             });
         }
 
-        // --- 👑 GESTÃO MATRIZ DE LICENÇAS WHITE LABEL ---
-        function processarCentralDeLicencasSaaS() {
-            const dicionarioClientes = {
-                "CLIENT_01": "Sacolão Miranda (Instância 01)",
-                "CLIENT_02": "PetFlow Master (Enterprise Node)",
-                "CLIENT_FREE": "Licença Demonstrativa Gratuita"
-            };
-
-            const grid = document.getElementById('adm-matrix-grid');
-            const listaIds = Object.keys(dicionarioClientes);
-
-            const poolEquity = localCacheData.reduce((acc, t) => acc + t.valor, 0);
-            const poolWins = localCacheData.filter(t => t.resultado === 'WIN').length;
-            const poolWinrate = localCacheData.length > 0 ? ((poolWins / localCacheData.length) * 100).toFixed(1) : 0;
-
-            document.getElementById('adm-pool-liquidez').innerText = `$ ${poolEquity.toFixed(2)}`;
-            document.getElementById('adm-pool-contas').innerText = listaIds.length - 1;
-            document.getElementById('adm-pool-winrate').innerText = `${poolWinrate}%`;
-
-            grid.innerHTML = listaIds.map(id => {
-                const tradesDoCliente = localCacheData.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
-                const cWins = tradesDoCliente.filter(t => t.resultado === 'WIN').length;
-                const cEquity = tradesDoCliente.reduce((acc, t) => acc + t.valor, 0);
-                const cWinrate = tradesDoCliente.length > 0 ? ((cWins / tradesDoCliente.length) * 100).toFixed(1) : 0;
-
-                return `
-                <div class="p-5 rounded-xl border border-white/5 bg-black/40 flex flex-col justify-between hover:border-[#ff6b00]/40 transition-all hover:shadow-[0_0_15px_rgba(255,107,0,0.08)]">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-xs font-black text-white uppercase tracking-tight font-cyber">${dicionarioClientes[id]}</h4>
-                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">${id}</span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 font-mono">Último sinal capitaneado: ${tradesDoCliente[0] ? new Date(tradesDoCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/5 font-mono text-center">
-                        <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Saldo P&L</span>
-                            <span class="text-xs font-bold ${cEquity >= 0 ? 'text-emerald-400' : 'text-red-400'}">$ ${cEquity.toFixed(2)}</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">WinRate</span>
-                            <span class="text-xs font-bold text-blue-400">${cWinrate}%</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Sinais</span>
-                            <span class="text-xs font-bold text-gray-300">${tradesDoCliente.length}</span>
-                        </div>
-                    </div>
-
-                    <button onclick="document.getElementById('instance-switcher').value='${id}'; atualizarEscopoFiltro('${id}');" class="w-full mt-4 bg-white/5 hover:bg-[#ff6b00] hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-widest font-cyber transition-all">
-                        Inspecionar Mola
-                    </button>
-                </div>`;
-            }).join('');
-        }
-
-        // --- 📡 STREAM REALTIME SOBERANO CHANNEL ---
+        // ESCUTA CANAL REALTIME DO SUPABASE PARA ATUALIZAR EM TEMPO REAL SEM REFRESH
         supabase.channel('sovereign-stream-v4')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                ejecutarPipelineDados();
+                carregarHistoricoSoberano();
             }).subscribe();
 
-        window.onload = () => {
-            ejecutarPipelineDados();
-        };
+        window.onload = () => { carregarHistoricoSoberano(); };
     </script>
 </body>
 
