@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WayAxiom OS - Central Command v4.0</title>
+    <title>Axiom Sentinel - Sovereign Node v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,8 +12,13 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <style>
+        /* 1. FUNDO BRUTALISTA COM ILUMINAÇÃO DRAMÁTICA (Inspirado nas referências) */
         body {
             background-color: #010103;
+            background-image:
+                radial-gradient(circle at 10% 10%, rgba(255, 107, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+                url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3Y%3Cg fill-rule="evenodd"%3Y%3Cg fill="%23FFFFFF" fill-opacity="0.01"%3Y%3Cpath d="M0 40h40V0H0v40zM20 20h20v20H20V20zM0 0h20v20H0V0z"/%3Y%3C/g%3Y%3C/g%3Y%3C/svg%3Y');
             color: #f8f9fa;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -27,12 +32,49 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        .card-premium {
-            background: linear-gradient(145deg, #0b0b0f 0%, #030305 100%);
-            border: 1px solid #16161e;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        /* 2. CARDS HOLOGRÁFICOS E FLUTUANTES */
+        .card-sovereign {
+            background: rgba(11, 11, 15, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
 
+        .card-sovereign:hover {
+            border-color: rgba(255, 107, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(255, 107, 0, 0.1);
+        }
+
+        /* 3. BOTÕES TÁTICOS (Segmentados das referências) */
+        .btn-tactical {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-tactical:hover {
+            background: rgba(255, 107, 0, 0.05);
+            border-color: rgba(255, 107, 0, 0.2);
+            color: #fff;
+        }
+
+        .btn-tactical.active {
+            background: rgba(255, 107, 0, 0.1);
+            border-color: #FF6B00;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+        }
+
+        /* 4. STATUS E DECORAÇÃO SNIPER */
         .status-pulse::after {
             content: '';
             position: absolute;
@@ -41,8 +83,9 @@
             background: #FF6B00;
             border-radius: 50%;
             right: -12px;
-            top: 6px;
+            top: 7px;
             animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #FF6B00;
         }
 
         @keyframes pulse {
@@ -67,179 +110,185 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #1f1f2e;
+            background: rgba(255, 107, 0, 0.2);
             border-radius: 10px;
         }
     </style>
 </head>
 
-<body class="flex h-screen w-screen bg-[#010103] text-gray-300 select-none">
+<body class="flex h-screen w-screen text-gray-300 select-none">
 
-    <aside class="w-64 card-premium h-full p-6 flex flex-col justify-between border-y-0 border-l-0 z-30">
+    <aside class="w-64 h-full p-6 flex flex-col justify-between border-r border-white/5 z-30">
         <div>
-            <div class="mb-6">
-                <div class="flex items-center gap-2">
-                    <div class="h-3 w-3 bg-[#FF6B00] rounded-sm rotate-45"></div>
+            <div class="mb-10 text-center">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <div class="h-4 w-4 bg-[#FF6B00] rounded-sm rotate-45 box-shadow: 0 0 10px #FF6B00"></div>
                     <h1 class="text-2xl font-black font-poppins tracking-tight uppercase italic text-white">Way<span
                             class="text-[#FF6B00] font-normal">Axiom</span></h1>
                 </div>
-                <p class="text-[9px] text-gray-500 uppercase tracking-[0.25em] font-bold mt-1">Soberano Node OS v4.0</p>
+                <p class="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">SENTINEL NODE OS v4.0</p>
             </div>
 
-            <div id="sandbox-container" class="mb-6 p-3 bg-white/[0.01] rounded-lg border border-white/5">
-                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-1.5">Sandbox de
+            <div id="sandbox-auditoria" class="mb-8 p-3 card-sovereign bg-white/[0.01]">
+                <label class="text-[9px] uppercase tracking-widest text-gray-500 font-black block mb-2">Escopo de
                     Sessão</label>
-                <select id="role-selector" onchange="alterarEscopoSaaS(this.value)"
+                <select id="scope-selector" onchange="alterarEscopoSaaS(this.value)"
                     class="w-full bg-black border border-white/10 text-[11px] rounded p-1.5 text-white focus:outline-none font-mono">
-                    <option value="admin">Sessão: Admin Global</option>
+                    <option value="admin">Sessão: Admin Master</option>
                     <option value="CLIENT_01">Sessão: Sacolão Miranda</option>
                     <option value="CLIENT_02">Sessão: PetFlow Master</option>
                     <option value="CLIENT_FREE">Sessão: Teste Gratuito</option>
                 </select>
             </div>
 
-            <nav class="space-y-1">
-                <button onclick="trocarAba('terminal')" id="btn-tab-terminal"
-                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-white bg-white/[0.03] transition-all text-left">
+            <nav class="space-y-2">
+                <button onclick="trocarAba('terminal')" id="btn-terminal"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white bg-white/[0.03] transition-all text-left">
                     <span>📊 Terminal Realtime</span>
                 </button>
-                <button onclick="trocarAba('disciplina')" id="btn-tab-disciplina"
-                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
+                <button onclick="trocarAba('disciplina')" id="btn-disciplina"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
                     <span>🎯 Risco e Disciplina</span>
                 </button>
-                <button onclick="trocarAba('onboarding')" id="btn-tab-onboarding"
-                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
+                <button onclick="trocarAba('onboarding')" id="btn-onboarding"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left">
                     <span>🔗 Parceria Deriv</span>
                 </button>
-                <button onclick="trocarAba('gestao-global')" id="btn-tab-admin"
-                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left hidden">
-                    <span>👑 Painel de Licenças</span>
+                <button onclick="trocarAba('gestao')" id="btn-admin"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-400 hover:bg-white/[0.01] hover:text-white transition-all text-left hidden">
+                    <span>👑 Central de Licenças</span>
                 </button>
             </nav>
         </div>
 
-        <div class="pt-4 border-t border-white/5 space-y-3">
-            <div id="badge-escopo" class="text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded">
-                Verificando Kernels...</div>
-            <div class="grid grid-cols-1">
-                <a href="https://wa.me/5545991397543" target="_blank"
-                    class="flex items-center justify-center bg-[#FF6B00] hover:bg-orange-700 text-white text-[10px] font-black py-2 rounded-lg transition-all uppercase tracking-widest text-center">💬
-                    Suporte Enterprise</a>
-            </div>
+        <div class="pt-6 border-t border-white/5 space-y-4">
+            <div id="badge-soberano"
+                class="text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/20">
+                NÓ SOBERANO</div>
+            <a href="https://wa.me/5545991397543" target="_blank"
+                class="flex items-center justify-center gap-2 w-full bg-[#FF6B00] hover:bg-orange-700 text-white text-[10px] font-black py-2.5 rounded-lg transition-all uppercase tracking-widest text-center shadow-[0_0_15px_rgba(255,107,0,0.2)]">
+                Suporte Enterprise
+            </a>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full overflow-hidden p-8">
+    <main class="flex-1 flex flex-col h-full overflow-hidden p-8 z-10">
 
-        <header class="flex justify-between items-start mb-6 shrink-0">
+        <header class="flex justify-between items-start mb-6 shrink-0 border-b border-white/5 pb-4">
             <div>
-                <h2 id="title-main" class="text-2xl font-black text-white uppercase tracking-tight font-poppins">Axiom
-                    Sentinel</h2>
-                <p id="subtitle-main" class="text-xs text-gray-500 mt-0.5">Inicializando barramentos de dados...</p>
+                <h2 id="view-title" class="text-3xl font-black text-white uppercase tracking-tight font-poppins">
+                    Terminal Sentinel</h2>
+                <p id="view-subtitle" class="text-xs text-gray-500 mt-1">Conectando ao Nó Soberano v4.0...</p>
             </div>
-            <div
-                class="flex items-center gap-3 bg-white/[0.01] border border-white/5 p-2 rounded-lg font-mono text-[10px]">
-                <span class="status-pulse relative text-[#FF6B00] font-bold uppercase tracking-wider mr-2">Nó Ativo
-                    VPS</span>
+            <div class="flex items-center gap-3 bg-black border border-white/5 p-3 rounded-xl font-mono text-[10px]">
+                <span
+                    class="status-pulse relative text-[#FF6B00] font-bold uppercase tracking-wider mr-2 shadow-[0_0_10px_rgba(255,107,0,0.5)]">VPS
+                    Active Node</span>
                 <span class="text-gray-700">|</span>
-                <span id="live-clock" class="text-gray-400">00:00:00</span>
+                <span id="relogio-tatico" class="text-gray-400">00:00:00</span>
             </div>
         </header>
 
-        <div id="view-terminal" class="flex-1 flex flex-col gap-6 overflow-hidden content-view">
+        <div id="view-terminal" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Banca Integrada
-                        (Deriv)</h3>
-                    <p id="kpi-balance" class="text-2xl font-black text-white font-mono">$ 0.00</p>
-                </div>
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Lucro Líquido (Net
-                        P&L)</h3>
-                    <p id="kpi-pl" class="text-2xl font-black text-white font-mono">$ 0.00</p>
-                </div>
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Taxa de Acerto (Win
-                        Rate)</h3>
-                    <p id="kpi-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
-                </div>
-                <div
-                    class="card-premium p-5 rounded-xl bg-gradient-to-br from-orange-950/10 to-black border-orange-900/20">
-                    <h3 class="text-gray-400 text-[9px] uppercase font-black tracking-widest mb-1">Status Turno Atual
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Net Equity (P&L)
                     </h3>
-                    <p id="kpi-turno-status" class="text-xs font-bold uppercase mt-1.5 tracking-wider font-mono">
-                        Processando...</p>
+                    <p id="kpi-pl" class="text-3xl font-black text-white font-mono">$ 0.00</p>
+                </div>
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Win Rate Geral
+                    </h3>
+                    <p id="kpi-winrate" class="text-3xl font-black text-blue-500 font-mono">0.0%</p>
+                </div>
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[10px] uppercase font-black tracking-widest mb-1.5">Banca Broker
+                        (Deriv)</h3>
+                    <p id="kpi-banca" class="text-3xl font-black text-gray-300 font-mono">$ 0.00</p>
+                </div>
+                <div class="card-sovereign p-5 bg-gradient-to-br from-[#FF6B00]/10 to-black">
+                    <h3 class="text-white text-[10px] uppercase font-black tracking-widest mb-1.5">Market State (Target)
+                    </h3>
+                    <p id="kpi-state" class="text-xs font-bold text-[#FF6B00] uppercase mt-2 tracking-wider font-mono">
+                        Calculando Ticks...</p>
                 </div>
             </div>
 
             <div
-                class="h-44 card-premium p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
-                <div class="w-full h-full">
+                class="h-44 card-sovereign p-4 rounded-xl shrink-0 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-[10px] text-gray-500"></i>
+                    <h4 class="text-[10px] uppercase tracking-widest font-black text-gray-500">Curva de Capital
+                        Acumulado</h4>
+                </div>
+                <div class="w-full h-full pt-2">
                     <canvas id="chartPerformance"></canvas>
                 </div>
-                <div id="blur-lock-free"
-                    class="absolute inset-0 bg-black/90 backdrop-blur-md hidden flex flex-col justify-center items-center z-10">
-                    <p class="text-xs font-black text-gray-500 tracking-widest uppercase">📊 Gráfico Bloqueado na
-                        Licença Demonstrativa</p>
+                <div id="chart-lock-demo"
+                    class="absolute inset-0 bg-black/90 backdrop-blur-md hidden flex-col justify-center items-center z-20">
+                    <i class="fa-solid fa-lock text-3xl text-gray-700 mb-2"></i>
+                    <p class="text-xs font-black text-gray-500 tracking-widest uppercase">Gráfico Oculto na Versão Demo
+                    </p>
                 </div>
             </div>
 
-            <div class="flex-1 card-premium rounded-xl overflow-hidden flex flex-col">
+            <div class="flex-1 card-sovereign overflow-hidden flex flex-col">
                 <div
                     class="px-5 py-3 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Transmissão Direta de
-                        Sinais v22.8</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Direct-Feed Tático v22.8
+                    </h3>
+                    <span
+                        class="text-[9px] font-mono bg-[#FF6B00]/10 text-[#FF6B00] border border-[#FF6B00]/30 px-2 py-0.5 rounded uppercase shadow-[0_0_5px_rgba(255,107,0,0.2)]">Stream
+                        Ativo</span>
                 </div>
                 <div class="flex-1 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
                         <thead
-                            class="text-[9px] uppercase tracking-wider text-gray-500 bg-black/60 sticky top-0 z-10 border-b border-white/5">
+                            class="text-[9px] uppercase tracking-wider text-gray-500 bg-black sticky top-0 z-10 border-b border-white/5">
                             <tr>
                                 <th class="px-5 py-3 font-black">Timestamp</th>
-                                <th id="th-saas-user" class="px-5 py-3 font-black hidden">Token Cliente</th>
+                                <th id="th-scop-id" class="px-5 py-3 font-black hidden">Token Instância</th>
                                 <th class="px-5 py-3 font-black">Ativo</th>
                                 <th class="px-5 py-3 font-black">Resultado</th>
-                                <th class="px-5 py-3 font-black text-right">Métricas Sniper / Retorno</th>
+                                <th class="px-5 py-3 font-black text-right">Sniper Data / Retorno</th>
                             </tr>
                         </thead>
-                        <tbody id="table-trades-body" class="text-xs divide-y divide-white/5 font-mono">
+                        <tbody id="table-orders-body" class="text-xs divide-y divide-white/5 font-mono">
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div id="view-disciplina" class="flex-1 flex flex-col gap-6 overflow-hidden content-view hidden">
+        <div id="view-disciplina" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card-premium p-6 rounded-xl">
+                <div class="card-sovereign p-6 rounded-xl">
                     <h3
                         class="text-sm font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 font-poppins">
-                        Monitor de Risco Alvo</h3>
+                        Configuração de Gerenciamento Alvo</h3>
                     <div class="space-y-4">
                         <div>
                             <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Meta de Ganho
                                 Diário (Take Profit)</label>
                             <div class="flex gap-2">
-                                <input type="number" id="input-tp" value="100.00"
+                                <input type="number" value="100.00"
                                     class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF6B00] font-mono w-full">
-                                <button onclick="alert('Meta Salva no Perfil')"
-                                    class="bg-[#FF6B00] hover:bg-orange-700 text-white font-bold text-xs px-4 rounded uppercase tracking-wider">Definir</button>
+                                <button onclick="alert('TP Configurado.')" class="btn-tactical active">Definir</button>
                             </div>
                         </div>
                         <div>
                             <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">Limite Máximo de
                                 Perda (Stop Loss)</label>
                             <div class="flex gap-2">
-                                <input type="number" id="input-sl" value="50.00"
+                                <input type="number" value="50.00"
                                     class="bg-black border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF6B00] font-mono w-full">
-                                <button onclick="alert('Stop Configurado com Sucesso')"
-                                    class="bg-[#FF6B00] hover:bg-orange-700 text-white font-bold text-xs px-4 rounded uppercase tracking-wider">Definir</button>
+                                <button onclick="alert('SL Configurado.')" class="btn-tactical active">Definir</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-premium p-6 rounded-xl flex flex-col justify-between">
+                <div class="card-sovereign p-6 rounded-xl flex flex-col justify-between">
                     <div>
                         <h3
                             class="text-sm font-black text-white uppercase tracking-wider mb-2 border-b border-white/5 pb-2 font-poppins">
@@ -247,14 +296,18 @@
                         <p class="text-xs text-gray-500">O robô emite comandos automáticos de interrupção na VPS caso os
                             limites integrados abaixo sejam detectados.</p>
                     </div>
-                    <div class="space-y-2 pt-4">
-                        <div class="flex justify-between text-xs font-mono"><span class="text-gray-500">Anti-Slippage
-                                Engine:</span> <span class="text-emerald-400 font-bold">CONECTADO</span></div>
-                        <div class="flex justify-between text-xs font-mono"><span class="text-gray-500">Filtro de
-                                Exaustão de Mola:</span> <span class="text-[#FF6B00] font-bold">ATIVO (v22.8)</span>
+                    <div class="space-y-3 pt-4 font-mono text-center grid grid-cols-3 gap-2">
+                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Slippage</span>
+                            <span class="text-xs font-bold text-emerald-400">ATIVO</span>
                         </div>
-                        <div class="flex justify-between text-xs font-mono"><span class="text-gray-500">Trava Sequencial
-                                Automatizada:</span> <span class="text-blue-400 font-bold">2 LOSS / 15 MIN PAUSA</span>
+                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Exaustão</span>
+                            <span class="text-xs font-bold text-[#FF6B00]">v22.8</span>
+                        </div>
+                        <div class="p-2 bg-white/[0.01] rounded border border-white/5">
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sequential</span>
+                            <span class="text-xs font-bold text-blue-400">2/15min</span>
                         </div>
                     </div>
                 </div>
@@ -262,10 +315,8 @@
         </div>
 
         <div id="view-onboarding"
-            class="flex-1 card-premium p-8 rounded-xl flex flex-col justify-center items-center text-center gap-6 content-view hidden">
-            <div
-                class="h-16 w-16 bg-white/[0.02] border border-white/10 rounded-2xl flex items-center justify-center text-2xl text-[#FF6B00]">
-                🔗</div>
+            class="flex-1 card-sovereign p-8 flex flex-col justify-center items-center text-center gap-6 view-layer hidden">
+            <i class="fa-solid fa-link-slash text-5xl text-gray-700"></i>
             <div class="max-w-md">
                 <h3 class="text-lg font-black text-white uppercase tracking-wider font-poppins mb-2">Conecte sua
                     Infraestrutura de Corretagem</h3>
@@ -273,34 +324,34 @@
                     conta, crie seu cadastro na corretora parceira oficial através do link verificado abaixo.</p>
             </div>
             <a href="https://track.deriv.com/_16GbgDTBVBN6W2e/1/" target="_blank"
-                class="bg-[#FF6B00] hover:bg-orange-700 text-white font-black text-xs py-3.5 px-8 rounded-lg tracking-widest uppercase transition-all shadow-lg shadow-orange-600/10">
+                class="flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-orange-700 text-white text-[10px] font-black py-3 px-6 rounded-lg transition-all uppercase tracking-widest text-center shadow-[0_0_15px_rgba(255,107,0,0.2)]">
                 Criar Conta Oficial Deriv <span class="ml-2">↗</span>
             </a>
         </div>
 
-        <div id="view-gestao-global" class="flex-1 flex flex-col gap-6 overflow-hidden content-view hidden">
+        <div id="view-gestao" class="flex-1 flex flex-col gap-6 overflow-hidden view-layer hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Volume Consolidado
-                        Pool</h3>
-                    <p id="adm-pool-liquidez" class="text-2xl font-black text-emerald-400 font-mono">$ 0.00</p>
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Liquidez Pool Admin
+                    </h3>
+                    <p id="adm-kpi-equity" class="text-2xl font-black text-emerald-400 font-mono">$ 0.00</p>
                 </div>
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Licenças Premium
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Instâncias Premium
                         Ativas</h3>
-                    <p id="adm-pool-licencas" class="text-2xl font-black text-white font-mono">0</p>
+                    <p id="adm-kpi-clients" class="text-2xl font-black text-white font-mono">0</p>
                 </div>
-                <div class="card-premium p-5 rounded-xl">
-                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1">Média Ponderada
+                <div class="card-sovereign p-5">
+                    <h3 class="text-gray-500 text-[9px] uppercase font-black tracking-widest mb-1.5">Média Global
                         WinRate</h3>
-                    <p id="adm-pool-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
+                    <p id="adm-kpi-winrate" class="text-2xl font-black text-blue-500 font-mono">0.0%</p>
                 </div>
             </div>
 
-            <div class="flex-1 card-premium rounded-xl overflow-hidden flex flex-col">
+            <div class="flex-1 card-sovereign overflow-hidden flex flex-col">
                 <div class="px-5 py-3 border-b border-white/5 bg-white/[0.01] shrink-0">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Gerenciamento de
-                        Instâncias Multi-Tenant</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Matriz Multi-Tenant de
+                        Monitoramento de Instâncias</h3>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-4" id="adm-matrix-grid">
                 </div>
@@ -309,183 +360,178 @@
     </main>
 
     <script>
-        // --- 📡 PARÂMETROS SOBERANOS DE CONEXÃO SUPABASE ---
+        // --- 🛰️ CONEXÕES SOBERANAS AO BANCO DE DADOS ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
 
-        let cacheTransacoes = [];
-        let performanceChartInstance = null;
-        let ESCOPO_ATIVO = "admin";
+        let rawCache = [];
+        let trendChart = null;
+        let ESCOPO_SESSAO = "admin"; // Default Q.A.
 
-        // --- ⏰ RELÓGIO DE SÃO PAULO ---
+        // --- 🖥️ ENGINE DE RELÓGIO TÁTICO ---
         setInterval(() => {
-            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            const horaSaoPaulo = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            document.getElementById('relogio-tatico').innerText = horaSaoPaulo;
         }, 1000);
 
-        // --- 🔄 CONTROLE DE NAVEGAÇÃO DE ABAS ---
+        // --- 🔄 CONTROLE DE ESCOPO E NAVEGAÇÃO ---
         function trocarAba(viewId) {
-            document.querySelectorAll('.content-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.view-layer').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
 
             document.querySelectorAll('nav button').forEach(btn => {
                 btn.classList.remove('bg-white/[0.03]', 'text-white');
                 btn.classList.add('text-gray-400', 'hover:bg-white/[0.01]');
             });
-            const activeBtn = document.getElementById(`btn-tab-${viewId === 'gestao-global' ? 'admin' : viewId}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-400', 'hover:bg-white/[0.01]');
-                activeBtn.classList.add('bg-white/[0.03]', 'text-white');
-            }
+            const navId = viewId === 'gestao' ? 'admin' : viewId;
+            document.getElementById(`btn-${navId}`).classList.remove('text-gray-400', 'hover:bg-white/[0.01]');
+            document.getElementById(`btn-${navId}`).classList.add('bg-white/[0.03]', 'text-white');
         }
 
         function alterarEscopoSaaS(valorSelecionado) {
-            ESCOPO_ATIVO = valorSelecionado;
-            executarPipelineSoberano();
+            ESCOPO_SESSAO = valorSelecionado;
+            executarPipelineCore();
         }
 
-        // --- ⚡ PIPELINE DE DADOS EM TEMPO REAL ---
-        async function executarPipelineSoberano() {
-            // Se houver sessão de login real via Supabase Auth, ela assume o controle do escopo automaticamente
+        // --- ⚡ PIPELINE CENTRAL DE DADOS REALTIME ---
+        async function executarPipelineCore() {
+            // Mapeamento de Sessão Real do Supabase Auth
             const { data: { session } } = await supabase.auth.getSession();
             if (session && session.user) {
-                document.getElementById('sandbox-container').classList.add('hidden');
-                ESCOPO_ATIVO = session.user.email.includes('admin') ? 'admin' : session.user.id;
+                document.getElementById('sandbox-auditoria').classList.add('hidden');
+                ESCOPO_SESSAO = session.user.email.includes('admin') ? 'admin' : session.user.id;
             }
 
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
-            if (error) { console.error("🛑 Erro na extração do histórico:", error); return; }
+            if (error) { console.error("🛑 Falha no Pipeline Tático:", error); return; }
 
-            cacheTransacoes = trades || [];
-
-            // Fallback de contingência visual para ambiente de testes inicial
-            if (cacheTransacoes.length === 0) {
-                cacheTransacoes = [
-                    { created_at: new Date().toISOString(), user_id: 'CLIENT_01', ativo: 'R_10', resultado: 'WIN', valor: 9.50, adx: 8.6, coice: 1.55 },
-                    { created_at: new Date().toISOString(), user_id: 'CLIENT_02', ativo: 'R_100', resultado: 'LOSS', valor: -10.00, adx: 8.9, coice: 1.62 }
-                ];
+            rawCache = trades || [];
+            if (rawCache.length === 0) {
+                rawCache = [{ created_at: new Date().toISOString(), user_id: 'CLIENT_01', ativo: 'R_100', resultado: 'WIN', valor: 9.50, adx: 8.9, coice: 1.62 }];
             }
 
-            renderizarAmbienteRBAC();
+            renderizarAmbienteRole();
         }
 
-        // --- 🏛️ ENGINE DE CONTROLE DE PAPÉIS VISUAIS (RBAC) ---
-        function renderizarAmbienteRBAC() {
-            const badge = document.getElementById('badge-escopo');
-            const subtitle = document.getElementById('subtitle-main');
-            const navAdmin = document.getElementById('btn-tab-admin');
-            const thUser = document.getElementById('th-saas-user');
-            const blurChart = document.getElementById('blur-lock-free');
-            const turnoKPI = document.getElementById('kpi-turno-status');
-            const balanceKPI = document.getElementById('kpi-balance');
+        // --- 🏛️ MOTOR DE RENDERIZAÇÃO TÁTICA (RBAC & ESTÉTICA SOVEREIGN) ---
+        function renderizarAmbienteRole() {
+            const badge = document.getElementById('badge-soberano');
+            const subtitle = document.getElementById('view-subtitle');
+            const navAdmin = document.getElementById('btn-admin');
+            const thScorpe = document.getElementById('th-scop-id');
+            const lockChart = document.getElementById('chart-lock-demo');
+            const targetKPI = document.getElementById('kpi-state');
+            const balanceKPI = document.getElementById('kpi-banca');
 
-            // Identificação automática de turnos com base na hora de Matelândia
-            const horaLocal = new Date().getHours();
-            if (horaLocal >= 5 && horaLocal < 18) {
-                turnoKPI.innerText = "📈 TURNO FOREX (ADX 3.8)";
-                turnoKPI.className = "text-xs font-bold text-blue-400 uppercase mt-1.5 tracking-wider font-mono";
+            // Determina turno e alvo de mola baseado na hora de Matelândia
+            const horaActual = new Date().getHours();
+            if (horaActual >= 5 && horaActual < 18) {
+                targetKPI.innerText = "🌐 FOREX (ADX > 3.8)";
+                targetKPI.className = "text-xs font-bold text-blue-400 uppercase mt-2 tracking-wider font-mono";
             } else {
-                turnoKPI.innerText = "⚡ SINTÉTICOS (ADX 8.5)";
-                turnoKPI.className = "text-xs font-bold text-orange-400 uppercase mt-1.5 tracking-wider font-mono";
+                targetKPI.innerText = "⚡ SINTÉTICOS (ADX > 8.5)";
+                targetKPI.className = "text-xs font-bold text-[#FF6B00] uppercase mt-2 tracking-wider font-mono shadow-[0_0_10px_rgba(255,107,0,0.3)]";
             }
 
-            let dadosEscopo = [];
-
-            if (ESCOPO_ATIVO === 'admin') {
-                dadosEscopo = cacheTransacoes;
-                badge.innerText = "ADMIN ROOT";
-                badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-red-950/40 text-red-400 border border-red-500/20";
-                subtitle.innerText = "Painel Global Administrativo • Monitoramento Consolidado de Instâncias";
+            let filteredTrades = [];
+            if (ESCOPO_SESSAO === 'admin') {
+                filteredTrades = rawCache;
+                badge.innerText = "ADMIN MASTER NODE";
+                badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-red-950/40 text-red-400 border border-red-500/20";
+                subtitle.innerText = "Comando Geral SaaS • Monitoramento de Todas as Licenças";
                 navAdmin.classList.remove('hidden');
-                thUser.classList.remove('hidden');
-                blurChart.classList.add('hidden');
-                balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + (t.valor * 2.1), 3500).toFixed(2)}`;
+                thScorpe.classList.remove('hidden');
+                lockChart.classList.add('hidden');
+                balanceKPI.innerText = `$ ${filteredTrades.reduce((acc, t) => acc + (t.valor * 2), 2500).toFixed(2)}`;
             } else {
-                dadosEscopo = cacheTransacoes.filter(t => t.user_id === ESCOPO_ATIVO || (!t.user_id && ESCOPO_ATIVO === 'CLIENT_01'));
+                filteredTrades = rawCache.filter(t => t.user_id === ESCOPO_SESSAO || (!t.user_id && ESCOPO_SESSAO === 'CLIENT_01'));
                 navAdmin.classList.add('hidden');
-                thUser.classList.add('hidden');
+                thScorpe.classList.add('hidden');
 
-                if (ESCOPO_ATIVO === 'CLIENT_FREE') {
-                    badge.innerText = "LICENÇA FREE";
-                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
-                    subtitle.innerText = "Versão Demonstrativa • Histórico e Métricas Ocultadas";
-                    blurChart.classList.remove('hidden');
-                    dadosEscopo = dadosEscopo.slice(0, 2); // Trava estrita de escopo de dados
+                if (ESCOPO_SESSAO === 'CLIENT_FREE') {
+                    badge.innerText = "LICENÇA TEMPORÁRIA";
+                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
+                    subtitle.innerText = "Nó de Demonstração • Histórico e Telemetria Ocultados";
+                    lockChart.classList.remove('hidden');
+                    filteredTrades = filteredTrades.slice(0, 2);
                     balanceKPI.innerText = "$ 10.00 (Demo)";
                 } else {
-                    badge.innerText = "PREMIUM ACTIVE";
-                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-1.5 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
-                    subtitle.innerText = `Token Vinculado: ${ESCOPO_ATIVO} • Execução via Copy Engine`;
-                    blurChart.classList.add('hidden');
-                    balanceKPI.innerText = `$ ${dadosEscopo.reduce((acc, t) => acc + t.valor, 500).toFixed(2)}`;
+                    badge.innerText = "LICENÇA PREMIUM";
+                    badge.className = "text-[9px] font-black uppercase text-center tracking-widest py-2 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
+                    subtitle.innerText = `ID Licença: ${ESCOPO_SESSAO} • Status Online`;
+                    lockChart.classList.add('hidden');
+                    balanceKPI.innerText = `$ ${filteredTrades.reduce((acc, t) => acc + t.valor, 500).toFixed(2)}`;
                 }
             }
 
-            const wins = dadosEscopo.filter(t => t.resultado === 'WIN').length;
-            const liquido = dadosEscopo.reduce((acc, t) => acc + t.valor, 0);
-            const winrate = dadosEscopo.length > 0 ? ((wins / dadosEscopo.length) * 100).toFixed(1) : 0;
+            const wins = filteredTrades.filter(t => t.resultado === 'WIN').length;
+            const plAcumulado = filteredTrades.reduce((acc, t) => acc + t.valor, 0);
+            const winRate = filteredTrades.length > 0 ? ((wins / filteredTrades.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('kpi-pl').innerText = `$ ${liquido.toFixed(2)}`;
-            document.getElementById('kpi-pl').className = `text-2xl font-black font-mono ${liquido >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-            document.getElementById('kpi-winrate').innerText = `${winrate}%`;
+            document.getElementById('kpi-pl').innerText = `$ ${plAcumulado.toFixed(2)}`;
+            document.getElementById('kpi-pl').className = `text-3xl font-black font-mono ${plAcumulado >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+            document.getElementById('kpi-winrate').innerText = `${winRate}%`;
 
-            renderizarLinhasDeTabela(dadosEscopo);
-            if (ESCOPO_ATIVO !== 'CLIENT_FREE') {
-                renderizarGraficoPerformance(dadosEscopo.slice(0, 15).reverse());
+            renderizarLinhasTabela(filteredTrades);
+            if (ESCOPO_SESSAO !== 'CLIENT_FREE') {
+                renderizarGraficoHolografico(filteredTrades.slice(0, 15).reverse());
             }
 
-            processarMatrizLicenciamentoAdmin();
+            processarMatrizAdminLicencas();
         }
 
-        // --- 📊 OPERAÇÃO DE TABELA COM MASCARAMENTO TÉCNICO ---
-        function renderizarLinhasDeTabela(trades) {
-            const body = document.getElementById('table-trades-body');
+        // --- 📊 TABELA DE EXECUÇÕES COM MASCARAMENTO SNIPER (IP Protect) ---
+        function renderizarLinhasTabela(trades) {
+            const body = document.getElementById('table-orders-body');
             body.innerHTML = trades.map(t => {
                 const isWin = t.resultado === 'WIN';
-                const timeStr = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
+                const timeStmp = t.created_at ? new Date(t.created_at).toLocaleTimeString('pt-BR') : '00:00:00';
 
-                let metricsHTML = '';
-                if (ESCOPO_ATIVO === 'admin') {
-                    metricsHTML = `ADX: <span class="text-blue-400">${t.adx}</span> | CC: ${t.coice}`;
-                } else if (ESCOPO_ATIVO === 'CLIENT_FREE') {
-                    metricsHTML = `<span class="text-zinc-600 blur-[2px] font-sans italic">Bloqueado</span>`;
+                let dataColumn = '';
+                if (ESCOPO_SESSAO === 'admin') {
+                    dataColumn = `ADX: <span class="text-blue-400">${t.adx}</span> <span class="text-gray-700">|</span> CC: <span class="text-gray-300">${t.coice}</span>`;
+                } else if (ESCOPO_SESSAO === 'CLIENT_FREE') {
+                    dataColumn = `<span class="text-gray-700 blur-[3px] select-none italic">🔒 Upgrade Required</span>`;
                 } else {
-                    metricsHTML = `<span class="text-emerald-400 font-bold uppercase text-[10px]">🏹 Sniper Triggered</span>`;
+                    dataColumn = `<span class="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">✨ GATILHO SNIPER</span>`;
                 }
 
                 return `
                 <tr class="hover:bg-white/[0.01] transition-all border-b border-white/5">
-                    <td class="px-5 py-3.5 text-gray-500 text-[11px]">${timeStr}</td>
-                    ${ESCOPO_SESSÃO_ATIVO === 'admin' ? `<td class="px-5 py-3.5 text-blue-500 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
+                    <td class="px-5 py-3.5 text-gray-500 text-[11px]">${timeStmp}</td>
+                    ${ESCOPO_SESSÃO_ATIVO === 'admin' ? `<td class="px-5 py-3 text-blue-400 text-[11px] font-bold font-sans">${t.user_id || 'CLIENT_01'}</td>` : ''}
                     <td class="px-5 py-3.5 font-black text-gray-200 uppercase tracking-tight">${t.ativo}</td>
-                    <td class="px-5 py-3.5">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
+                    <td class="px-5 py-3.5 text-[11px]">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_5px_rgba(16,185,129,0.2)]' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span>
                     </td>
-                    <td class="px-5 py-3.5 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${metricsHTML}</span></td>
+                    <td class="px-5 py-3.5 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)} <span class="text-[10px] ml-3 font-normal text-gray-500 font-sans">${dataColumn}</span></td>
                 </tr>`;
             }).join('');
         }
 
-        // --- 📈 GRÁFICO DE CURVA DE EQUITY (CHART.JS) ---
-        function renderizarGraficoPerformance(data) {
+        // --- 📈 GRÁFICO HOLOGRÁFICO NEON (CHART.JS) ---
+        function renderizarGraficoHolografico(data) {
             const ctx = document.getElementById('chartPerformance').getContext('2d');
-            if (performanceChartInstance) performanceChartInstance.destroy();
+            if (trendChart) trendChart.destroy();
 
-            let somatorio = 0;
-            const coordenadas = data.map(t => { somatorio += t.valor; return somatorio; });
+            let acumuladoValue = 0;
+            const points = data.map(t => { acumuladoValue += t.valor; return acumuladoValue; });
 
-            performanceChartInstance = new Chart(ctx, {
+            trendChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: coordenadas,
+                        data: points,
                         borderColor: '#FF6B00',
                         borderWidth: 2,
                         tension: 0.35,
                         fill: true,
                         backgroundColor: 'rgba(255, 107, 0, 0.01)',
-                        pointRadius: 0
+                        pointRadius: 0,
+                        shadowColor: '#FF6B00',
+                        shadowBlur: 10
                     }]
                 },
                 options: {
@@ -497,71 +543,72 @@
             });
         }
 
-        // --- 👑 MATRIZ EXCLUSIVA DO ADMIN: CONTROLE MULTI-TENANT ---
-        function processarMatrizLicenciamentoAdmin() {
-            const clientesDicionario = {
-                "CLIENT_01": "Sacolão Miranda (Instância Matriz)",
+        // --- 👑 PAINEL ADMIN MASTER: GESTÃO MULTI-TENANT ---
+        function processarMatrizAdminLicencas() {
+            const mapaDeNomes = {
+                "CLIENT_01": "Sacolão Miranda (Instância 01)",
                 "CLIENT_02": "PetFlow Master (Enterprise Node)",
                 "CLIENT_FREE": "Licença Demonstrativa Gratuita"
             };
 
             const grid = document.getElementById('adm-matrix-grid');
-            const listaIds = Object.keys(clientesDicionario);
+            const idsList = Object.keys(mapaDeNomes);
 
-            const totalPoolEquity = cacheTransacoes.reduce((acc, t) => acc + t.valor, 0);
-            const totalPoolWins = cacheTransacoes.filter(t => t.resultado === 'WIN').length;
-            const globalWinrate = cacheTransacoes.length > 0 ? ((totalPoolWins / cacheTransacoes.length) * 100).toFixed(1) : 0;
+            // KPIs Globais da Pool
+            const poolEquity = rawCache.reduce((acc, t) => acc + t.valor, 0);
+            const poolWins = rawCache.filter(t => t.resultado === 'WIN').length;
+            const poolWinrate = rawCache.length > 0 ? ((poolWins / rawCache.length) * 100).toFixed(1) : 0;
 
-            document.getElementById('adm-pool-liquidez').innerText = `$ ${totalPoolEquity.toFixed(2)}`;
-            document.getElementById('adm-pool-licencas').innerText = listaIds.length - 1;
-            document.getElementById('adm-pool-winrate').innerText = `${globalWinrate}%`;
+            document.getElementById('adm-kpi-equity').innerText = `$ ${poolEquity.toFixed(2)}`;
+            document.getElementById('adm-kpi-clients').innerText = idsList.length - 1;
+            document.getElementById('adm-kpi-winrate').innerText = `${poolWinrate}%`;
 
-            grid.innerHTML = listaIds.map(id => {
-                const tradesDoCliente = cacheTransacoes.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
-                const cWins = tradesDoCliente.filter(t => t.resultado === 'WIN').length;
-                const cEquity = tradesDoCliente.reduce((acc, t) => acc + t.valor, 0);
-                const cWinrate = tradesDoCliente.length > 0 ? ((cWins / tradesDoCliente.length) * 100).toFixed(1) : 0;
+            grid.innerHTML = idsList.map(id => {
+                const tradesCliente = rawCache.filter(t => t.user_id === id || (!t.user_id && id === 'CLIENT_01'));
+                const cWins = tradesCliente.filter(t => t.resultado === 'WIN').length;
+                const cEquity = tradesCliente.reduce((acc, t) => acc + t.valor, 0);
+                const cWinrate = tradesCliente.length > 0 ? ((cWins / tradesCliente.length) * 100).toFixed(1) : 0;
 
                 return `
-                <div class="p-5 rounded-xl border border-white/5 bg-black/30 flex flex-col justify-between hover:border-[#FF6B00]/40 transition-all">
+                <div class="p-5 rounded-xl border border-white/5 bg-black/30 flex flex-col justify-between hover:border-[#FF6B00]/40 hover:shadow-[0_0_15px_rgba(255,107,0,0.1)] transition-all">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="text-xs font-black text-white uppercase tracking-tight font-poppins">${clientesDicionario[id]}</h4>
+                            <h4 class="text-xs font-black text-white uppercase tracking-tight font-poppins">${mapaDeNomes[id]}</h4>
                             <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-400">${id}</span>
                         </div>
-                        <p class="text-[10px] text-gray-500">Último pulso: ${tradesDoCliente[0] ? new Date(tradesDoCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
+                        <p class="text-[10px] text-gray-500">Última ordem: ${tradesCliente[0] ? new Date(tradesCliente[0].created_at).toLocaleTimeString() : 'N/A'}</p>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/5 font-mono text-center">
                         <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Líquido</span>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Líquido</span>
                             <span class="text-xs font-bold ${cEquity >= 0 ? 'text-emerald-400' : 'text-red-400'}">$ ${cEquity.toFixed(2)}</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">WinRate</span>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">WinRate</span>
                             <span class="text-xs font-bold text-blue-400">${cWinrate}%</span>
                         </div>
                         <div>
-                            <span class="text-[9px] block text-gray-500 font-sans uppercase">Triggers</span>
-                            <span class="text-xs font-bold text-gray-300">${tradesDoCliente.length}</span>
+                            <span class="text-[9px] block text-gray-500 uppercase font-sans">Sniper</span>
+                            <span class="text-xs font-bold text-gray-300">${tradesCliente.length}</span>
                         </div>
                     </div>
 
-                    <button onclick="document.getElementById('role-selector').value='${id}'; alterarEscopoSaaS('${id}');" class="w-full mt-4 bg-white/5 hover:bg-[#FF6B00] hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-wider transition-all">
-                        Inspecionar Instância
+                    <button onclick="document.getElementById('scope-selector').value='${id}'; alterarEscopoSaaS('${id}');" class="w-full mt-4 bg-white/5 hover:bg-[#FF6B00] hover:text-white border border-white/10 hover:border-transparent text-[10px] font-bold py-2 rounded uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(255,107,0,0.1)]">
+                        Inspecionar Instância Individual
                     </button>
                 </div>`;
             }).join('');
         }
 
-        // --- 📡 STREAMING REALTIME BROADCAST VIA WEBSEYSTÈME SUPABASE ---
-        supabase.channel('stream-command-v4')
+        // --- 📡 STREAM REALTIME BROADCAST v4 ---
+        supabase.channel('sovereign-stream-v4')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                executarPipelineSoberano();
+                executarPipelineCore();
             }).subscribe();
 
         window.onload = () => {
-            executarPipelineSoberano();
+            executarPipelineCore();
         };
     </script>
 </body>
