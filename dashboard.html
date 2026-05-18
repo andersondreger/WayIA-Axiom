@@ -1,400 +1,627 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXIOM SOBERANO v4.0 - DASHBOARD</title>
+    <title>Axiom Sentinel OS v4.0 - Sovereign Command</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
     <style>
-        body {
-            background-color: #060608;
-            color: #d1d5db;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            background-image: radial-gradient(circle at 50% 10%, rgba(255, 107, 0, 0.05) 0%, transparent 60%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
         }
 
-        .font-cyber {
-            font-family: 'Orbitron', sans-serif;
+        :root {
+            --bg-deep: #04071a;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --blue: #00e5ff;
+            --orange: #ff5500;
+            --green: #3fffa2;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8899cc;
+            --text-dim: #4a5a8a;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-primary);
+            overflow-x: hidden
         }
 
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .panel-root {
-            background-color: #0b0b0f;
-            border: 1px solid #1a1a24;
-            border-radius: 8px;
-        }
-
-        /* GAUGE DE DISCIPLINA SEMICIRCULAR */
-        .semi-circle-gauge {
-            position: relative;
-            width: 160px;
-            height: 80px;
+        /* Background Espacial do Aurea Design */
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
             overflow: hidden;
+            pointer-events: none;
         }
 
-        .gauge-base {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            border: 16px solid #13131a;
-            border-bottom-color: transparent !important;
-            border-left-color: transparent !important;
-            transform: rotate(-135deg);
+        .bg-orb1 {
             position: absolute;
-        }
-
-        .gauge-progress {
-            width: 160px;
-            height: 160px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            border: 16px solid #ff5500;
-            border-bottom-color: transparent !important;
-            border-left-color: transparent !important;
-            transform: rotate(-135deg);
+            background: radial-gradient(circle, rgba(255, 85, 0, 0.05) 0%, transparent 70%);
+            top: -100px;
+            right: -80px;
+        }
+
+        .bg-orb2 {
             position: absolute;
-            filter: drop-shadow(0 0 10px #ff5500);
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.04) 0%, transparent 70%);
+            bottom: -150px;
+            left: 100px;
         }
 
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+        .bg-planet {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #101535, #04071a);
+            top: 30px;
+            right: 80px;
+            box-shadow: inset -20px -20px 60px #000a, 0 0 80px rgba(255, 85, 0, 0.05);
+            animation: floatPlanet 12s ease-in-out infinite
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #1a1a24;
-            border-radius: 4px;
+        .stars {
+            position: absolute;
+            inset: 0
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff5500;
+        @keyframes floatPlanet {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-18px)
+            }
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: .3
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-right: 1px solid var(--glass-border);
+            background: rgba(4, 7, 26, 0.6);
+            backdrop-filter: blur(20px)
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 8px 20px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--orange), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 0 15px var(--orange);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .nav-item:hover {
+            background: var(--glass);
+            color: var(--text-primary)
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(255, 85, 0, 0.1), rgba(0, 229, 255, 0.02));
+            color: #fff;
+            border: 1px solid rgba(255, 85, 0, 0.2)
+        }
+
+        /* Grid de Alta Performance */
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 240px;
+            gap: 16px
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 18px;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .card:hover {
+            border-color: rgba(255, 85, 0, 0.2);
+            background: var(--glass-hover)
+        }
+
+        /* Semicircle Gauge */
+        .circle-wrap {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 8px
+        }
+
+        .circle-bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .circle-bg::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: #04071a
+        }
+
+        .circle-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center
+        }
+
+        .tactical-select {
+            background: #04071a;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            font-family: 'JetBrains Mono';
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            outline: none;
         }
     </style>
 </head>
 
-<body class="w-screen h-screen p-4 flex flex-col gap-4 select-none">
+<body>
 
-    <header class="w-full flex justify-between items-center border-b border-white/5 pb-2 shrink-0">
-        <div>
-            <h1 class="text-2xl font-cyber font-black tracking-wider text-white">NÓ SOBERANO AXIOM v4.0</h1>
-            <p class="text-[10px] font-mono text-[#ff5500] uppercase tracking-[0.2em]">SISTEMA DE MONITORIZAÇÃO E
-                CONTROLO TÁTICO</p>
-        </div>
-        <div
-            class="flex items-center gap-6 text-[11px] font-mono bg-[#0b0b0f] border border-white/5 px-4 py-1.5 rounded">
-            <div class="flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
-                <span class="text-gray-400">VPS CORE SINCERITY ACTIVE</span>
+    <div class="bg">
+        <div class="bg-orb1"></div>
+        <div class="bg-orb2"></div>
+        <div class="bg-planet"></div>
+        <svg class="stars" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
+            <g id="stars-group"></g>
+        </svg>
+    </div>
+
+    <div class="shell">
+        <nav class="sidebar">
+            <div class="logo font-cyber text-white">
+                <div class="logo-icon">✦</div>WayAxiom
             </div>
-            <span class="text-gray-700">|</span>
-            <span id="txt-relogio" class="text-gray-300">00:00:00</span>
-        </div>
-    </header>
 
-    <div class="flex-1 w-full flex gap-4 overflow-hidden">
+            <div class="p-2 mb-4 bg-black/40 rounded-xl border border-white/5">
+                <label class="text-[9px] font-mono uppercase text-gray-500 block mb-1">Sandbox SaaS Node</label>
+                <select id="scope-switcher" onchange="atualizarFiltrosSaaS(this.value)"
+                    class="w-full tactical-select text-white">
+                    <option value="admin">GUARDIAN ROOT</option>
+                    <option value="CLIENT_01">Sacolão Miranda</option>
+                    <option value="CLIENT_02">PetFlow Master</option>
+                    <option value="CLIENT_FREE">Sessão Demo Grátis</option>
+                </select>
+            </div>
 
-        <div class="w-72 flex flex-col gap-4 shrink-0 h-full">
-            <div class="flex-1 panel-root p-4 flex flex-col overflow-hidden">
+            <div class="space-y-1">
+                <div class="nav-item active">📊 Central Realtime</div>
+                <div class="nav-item">🎯 Risco e Linhas</div>
+                <div id="btn-adm-panel" class="nav-item hidden">👑 Pool de Licenças</div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-white/5 space-y-2">
+                <div id="badge-escopo"
+                    class="text-[9px] font-mono font-bold text-center py-2 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    ADMIN MODE</div>
+                <a href="https://wa.me/5545991397543" target="_blank"
+                    class="w-full block text-center bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-orange-600/20 transition-all uppercase tracking-wider">Suporte
+                    Server</a>
+            </div>
+        </nav>
+
+        <main class="flex-grow flex flex-col overflow-hidden h-screen p-6">
+            <header class="flex justify-between items-center mb-6 shrink-0 border-b border-white/5 pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white">Axiom Sentinel Central</h2>
+                    <p id="txt-sub-header" class="text-xs text-gray-500 mt-0.5">Direct-Feed Realtime Telemetry Nodes</p>
+                </div>
                 <div
-                    class="text-[10px] font-mono text-[#ff5500] uppercase tracking-wider mb-2 border-b border-white/5 pb-1">
-                    GERENCIAMENTO DE NÓS</div>
-                <div class="flex-1 overflow-y-auto space-y-1 pr-1 font-mono text-[11px]">
-                    <div class="flex justify-between items-center p-1.5 bg-white/[0.02] rounded border border-white/5">
-                        <span class="text-white font-bold">ID: ADMIN_ROOT</span>
-                        <span class="text-amber-500 text-[10px]">👑 MASTER</span>
-                    </div>
-                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>NODE_SINT_01</span><span
-                            class="text-emerald-500">● Conectado</span></div>
-                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>NODE_FRX_02</span><span
-                            class="text-emerald-500">● Conectado</span></div>
-                    <div class="flex justify-between items-center p-1.5 text-gray-500"><span>AUDIT_FLOW</span><span
-                            class="text-blue-500">● Ouvindo</span></div>
+                    class="flex items-center gap-4 font-mono text-[11px] bg-black/40 border border-white/5 px-4 py-2 rounded-full">
+                    <span
+                        class="relative text-emerald-400 font-bold uppercase tracking-wider pl-3 flex items-center gap-1.5"><span
+                            class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>VPS Loop Stream</span>
+                    <span class="text-gray-700">|</span>
+                    <span id="relogio-tatico" class="text-gray-400">00:00:00</span>
                 </div>
-            </div>
+            </header>
 
-            <div class="panel-root p-4 shrink-0">
-                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-3">CONTRATOS DE REDE</div>
-                <div class="grid grid-cols-2 gap-2 text-center text-[10px] font-bold font-cyber">
-                    <button onclick="alterarEscopo('admin')"
-                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-white hover:border-[#ff5500] transition-all">VISÃO
-                        GLOBAL</button>
-                    <button onclick="alterarEscopo('SINTÉTICOS')"
-                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-gray-400 hover:border-[#ff5500] transition-all">SINTÉTICOS</button>
-                    <button onclick="alterarEscopo('FOREX')"
-                        class="p-3 bg-white/[0.02] border border-white/5 rounded text-gray-400 hover:border-[#ff5500] transition-all">FOREX</button>
-                    <button
-                        class="p-3 bg-red-950/20 border border-red-900/30 rounded text-red-400 hover:bg-red-900/30 transition-all">ALERTAS</button>
-                </div>
-            </div>
-        </div>
+            <div class="flex-grow overflow-y-auto pr-1 grid-main">
 
-        <div class="flex-1 flex flex-col gap-4 h-full overflow-hidden">
-            <div class="flex-1 panel-root p-4 flex flex-col gap-4 overflow-hidden">
-                <div class="flex justify-between items-center border-b border-white/5 pb-2">
-                    <h2 class="font-cyber font-black text-sm tracking-wider text-white">MONITORIZAÇÃO EM TEMPO REAL</h2>
+                <div class="card flex flex-col justify-between">
                     <div>
-                        <span id="badge-soberano"
-                            class="text-[10px] font-mono bg-[#ff5500]/10 border border-[#ff5500]/20 px-2 py-0.5 rounded text-[#ff5500] font-bold">ADMIN
-                            MASTER NODE</span>
+                        <div
+                            class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                            ⚡ Pulso de Ticks (Velo-Force)</div>
+                        <div class="text-4xl font-bold tracking-tight text-white font-mono" id="kpi-banca">$ 0.00</div>
+                        <div class="text-[10px] text-gray-500 font-mono mt-1">Banca Corretora Deriv Ativa</div>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                    <div class="bg-black/50 border border-white/5 rounded p-4 flex flex-col justify-between h-36">
-                        <span class="text-[10px] font-mono text-gray-500 uppercase block">FILTRO DE AGRESSIVIDADE</span>
-                        <div class="flex justify-between items-center font-mono text-xs mt-2">
-                            <div><span class="text-gray-500 block text-[9px]">TARGET ADX</span><span id="lbl-adx-val"
-                                    class="text-orange-500 font-bold text-sm">8.7</span></div>
-                            <div><span class="text-gray-500 block text-[9px]">COICE MÍNIMO</span><span
-                                    class="text-emerald-400 font-bold text-sm">1.50</span></div>
+                    <div class="w-full h-12 overflow-hidden my-2">
+                        <svg class="w-full h-full" viewBox="0 0 300 38" preserveAspectRatio="none">
+                            <path
+                                d="M0 28 Q10 28 14 28 Q18 28 20 22 Q22 16 25 4 Q26 1 27 2 Q28 3 30 10 Q32 17 34 22 Q36 26 38 28 Q60 28 70 28 Q74 28 76 22 Q78 16 81 5 Q82 2 83 3 Q84 4 86 11 Q88 18 90 22 Q92 26 94 28 Q130 28 140 28"
+                                fill="none" stroke="#ff5500" stroke-width="2" />
+                        </svg>
+                    </div>
+
+                    <div class="border-t border-white/5 pt-3">
+                        <div class="text-[10px] font-mono text-gray-500 mb-1.5 uppercase">Monitor de Margem Operacional
+                        </div>
+                        <div class="flex items-center gap-3 font-mono text-xs">
+                            <span class="text-gray-500">0%</span>
+                            <div class="flex-grow h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-full" style="width: 76%">
+                                </div>
+                            </div>
+                            <span class="text-emerald-400 font-bold">76%</span>
                         </div>
                     </div>
+                </div>
 
-                    <div
-                        class="bg-black/50 border border-white/5 rounded p-4 flex flex-col items-center justify-center h-36">
-                        <span class="text-[10px] font-mono text-gray-500 uppercase block mb-2">TAXA DE ACERTO
-                            (WINRATE)</span>
-                        <div class="semi-circle-gauge">
-                            <div class="gauge-base"></div>
-                            <div id="node-gauge-progress" class="gauge-progress"></div>
-                            <div class="absolute inset-0 flex items-end justify-center pb-1">
-                                <span id="node-gauge-text" class="text-xl font-cyber font-black text-white">0%</span>
+                <div class="card flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">📈 Curva de
+                            Performance Acumulada</div>
+                        <span
+                            class="text-[10px] font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded text-gray-400">Hoje,
+                            18 Mai</span>
+                    </div>
+                    <div class="flex-grow relative h-28 pt-2">
+                        <canvas id="chartEquityRealtime"></canvas>
+                        <div id="lock-demo-layer"
+                            class="absolute inset-0 bg-black/95 backdrop-blur-md hidden flex-col justify-center items-center rounded-xl z-20">
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">🔒 Histórico Ocultado
+                                na Sessão Grátis</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 mt-2 text-[10px] font-mono text-gray-500">
+                        <div class="flex items-center gap-1.5"><span class="h-0.5 w-4 bg-[#ff5500]"></span>Líquido
+                            Realizado</div>
+                        <div class="flex items-center gap-1.5"><span
+                                class="h-0.5 w-4 border-t border-dashed border-cyan-400"></span>Flutuante Projetado
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Win Rate</div>
+                    <div class="circle-wrap">
+                        <div id="ring-winrate" class="circle-bg">
+                            <div class="circle-inner">
+                                <div id="lbl-winrate-pct" class="text-2xl font-bold text-white font-mono">0%</div>
+                                <div class="text-[9px] font-mono text-cyan-400 uppercase tracking-wider">Assert</div>
                             </div>
                         </div>
                     </div>
+                    <div class="text-[10px] text-gray-500 font-mono mt-1">Taxa de Acerto Realtime</div>
+                </div>
 
-                    <div
-                        class="bg-black/50 border border-white/5 rounded p-4 flex flex-col justify-between h-36 font-mono text-[11px]">
-                        <span class="text-[10px] font-mono text-gray-500 uppercase block">EXECUÇÃO VPS</span>
-                        <div class="space-y-1">
-                            <div class="flex justify-between"><span class="text-gray-500">EXPIRAÇÃO:</span><span
-                                    class="text-white font-bold">1 MINUTO</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500">MOMENTUM DELTA:</span><span
-                                    class="text-[#ff5500] font-bold">ATIVO</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500">TRAVA SEGURANÇA:</span><span
-                                    class="text-red-400 font-bold">2 LOSS / 15M</span></div>
+                <div class="card bg-gradient-to-br from-[#0c1f3c]/40 to-black/60 border-cyan-500/20">
+                    <div class="text-[11px] font-bold text-cyan-400 uppercase tracking-widest mb-2">🔥 P&L Acumulado
+                        Diário</div>
+                    <div id="lbl-pl-bruto" class="text-5xl font-bold tracking-tight text-white font-mono">$ 0.00</div>
+                    <div id="lbl-estado-turno" class="text-[10px] font-mono text-orange-400 uppercase font-bold mt-2">
+                        Calculando Ticks VPS...</div>
+
+                    <div class="flex items-end gap-1.5 h-10 my-4" id="bar-chart-vps"></div>
+
+                    <div class="flex gap-2 flex-wrap text-[10px] font-mono text-gray-400">
+                        <span class="bg-white/5 border border-white/10 px-2 py-1 rounded-full">🎯 TP: $100.00</span>
+                        <span class="bg-white/5 border border-white/10 px-2 py-1 rounded-full">🛑 SL: $50.00</span>
+                    </div>
+                </div>
+
+                <div class="card flex flex-col justify-between">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                        <div class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">🎯 Monitor de
+                            Disciplina</div>
+                        <div id="lbl-adx-target" class="text-xs font-mono font-bold text-orange-500">ADX > 8.7</div>
+                    </div>
+                    <div class="w-full h-24 relative flex items-center justify-center pt-2">
+                        <svg width="100%" height="100%" viewBox="0 0 320 90" preserveAspectRatio="xMidYMid meet">
+                            <path d="M 60 80 A 100 80 0 0 1 260 80" fill="none" stroke="rgba(255,255,255,0.03)"
+                                stroke-width="14" stroke-linecap="round" />
+                            <path id="gauge-arc-path" d="M 60 80 A 100 80 0 0 1 260 80" fill="none"
+                                stroke="url(#arcGrad)" stroke-width="6" stroke-linecap="round" />
+                            <text x="160" y="55" text-anchor="middle" font-size="11" fill="#8899cc">Agressividade</text>
+                            <text id="txt-gauge-status" x="160" y="76" text-anchor="middle" font-size="20"
+                                fill="#f0f4ff" font-weight="700" class="font-mono">8.7 ADX</text>
+                            <defs>
+                                <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#00e5ff" />
+                                    <stop offset="50%" stop-color="#ff5500" />
+                                    <stop offset="100%" stop-color="#ef4444" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="text-[10px] font-mono text-gray-500 text-center uppercase">Ajuste Fino de Calibragem
+                        Automática</div>
+                </div>
+
+                <div class="card flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Coice Mínimo</div>
+                    <div class="circle-wrap">
+                        <div id="ring-coice" class="circle-bg">
+                            <div class="circle-inner">
+                                <div id="lbl-coice-val" class="text-2xl font-bold text-white font-mono">1.50</div>
+                                <div class="text-[9px] font-mono text-orange-500 uppercase tracking-wider">Factor</div>
+                            </div>
                         </div>
                     </div>
+                    <div class="text-[10px] text-gray-500 font-mono mt-1">Tração da Mola Acumulada</div>
                 </div>
 
-                <div class="h-32 bg-black/40 border border-white/5 rounded p-4 relative shrink-0">
-                    <span class="text-[10px] font-mono text-gray-500 uppercase block mb-1">Estatísticas de Distribuição
-                        Volumétrica</span>
-                    <div class="w-full h-20">
-                        <canvas id="barPerformanceChart"></canvas>
+                <div
+                    class="card grid-column:3 flex flex-col justify-between bg-gradient-to-b from-black/80 to-[#100808]/40 border-orange-500/10">
+                    <div class="text-center py-2">
+                        <div
+                            class="h-14 w-14 mx-auto rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(255,85,0,0.15)]">
+                            📡</div>
+                        <h3 class="text-sm font-bold text-white uppercase mt-2">Evolution API</h3>
+                        <p class="text-[10px] text-gray-500 font-mono">Gateway de Transmissão Ativo</p>
                     </div>
-                </div>
 
-                <div class="flex-1 bg-black/20 border border-white/5 rounded overflow-hidden flex flex-col">
-                    <div
-                        class="flex justify-between items-center p-3 bg-black/40 border-b border-white/5 font-mono text-[10px]">
-                        <span class="text-gray-400 uppercase tracking-wider">HISTÓRICO RECENTE DE DISPAROS (TRANSMISSÃO
-                            DIRETA)</span>
-                        <span id="lbl-net-pl" class="text-white font-bold">$ 0.00</span>
+                    <div class="space-y-1.5 font-mono text-[10px]">
+                        <div class="p-2 bg-white/[0.02] border border-white/5 rounded-lg flex justify-between">
+                            <span>INSTÂNCIA:</span><span class="text-emerald-400 font-bold">CONNECTED</span></div>
+                        <div class="p-2 bg-white/[0.02] border border-white/5 rounded-lg flex justify-between">
+                            <span>RELAY ALERTS:</span><span class="text-orange-400 font-bold">ON (v23.6)</span></div>
                     </div>
-                    <div class="flex-1 overflow-y-auto font-mono text-xs">
-                        <table class="w-full text-left">
-                            <thead class="text-[10px] text-gray-500 bg-black/60 sticky top-0 border-b border-white/5">
-                                <tr>
-                                    <th class="p-3">Timestamp</th>
-                                    <th class="p-3">Ativo</th>
-                                    <th class="p-3">Direção</th>
-                                    <th class="p-3">Estado</th>
-                                    <th class="p-3 text-right">Retorno Líquido</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-trades-rows" class="divide-y divide-white/5">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="w-80 flex flex-col gap-4 shrink-0 h-full">
-            <div class="panel-root p-4 space-y-3 shrink-0 text-xs font-mono">
-                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider border-b border-white/5 pb-1">
-                    API GATEWAY STATUS</div>
-                <div class="flex justify-between"><span>WEBHOOK N8N</span><span
-                        class="text-emerald-400 font-bold">ONLINE ●</span></div>
-                <div class="flex justify-between"><span>SUPABASE STREAM</span><span
-                        class="text-emerald-400 font-bold">CONECTADO ●</span></div>
-                <div class="p-2.5 bg-black rounded border border-white/5 space-y-1 mt-2">
-                    <span class="text-emerald-500 block font-bold text-[11px]">EVOLUTION API (INSTÂNCIA)</span>
-                    <p class="text-[10px] text-gray-500 font-sans">STATUS: ATIVA<br>RELAY WHATSAPP: PRONTO</p>
+                    <button onclick="window.open('https://track.deriv.com/_16GbgDTBVBN6W2e/1/', '_blank')"
+                        class="w-full py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold text-xs rounded-xl shadow-md transition-all uppercase tracking-wider mt-2">Vincular
+                        Broker ↗</button>
                 </div>
+
             </div>
 
-            <div class="panel-root p-4 flex-1 flex flex-col overflow-hidden">
-                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-3 shrink-0">MARKET VELOCITY
-                    (ADX LIVE)</div>
-                <div id="trends-bars-container" class="flex-grow overflow-y-auto space-y-3 font-mono text-xs">
+            <div class="h-44 card mt-4 overflow-hidden flex flex-col shrink-0">
+                <div
+                    class="px-4 py-2 border-b border-white/5 bg-white/[0.01] flex justify-between items-center shrink-0 text-[10px] font-mono">
+                    <span class="text-gray-400 uppercase tracking-widest">Direct-Feed Tático Monitor</span>
+                    <span
+                        class="text-emerald-400 font-bold uppercase tracking-wider shadow-[0_0_5px_rgba(16,185,129,0.2)]">Websocket
+                        Ativo</span>
+                </div>
+                <div class="flex-grow overflow-y-auto">
+                    <table class="w-full text-left font-mono text-xs">
+                        <thead class="text-[10px] text-gray-500 bg-black sticky top-0 border-b border-white/5">
+                            <tr>
+                                <th class="p-2.5">Timestamp</th>
+                                <th class="p-2.5">Ativo</th>
+                                <th class="p-2.5">Direção</th>
+                                <th class="p-2.5">Resultado</th>
+                                <th class="p-2.5 text-right">P&L Retorno</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-feed-rows" class="divide-y divide-white/5 text-[11px]">
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="panel-root p-4 h-40 shrink-0 flex flex-col overflow-hidden">
-                <div class="text-[10px] font-mono text-gray-500 uppercase tracking-wider mb-2 shrink-0">MARKET MOMENTUM
-                    VECTOR</div>
-                <div class="flex-1 min-h-0">
-                    <canvas id="marketWatchChart"></canvas>
-                </div>
-            </div>
-        </div>
-
+        </main>
     </div>
 
     <script>
-        // --- 🛰️ CONEXÃO REATIVA SUPABASE ---
+        // --- 🛰️ CONEXÃO REATIVA AO SUPABASE REALTIME ---
         const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
         const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
         const supabase = window.supabase.createClient(_URL, _KEY);
 
-        let localRepository = [];
-        let chartBarInstance = null;
-        let chartLineMiniInstance = null;
-        let FILTRO_ATIVO = "admin";
+        let globalCache = [];
+        let chartInstance = null;
+        let SCOPE_ATIVO = "admin";
 
-        // TIMER DO CABEÇALHO
+        // Gerador de Estrelas do Modelo Aurea
+        const group = document.getElementById('stars-group');
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', Math.random() * 1400); c.setAttribute('cy', Math.random() * 900);
+            c.setAttribute('r', Math.random() * .5 + .1); c.setAttribute('fill', '#fff');
+            c.setAttribute('opacity', Math.random() * .7 + .2);
+            c.style.animation = `twinkle ${(Math.random() * 3 + 2).toFixed(1)}s infinite`;
+            group.appendChild(c);
+        }
+
+        // Relógio de Precisão de Matelândia
         setInterval(() => {
-            document.getElementById('txt-relogio').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            document.getElementById('relogio-tatico').innerText = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         }, 1000);
 
-        function alterarEscopo(novoEscopo) {
-            FILTRO_ATIVO = novoEscopo;
-            renderizarPainelAxiom();
+        function atualizarFiltrosSaaS(val) {
+            SCOPE_ATIVO = val;
+            processarPipelineDados();
         }
 
-        async function carregarHistoricoSoberano() {
+        async function processarPipelineDados() {
             const { data: trades, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
             if (error) return;
-            localRepository = trades || [];
-            renderizarPainelAxiom();
+            globalCache = trades || [];
+            renderizarCabineAurea();
         }
 
-        function renderizarPainelAxiom() {
-            const tableBody = document.getElementById('table-trades-rows');
-            const totalPLText = document.getElementById('lbl-net-pl');
-            const adxLabel = document.getElementById('lbl-adx-val');
+        function renderizarCabineAurea() {
+            const table = document.getElementById('table-feed-rows');
+            const lockLayer = document.getElementById('lock-demo-layer');
+            const adxTarget = document.getElementById('lbl-adx-target');
+            const gaugeText = document.getElementById('txt-gauge-status');
+            const stateLabel = document.getElementById('lbl-estado-turno');
 
-            // Ajuste estético dinâmico do ADX dependendo do horário do Turno
-            const horaAtual = new Date().getHours();
-            if (horaAtual >= 5 && horaAtual < 18) {
-                adxLabel.innerText = "3.8";
-                adxLabel.className = "text-blue-400 font-bold text-sm font-mono";
+            // Regra de Turno e Calibragem Baseada na Hora de Matelândia
+            const horaLocal = new Date().getHours();
+            if (horaLocal >= 5 && horaLocal < 18) {
+                adxTarget.innerText = "ADX > 3.8"; gaugeText.innerText = "3.8 ADX";
+                stateLabel.innerText = "🌐 TURNO ATIVO: FOREX COMERCIAL";
+                stateLabel.className = "text-[10px] font-mono text-blue-400 uppercase font-bold mt-2";
             } else {
-                adxLabel.innerText = "8.7";
-                adxLabel.className = "text-orange-500 font-bold text-sm font-mono";
+                adxTarget.innerText = "ADX > 8.7"; gaugeText.innerText = "8.7 ADX";
+                stateLabel.innerText = "⚡ TURNO ATIVO: ÍNDICES SINTÉTICOS";
+                stateLabel.className = "text-[10px] font-mono text-orange-400 uppercase font-bold mt-2";
             }
 
-            let filteredList = localRepository;
-            if (FILTRO_ATIVO !== 'admin') {
-                // Filtra de acordo com o segmento selecionado
-                filteredList = localRepository.filter(t => t.ativo.startsWith('frx') ? FILTRO_ATIVO === 'FOREX' : FILTRO_ATIVO === 'SINTÉTICOS');
+            let filtered = globalCache;
+            if (SCOPE_ATIVO === 'admin') {
+                lockLayer.classList.add('hidden');
+                document.getElementById('badge-escopo').innerText = "GUARDIAN ROOT";
+                document.getElementById('badge-escopo').className = "text-[9px] font-mono font-bold text-center py-2 rounded bg-red-950/40 text-red-400 border border-red-500/20";
+                document.getElementById('btn-adm-panel').classList.remove('hidden');
+                document.getElementById('kpi-banca').innerText = `$ ${filtered.reduce((acc, t) => acc + (t.valor * 2), 3500).toFixed(2)}`;
+            } else {
+                filtered = globalCache.filter(t => t.user_id === SCOPE_ATIVO || (!t.user_id && SCOPE_ATIVO === 'CLIENT_01'));
+                document.getElementById('btn-adm-panel').classList.add('hidden');
+
+                if (SCOPE_ATIVO === 'CLIENT_FREE') {
+                    lockLayer.classList.remove('hidden');
+                    document.getElementById('badge-escopo').innerText = "SESSÃO TRIAL";
+                    document.getElementById('badge-escopo').className = "text-[9px] font-mono font-bold text-center py-2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700";
+                    filtered = filtered.slice(0, 2);
+                    document.getElementById('kpi-banca').innerText = "$ 10.00 (Demo)";
+                } else {
+                    lockLayer.classList.add('hidden');
+                    document.getElementById('badge-escopo').innerText = "PREMIUM NODE";
+                    document.getElementById('badge-escopo').className = "text-[9px] font-mono font-bold text-center py-2 rounded bg-blue-950/40 text-blue-400 border border-blue-500/20";
+                    document.getElementById('kpi-banca').innerText = `$ ${filtered.reduce((acc, t) => acc + t.valor, 500).toFixed(2)}`;
+                }
             }
 
-            const totalWins = filteredList.filter(t => t.resultado === 'WIN').length;
-            const netPL = filteredList.reduce((acc, t) => acc + t.valor, 0);
-            const winrate = filteredList.length > 0 ? ((totalWins / filteredList.length) * 100).toFixed(1) : 0;
+            const wins = filtered.filter(t => t.resultado === 'WIN').length;
+            const líquido = filtered.reduce((acc, t) => acc + t.valor, 0);
+            const winrate = filtered.length > 0 ? ((wins / filtered.length) * 100).toFixed(1) : 0;
 
-            totalPLText.innerText = `LÍQUIDO P&L ACUMULADO: $ ${netPL.toFixed(2)}`;
-            totalPLText.className = netPL >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
+            // Injeta Métricas nos Anéis de Conic-Gradient do Modelo Aurea
+            document.getElementById('lbl-winrate-pct').innerText = `${winrate}%`;
+            document.getElementById('ring-winrate').style.background = `conic-gradient(#00e5ff 0 ${winrate}%, #ffffff0f ${winrate}% 100%)`;
 
-            // Atualização Mecânica do Gauge
-            const gaugeFill = document.getElementById('node-gauge-progress');
-            document.getElementById('node-gauge-text').innerText = `${winrate}%`;
-            const rotationDegrees = -135 + (winrate * 1.8);
-            gaugeFill.style.transform = `rotate(${rotationDegrees}deg)`;
-            gaugeFill.style.borderColor = netPL >= 0 ? '#10b981' : '#ef4444';
+            const coiceFicticio = filtered.length > 0 ? filtered[0].coice : 1.50;
+            document.getElementById('lbl-coice-val').innerText = coiceFicticio;
+            const coicePct = (coiceFicticio / 3) * 100;
+            document.getElementById('ring-coice').style.background = `conic-gradient(#ff5500 0 ${coicePct}%, #ffffff0f ${coicePct}% 100%)`;
 
-            // Geração das Linhas da Tabela
-            tableBody.innerHTML = filteredList.map(t => {
-                const isWin = t.resultado === 'WIN';
-                const ts = t.created_at ? new Date(t.created_at).toLocaleTimeString() : '00:00:00';
-                const direcao = t.valor >= 0 ? 'CALL 📈' : 'PUT 📉';
-                return `
-                <tr class="hover:bg-white/[0.01] border-b border-white/5">
-                    <td class="p-3 text-gray-500 font-mono text-[11px]">${ts}</td>
-                    <td class="p-3 font-bold font-cyber text-gray-300">${t.ativo}</td>
-                    <td class="p-3 text-gray-400 text-[11px]">${direcao}</td>
-                    <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-black ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span></td>
-                    <td class="p-3 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)}</td>
-                </tr>`;
+            document.getElementById('lbl-plbruto').innerText = `$ ${líquido.toFixed(2)}`;
+            document.getElementById('lbl-plbruto').className = `text-5xl font-bold tracking-tight font-mono ${líquido >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+
+            // Geração de Barras de Histórico do Modelo Aurea
+            const barContainer = document.getElementById('bar-chart-vps');
+            barContainer.innerHTML = filtered.slice(0, 14).map(t => {
+                const h = Math.min(Math.abs(t.valor) * 4, 38);
+                return `<div class="flex-1 rounded-t bg-gradient-to-t ${t.resultado === 'WIN' ? 'from-emerald-500 to-green-400' : 'from-red-600 to-red-400'}" style="height: ${h + 4}px"></div>`;
             }).join('');
 
-            renderizarGraficoBarras(filteredList.slice(0, 15).reverse());
-            renderizarBarrasADX();
-            renderizarMiniLine();
+            // Preenchimento do Feed Tático
+            table.innerHTML = filtered.map(t => {
+                const isWin = t.resultado === 'WIN';
+                return `
+    <tr class="hover:bg-white/[0.01] border-b border-white/5">
+      <td class="p-2.5 text-gray-500 text-[11px]">${t.created_at ? new Date(t.created_at).toLocaleTimeString() : '00:00:00'}</td>
+      <td class="p-2.5 font-bold text-gray-300">${t.ativo}</td>
+      <td class="p-2.5 text-gray-400">${t.valor >= 0 ? 'CALL 📈' : 'PUT 📉'}</td>
+      <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${isWin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${t.resultado}</span></td>
+      <td class="p-2.5 text-right font-bold ${isWin ? 'text-emerald-400' : 'text-red-400'}">${isWin ? '+' : ''}${t.valor.toFixed(2)}</td>
+    </tr>`;
+            }).join('');
+
+            if (SCOPE_ATIVO !== 'CLIENT_FREE') {
+                renderizarGraficoAreaLinear(filtered.slice(0, 15).reverse());
+            }
         }
 
-        function renderizarGraficoBarras(data) {
-            const ctx = document.getElementById('barPerformanceChart').getContext('2d');
-            if (chartBarInstance) chartBarInstance.destroy();
+        function renderizarGraficoAreaLinear(data) {
+            const ctx = document.getElementById('chartEquityRealtime').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
 
-            chartBarInstance = new Chart(ctx, {
-                type: 'bar',
+            let somador = 0;
+            const pontos = data.map(t => { somador += t.valor; return somador; });
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: data.map(t => t.valor),
-                        backgroundColor: data.map(t => t.valor >= 0 ? '#10b981' : '#ef4444'),
-                        borderRadius: 2
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.02)' }, ticks: { color: '#4b5563', font: { size: 8 } } } },
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function renderizarBarrasADX() {
-            const container = document.getElementById('trends-bars-container');
-            const moedas = [
-                { nome: "Volatility 100 Index", val: 8.9 },
-                { nome: "Volatility 75 Index", val: 9.2 },
-                { nome: "Volatility 50 Index", val: 6.4 },
-                { nome: "Volatility 10 Index", val: 8.1 }
-            ];
-
-            container.innerHTML = moedas.map(m => {
-                const percentual = (m.val / 15) * 100;
-                return `
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[11px]"><span class="text-gray-400 font-bold">${m.nome}</span><span class="text-[#ff5500] font-bold">${m.val} ADX</span></div>
-                    <div class="w-full bg-white/5 h-1.5 rounded overflow-hidden">
-                        <div class="bg-gradient-to-r from-blue-500 to-[#ff5500] h-full" style="width: ${percentual}%"></div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function renderizarMiniLine() {
-            const ctx = document.getElementById('marketWatchChart').getContext('2d');
-            if (chartLineMiniInstance) chartLineMiniInstance.destroy();
-
-            chartLineMiniInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                    datasets: [{
-                        data: [10, 14, 8, 11, 19, 13, 22, 16, 18, 25],
-                        borderColor: '#ff5500',
-                        borderWidth: 1.5,
-                        tension: 0.4,
-                        fill: false,
-                        pointRadius: 0
+                        data: pontos, borderColor: '#ff5500', borderWidth: 2, tension: 0.35, fill: false, pointRadius: 0
                     }]
                 },
                 options: {
@@ -406,13 +633,11 @@
             });
         }
 
-        // ESCUTA CANAL REALTIME DO SUPABASE PARA ATUALIZAR EM TEMPO REAL SEM REFRESH
-        supabase.channel('sovereign-stream-v4')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-                carregarHistoricoSoberano();
-            }).subscribe();
+        supabase.channel('sovereign-stream-v4').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
+            processarPipelineDados();
+        }).subscribe();
 
-        window.onload = () => { carregarHistoricoSoberano(); };
+        window.onload = () => { processarPipelineDados(); };
     </script>
 </body>
 
