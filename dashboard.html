@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Command Dashboard</title>
+    <title>Axiom Sentinel Command</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -16,22 +15,21 @@
         }
 
         :root {
-            \n --bg-deep: #04071a;
-            \n --glass: #ffffff0d;
-            \n --glass-border: #ffffff1a;
-            \n --glass-hover: #ffffff18;
-            \n --blue: #4a9eff;
-            \n --blue-dim: #1a4a8a;
-            \n --orange: #ff7d3b;
-            \n --green: #3fffa2;
-            \n --purple: #9b7cff;
-            \n --cyan: #00e5ff;
-            \n --red: #ff4d6d;
-            \n --yellow: #ffd166;
-            \n --text-primary: #f0f4ff;
-            \n --text-secondary: #8899cc;
-            \n --text-dim: #4a5a8a;
-            \n
+            --bg-deep: #04071a;
+            --glass: #ffffff0d;
+            --glass-border: #ffffff1a;
+            --glass-hover: #ffffff18;
+            --blue: #4a9eff;
+            --blue-dim: #1a4a8a;
+            --orange: #ff7d3b;
+            --green: #3fffa2;
+            --purple: #9b7cff;
+            --cyan: #00e5ff;
+            --red: #ff4d6d;
+            --yellow: #ffd166;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8899cc;
+            --text-dim: #4a5a8a;
         }
 
         html,
@@ -44,7 +42,7 @@
             overflow-x: hidden
         }
 
-        /* Background */
+        /* Background Espacial Nativo */
         .bg {
             position: fixed;
             inset: 0;
@@ -54,39 +52,74 @@
 
         .bg-orb1 {
             position: absolute;
-            width: 700px;
-            height: 700px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(74, 158, 255, 0.06) 0%, transparent 70%);
-            top: -150px;
-            left: -100px
+            background: radial-gradient(circle, #1a2a8a55 0%, transparent 70%);
+            top: -100px;
+            right: -80px;
+            animation: pulse1 8s ease-in-out infinite
         }
 
         .bg-orb2 {
             position: absolute;
-            width: 600px;
-            height: 600px;
+            width: 500px;
+            height: 500px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(155, 124, 255, 0.04) 0%, transparent 70%);
-            bottom: -100px;
-            right: -50px
+            background: radial-gradient(circle, #0a1a6030 0%, transparent 70%);
+            bottom: -150px;
+            left: 100px;
+            animation: pulse2 10s ease-in-out infinite
         }
 
         .bg-planet {
             position: absolute;
-            width: 340px;
-            height: 340px;
+            width: 280px;
+            height: 280px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #101535, #04071a);
-            top: 40px;
-            right: 120px;
-            box-shadow: inset -30px -30px 80px rgba(0, 0, 0, 0.8), 0 0 100px rgba(74, 158, 255, 0.08);
-            animation: floatPlanet 16s ease-in-out infinite
+            background: radial-gradient(circle at 35% 35%, #1a2560, #08102e);
+            top: 30px;
+            right: 80px;
+            box-shadow: inset -20px -20px 60px #000a, 0 0 80px #1a2a6020;
+            animation: floatPlanet 12s ease-in-out infinite
+        }
+
+        .bg-planet::after {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            border: 1px solid #4a9eff22;
+            box-shadow: 0 0 40px #4a9eff15
         }
 
         .stars {
             position: absolute;
             inset: 0
+        }
+
+        @keyframes pulse1 {
+
+            0%,
+            100% {
+                transform: scale(1) translate(0, 0)
+            }
+
+            50% {
+                transform: scale(1.1) translate(-20px, 20px)
+            }
+        }
+
+        @keyframes pulse2 {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.15) translate(15px, -15px)
+            }
         }
 
         @keyframes floatPlanet {
@@ -97,7 +130,7 @@
             }
 
             50% {
-                transform: translateY(-25px)
+                transform: translateY(-18px)
             }
         }
 
@@ -105,7 +138,7 @@
 
             0%,
             100% {
-                opacity: .2
+                opacity: .3
             }
 
             50% {
@@ -113,66 +146,69 @@
             }
         }
 
-        /* Container layout */
-        .container {
+        /* Layout e Estrutura Identica */
+        .shell {
             position: relative;
             z-index: 1;
             display: flex;
             min-height: 100vh
         }
 
-        /* Sidebar */
+        /* Sidebar Original */
         .sidebar {
-            width: 260px;
+            width: 220px;
             flex-shrink: 0;
-            padding: 32px 24px;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
+            gap: 6px;
             border-right: 1px solid var(--glass-border);
-            background: rgba(4, 7, 26, 0.4);
-            backdrop-filter: blur(30px)
+            background: #ffffff04;
+            backdrop-filter: blur(12px)
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: .5px;
-            margin-bottom: 40px
+            gap: 8px;
+            padding: 0 8px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: .5px
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
             background: linear-gradient(135deg, var(--blue), var(--purple));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px
+            font-size: 14px
         }
 
-        .nav-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: auto
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 4px 8px 4px;
+            margin-top: 8px
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            justify-content: between;
-            padding: 12px 16px;
-            border-radius: 14px;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
             color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 400;
+            cursor: pointer;
             transition: all .2s;
-            cursor: pointer
+            position: relative
         }
 
         .nav-item:hover {
@@ -181,453 +217,700 @@
         }
 
         .nav-item.active {
-            background: var(--glass);
-            color: var(--text-primary);
-            box-shadow: inset 0 0 0 1px var(--glass-border)
+            background: linear-gradient(135deg, #1a3a8a40, #1a2a6020);
+            color: #fff;
+            border: 1px solid #4a9eff30
         }
 
-        .nav-item-inner {
-            display: flex;
-            align-items: center;
-            gap: 12px
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            border-radius: 2px;
+            background: var(--blue)
         }
 
         .nav-badge {
-            background: var(--blue-dim);
-            color: var(--blue);
+            margin-left: auto;
             font-size: 10px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 10px
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--orange), #ff5500);
+            color: #fff;
+            font-weight: 600
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--glass-border)
         }
 
         .user-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 16px;
             display: flex;
             align-items: center;
-            gap: 12px
+            gap: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: var(--glass);
+            cursor: pointer
         }
 
         .avatar {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--purple), var(--orange))
+            background: linear-gradient(135deg, #ff7d3b, #ff4d6d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            border: 2px solid var(--orange)
         }
 
         .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px
+            flex: 1;
+            min-width: 0
         }
 
         .user-name {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0
+        }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: #ffffff03;
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 10
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        .date-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--glass);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border)
+        }
+
+        .date-chip svg {
+            width: 14px;
+            height: 14px
+        }
+
+        .weather {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--glass);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border)
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        /* Seletor Multi-Tenant Estilizado para se Integrar ao Topbar */
+        .saas-node-select {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer
+        }
+
+        .saas-node-select option {
+            background: var(--bg-deep);
             color: var(--text-primary)
         }
 
-        .user-role {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-family: monospace
+        /* Grid Principal Intocado */
+        .content {
+            padding: 28px
         }
 
-        /* Main Content */
-        .main-content {
-            flex-grow: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            max-width: 1440px;
-            margin: 0 auto;
-            width: 100%
-        }
-
-        .header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 32px
+        .greeting {
+            margin-bottom: 24px
         }
 
         .greeting h1 {
             font-size: 28px;
             font-weight: 600;
-            letter-spacing: -.5px
+            margin-bottom: 4px
         }
 
         .greeting p {
-            color: var(--text-secondary);
-            font-size: 15px;
-            margin-top: 4px
-        }
-
-        .saas-select {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            padding: 10px 18px;
-            border-radius: 14px;
-            font-family: inherit;
             font-size: 14px;
-            outline: none;
-            cursor: pointer
+            color: var(--text-secondary)
         }
 
-        .saas-select option {
-            background: var(--bg-deep);
-            color: var(--text-primary)
-        }
-
-        /* Grid System */
-        .dashboard-grid {
+        .grid-main {
             display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 24px;
-            margin-bottom: 24px
+            grid-template-columns: 1fr 1fr 220px;
+            grid-template-rows: auto auto auto;
+            gap: 16px
         }
 
-        .grid-column {
-            display: flex;
-            flex-direction: column;
-            gap: 24px
-        }
-
-        /* Cards Base Style */
+        /* Cards */
         .card {
             background: var(--glass);
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 18px;
+            transition: all .3s;
             position: relative;
-            overflow: hidden;
-            transition: border-color .3s, background-color .3s
+            overflow: hidden
         }
 
         .card:hover {
-            border-color: var(--glass-hover);
+            border-color: #4a9eff30;
             background: var(--glass-hover)
         }
 
         .card-header {
             display: flex;
-            justify-content: between;
             align-items: center;
-            margin-bottom: 20px
+            justify-content: space-between;
+            margin-bottom: 12px
         }
 
         .card-title {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
             color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px
-        }
-
-        /* Card Heart Rate -> Pulso VPS */
-        .pulse-container {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            margin-bottom: 4px
-        }
-
-        .pulse-value {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: -1px
-        }
-
-        .pulse-unit {
-            font-size: 16px;
-            color: var(--text-secondary);
-            font-weight: 500
-        }
-
-        .pulse-sub {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 20px
-        }
-
-        .ecg-svg {
-            width: 100%;
-            height: 40px;
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 0;
-            margin-bottom: 20px
-        }
-
-        .energy-bar-wrap {
             display: flex;
             align-items: center;
-            justify-content: between;
-            font-size: 13px;
-            color: var(--text-secondary)
+            gap: 6px
         }
 
-        .energy-bar-bg {
-            width: 140px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
+        /* Heart Rate -> Pulso de Ticks */
+        .hr-value {
+            font-size: 32px;
+            font-weight: 600;
+            line-height: 1;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: baseline;
+            gap: 6px
+        }
+
+        .hr-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400
+        }
+
+        .hr-time {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 10px
+        }
+
+        .wave-container {
+            width: 100%;
+            height: 38px;
+            position: relative;
             overflow: hidden
         }
 
-        .energy-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--blue), var(--cyan));
-            border-radius: 3px
+        .wave-svg {
+            width: 100%;
+            height: 100%
         }
 
-        /* Card Stress -> Curva Performance */
-        .chart-container {
+        /* Energy Level -> Margem Livre */
+        .energy-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px
+        }
+
+        .energy-label {
+            font-size: 11px;
+            color: var(--text-dim)
+        }
+
+        .energy-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ffffff0f;
+            overflow: hidden
+        }
+
+        .energy-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--green), #00c8ff);
+            transition: width 1s ease;
+            animation: energyPulse 3s ease-in-out infinite
+        }
+
+        @keyframes energyPulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .7
+            }
+        }
+
+        .energy-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #3fffa220;
+            color: var(--green);
+            border: 1px solid #3fffa230
+        }
+
+        /* Stress Chart -> Curva de Equity */
+        .chart-area {
             width: 100%;
-            height: 180px;
+            height: 110px;
             position: relative
         }
 
-        .chart-legend {
+        .time-axis {
             display: flex;
-            gap: 24px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 16px
+            justify-content: space-between;
+            margin-top: 4px;
+            padding-right: 0;
+            font-size: 9.5px;
+            color: var(--text-dim)
         }
 
-        .legend-item {
+        .date-badge {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
-            gap: 8px
+            gap: 4px
         }
 
-        .legend-color {
-            width: 12px;
-            height: 3px;
-            border-radius: 2px
-        }
-
-        /* Row 2 Grid (Circles) */
-        .circles-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px
-        }
-
-        .circle-card-content {
+        /* Anéis Conic de Progresso */
+        .circle-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px 0
+            padding: 20px 14px;
+            text-align: center
         }
 
-        .progress-ring-wrap {
+        .circle-wrap {
             position: relative;
-            width: 120px;
-            height: 120px;
-            margin-bottom: 16px
+            width: 110px;
+            height: 110px;
+            margin-bottom: 8px
         }
 
-        .progress-ring-inner {
+        .circle-bg {
             position: absolute;
             inset: 0;
             border-radius: 50%;
+            background: conic-gradient(#4a9eff 0 var(--pct, 0%), #ffffff0f var(--pct, 0%) 100%);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center
         }
 
-        .ring-val {
-            font-size: 24px;
-            font-weight: 700
+        .circle-bg::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: var(--bg-deep)
         }
 
-        .ring-lbl {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            margin-top: 2px
-        }
-
-        .circle-sub {
-            font-size: 13px;
-            color: var(--text-secondary);
+        .circle-inner {
+            position: relative;
+            z-index: 1;
             text-align: center
         }
 
-        /* Card Activity -> P&L Diário */
-        .activity-card {
-            background: linear-gradient(135deg, rgba(4, 7, 26, 0.6), rgba(26, 74, 138, 0.15));
-            border-color: rgba(74, 158, 255, 0.2)
-        }
-
-        .activity-metric {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            font-size: 36px;
+        .circle-val {
+            font-size: 20px;
             font-weight: 700;
-            letter-spacing: -.5px;
-            margin-bottom: 24px
+            color: var(--text-primary)
         }
 
-        .activity-unit {
-            font-size: 14px;
-            color: rgba(240, 244, 255, 0.6);
-            font-weight: 400
+        .circle-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px
         }
 
-        .bars-container {
-            display: flex;
-            align-items: end;
-            justify-content: between;
-            height: 90px;
-            gap: 6px;
-            margin-bottom: 8px
-        }
-
-        .bar-item {
-            flex-grow: 1;
-            border-radius: 4px;
-            transition: background-color .2s, transform .2s;
-            cursor: pointer
-        }
-
-        .bar-item:hover {
-            transform: scaleY(1.05)
-        }
-
-        /* Card Sleep -> Calibragem */
-        .sleep-wrap {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-            padding: 10px 0
-        }
-
-        .sleep-gauge-container {
-            position: relative;
-            width: 150px;
-            height: 100px;
-            overflow: hidden
-        }
-
-        .sleep-metrics {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-grow: 1
-        }
-
-        .sleep-row {
-            display: flex;
-            align-items: center;
-            justify-content: between;
-            font-size: 13px
-        }
-
-        .sleep-label-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-secondary)
-        }
-
-        .sleep-dot {
+        .pulse-dot {
             width: 8px;
             height: 8px;
-            border-radius: 50%
+            border-radius: 50%;
+            background: var(--blue);
+            box-shadow: 0 0 10px var(--blue);
+            position: absolute;
+            animation: orbitDot 3s linear infinite
         }
 
-        .sleep-val {
-            font-weight: 600;
-            color: var(--text-primary);
+        @keyframes orbitDot {
+            0% {
+                transform: rotate(0) translateX(49px)
+            }
+
+            100% {
+                transform: rotate(360deg) translateX(49px)
+            }
+        }
+
+        /* Fator Coice Ring */
+        .hrv-circle-bg {
+            --pct: 50%;
+            background: conic-gradient(#ff7d3b 0 var(--pct, 50%), #ffffff0f var(--pct, 50%) 100%)
+        }
+
+        .hrv-circle-bg::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            border: 2px solid #ff7d3b22
+        }
+
+        /* Activity Card -> P&L Retorno */
+        .activity-card {
+            background: linear-gradient(135deg, #0d1f3c, #1a0a0a), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 60L60 0' stroke='%23ffffff04' stroke-width='1'/%3E%3C/svg%3E");
+            border-color: #ff7d3b30
+        }
+
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0a1d3e, #1c0808);
+            z-index: 0
+        }
+
+        .activity-card>* {
+            position: relative;
+            z-index: 1
+        }
+
+        .big-steps {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff, #ffd166);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
             font-family: monospace
         }
 
-        /* Card Ring -> Evolution API */
-        .ring-card {
-            background: linear-gradient(135deg, rgba(255, 125, 59, 0.08), rgba(4, 7, 26, 0.6))
+        .act-sub {
+            font-size: 12px;
+            color: #ff9d6a
         }
 
-        .ring-card:hover {
-            border-color: rgba(255, 125, 59, 0.25)
-        }
-
-        .ring-content {
+        .act-bpm {
             display: flex;
             align-items: center;
-            gap: 24px
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px
         }
 
-        .ring-visual {
-            width: 80px;
-            height: 80px;
+        .bpm-dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 125, 59, 0.1) 0%, transparent 70%);
-            border: 2px dashed rgba(255, 125, 59, 0.4);
+            background: var(--orange);
+            box-shadow: 0 0 8px var(--orange)
+        }
+
+        .bar-chart-mini {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 48px;
+            margin: 12px 0 8px
+        }
+
+        .bar-col {
+            flex: 1;
+            border-radius: 3px 3px 0 0;
+            background: #ff7d3b30;
+            transition: height .5s ease;
+            min-height: 4px
+        }
+
+        .bar-col.high {
+            background: linear-gradient(180deg, #ff7d3b, #ff5500)
+        }
+
+        .act-stats {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .act-stat {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 0 20px rgba(255, 125, 59, 0.1)
+            gap: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            background: #ffffff0a;
+            padding: 4px 8px;
+            border-radius: 20px
         }
 
-        .ring-details {
-            flex-grow: 1
+        /* Sleep Card -> Monitor de Disciplina */
+        .sleep-card {
+            background: linear-gradient(135deg, #08102e, #0a1535)
         }
 
-        .ring-name {
-            font-size: 16px;
-            font-weight: 600;
+        .sleep-chart {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            margin: 12px 0
+        }
+
+        .sleep-stages {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 6px 0
+        }
+
+        .sleep-stage {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px
+        }
+
+        .stage-bar-wrap {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: #ffffff0f;
+            margin: 0 8px;
+            overflow: hidden
+        }
+
+        .stage-bar {
+            height: 100%;
+            border-radius: 2px
+        }
+
+        .stage-deep {
+            background: var(--purple)
+        }
+
+        .stage-rem {
+            background: var(--blue)
+        }
+
+        .stage-light {
+            background: var(--cyan)
+        }
+
+        .sleep-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dim);
             margin-bottom: 4px
         }
 
-        .ring-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.4
+        .sleep-duration {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 4px 0
         }
 
-        .ring-btn {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            padding: 10px 20px;
-            border-radius: 14px;
-            font-size: 13px;
+        .sleep-bpm {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px
+        }
+
+        /* Ring Card -> Evolution API */
+        .upsell-card {
+            background: linear-gradient(135deg, #0c0808, #1a0808);
+            border-color: #ffffff15;
+            grid-column: 3
+        }
+
+        .upsell-title {
+            font-size: 16px;
             font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 6px
+        }
+
+        .upsell-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px
+        }
+
+        .upsell-feat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            background: #ffffff08;
+            border-radius: 8px;
+            margin-bottom: 6px;
             cursor: pointer;
             transition: all .2s;
-            white-space: nowrap
+            border: 1px solid transparent
         }
 
-        .ring-btn:hover {
-            background: linear-gradient(135deg, rgba(255, 125, 59, 0.15), rgba(255, 125, 59, 0.05));
-            border-color: rgba(255, 125, 59, 0.3)
+        .upsell-feat:hover {
+            background: #ffffff12;
+            border-color: var(--glass-border);
+            color: var(--text-primary)
         }
 
-        /* Feed Terminal Table */
+        .feat-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0
+        }
+
+        .feat-arrow {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-dim)
+        }
+
+        .ring-visual {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            position: relative
+        }
+
+        .ring-img {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 40% 35%, #3a2a1a, #1a1008);
+            border-radius: 50%;
+            border: 2px solid #ffd16630;
+            box-shadow: 0 0 30px #ffd16625, inset 0 -5px 20px #00000060;
+            position: relative
+        }
+
+        .ring-img::after {
+            content: '';
+            position: absolute;
+            inset: 20%;
+            border-radius: 50%;
+            border: 3px solid #ffd16660;
+            box-shadow: 0 0 15px #ffd16640
+        }
+
+        .ring-glow {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, #ffd16620, transparent);
+            bottom: 10px
+        }
+
+        /* Tabela de Histórico Direct-Feed Embutida no Rodapé */
         .terminal-card {
-            margin-top: 24px;
+            grid-column: 1/4;
+            margin-top: 8px;
             padding: 0;
             overflow: hidden
         }
 
         .terminal-header {
-            padding: 18px 24px;
-            border-b: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.01);
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center
         }
 
@@ -659,7 +942,7 @@
         .table-wrap {
             width: 100%;
             overflow-x: auto;
-            max-height: 220px;
+            max-height: 160px;
             overflow-y: auto
         }
 
@@ -671,7 +954,7 @@
         }
 
         th {
-            padding: 12px 24px;
+            padding: 10px 20px;
             color: var(--text-dim);
             font-weight: 600;
             text-transform: uppercase;
@@ -682,9 +965,10 @@
         }
 
         td {
-            padding: 14px 24px;
+            padding: 10px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            color: var(--text-secondary)
+            color: var(--text-secondary);
+            font-family: monospace
         }
 
         tr:hover td {
@@ -693,9 +977,9 @@
         }
 
         .badge-res {
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 600
         }
 
@@ -707,6 +991,34 @@
         .badge-loss {
             background: rgba(255, 77, 109, 0.1);
             color: var(--red)
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .card {
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: .2
+            }
+
+            50% {
+                opacity: 1
+            }
         }
     </style>
 </head>
@@ -722,286 +1034,390 @@
         </svg>
     </div>
 
-    <div class="container">
-        <aside class="sidebar">
+    <div class="shell">
+        <nav class="sidebar">
             <div class="logo">
                 <div class="logo-icon">✦</div>
-                <span>Aurea</span>
+                Aurea
             </div>
-            <div class="nav-group">
-                <div class="nav-item active">
-                    <div class="nav-item-inner"><span>📊</span>Command Central</div>
-                </div>
-                <div class="nav-item">
-                    <div class="nav-item-inner"><span>🎯</span>Estratégia e Risco</div>
-                    <span class="nav-badge">New</span>
+            <div class="sidebar-label">Overview</div>
+            <div class="nav-item active">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+                Dashboard
+            </div>
+            <div class="nav-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                Daily Log
+            </div>
+            <div class="nav-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 8v4l3 3" />
+                </svg>
+                AI Insights <span class="nav-badge">New</span>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="avatar">AW</div>
+                    <div class="user-info">
+                        <div class="user-name">Anderson ROOT</div>
+                        <div class="user-email">axiom_v23.6</div>
+                    </div>
                 </div>
             </div>
-            <div class="user-card">
-                <div class="avatar"></div>
-                <div class="user-info">
-                    <span class="user-name">Anderson ROOT</span>
-                    <span class="user-role">axiom_v23.6</span>
-                </div>
-            </div>
-        </aside>
+        </nav>
 
-        <main class="main-content">
-            <header class="header">
-                <div class="greeting">
-                    <h1>Axiom Sentinel Panel</h1>
-                    <p>Telemetria em tempo real direto da VPS</p>
-                </div>
-                <select id="scope-switcher" onchange="alternarEscopoNode(this.value)" class="saas-select">
-                    <option value="admin">GUARDIAN ROOT (Geral)</option>
-                    <option value="CLIENT_01">Sacolão Miranda</option>
-                    <option value="CLIENT_02">PetFlow Master</option>
-                    <option value="CLIENT_FREE">Sessão Trial</option>
-                </select>
-            </header>
-
-            <div class="dashboard-grid">
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Monitor de Pulso VPS</span>
-                            <span style="font-size:18px">⚡</span>
-                        </div>
-                        <div class="pulse-container">
-                            <span class="pulse-value" id="kpi-banca">0.00</span>
-                            <span class="pulse-unit">USD</span>
-                        </div>
-                        <div class="pulse-sub">Banca Alvo Conectada</div>
-                        <svg class="ecg-svg" viewBox="0 0 300 40" fill="none" stroke="var(--orange)" stroke-width="2">
-                            <path d="M0 20 H80 L85 10 L90 32 L95 0 L100 25 L105 20 H300" stroke-linecap="round"
-                                stroke-linejoin="round" />
+        <main class="main">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="date-chip">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
-                        <div class="energy-bar-wrap">
-                            <span>Margem Livre Operacional</span>
-                            <div class="energy-bar-bg">
-                                <div class="energy-bar-fill" style="width: 82%"></div>
-                            </div>
-                            <span style="color:var(--cyan);font-weight:600">82%</span>
-                        </div>
+                        <span id="relogio-txt">Sincronizando Relógio...</span>
                     </div>
-
-                    <div class="circles-grid">
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Win Rate</span>
-                            </div>
-                            <div class="circle-card-content">
-                                <div class="progress-ring-wrap" id="ring-winrate">
-                                    <div class="progress-ring-inner">
-                                        <span class="ring-val" id="lbl-winrate-pct">0%</span>
-                                        <span class="ring-lbl">Assert</span>
-                                    </div>
-                                </div>
-                                <span class="circle-sub">Taxa de Acerto Realtime</span>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Fator Coice</span>
-                            </div>
-                            <div class="circle-card-content">
-                                <div class="progress-ring-wrap" id="ring-coice">
-                                    <div class="progress-ring-inner">
-                                        <span class="ring-val" id="lbl-coice-val">1.50</span>
-                                        <span class="ring-lbl">Mola</span>
-                                    </div>
-                                </div>
-                                <span class="circle-sub">Aceleração de Vetor</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="weather">⚡ Matelândia · PR</div>
                 </div>
-
-                <div class="grid-column">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Curva de Performance Acumulada</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chartEquityRealtime"></canvas>
-                        </div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <div class="legend-color" style="background:var(--orange)"></div>
-                                <span>Líquido Realizado</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="border-top:2px dashed var(--cyan)"></div>
-                                <span>Flutuante Projetado</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card activity-card">
-                        <div class="card-header">
-                            <span class="card-title" style="color:rgba(240,244,255,0.6)">P&L Retorno Líquido</span>
-                        </div>
-                        <div class="activity-metric" id="lbl-pl-bruto">
-                            $ 0.00 <span class="activity-unit">Hoje</span>
-                        </div>
-                        <div class="bars-container" id="act-bars"></div>
-                        <div style="font-size:12px;color:rgba(240,244,255,0.4);font-family:monospace;margin-top:8px"
-                            id="lbl-estado-turno">
-                            Calculando Ticks VPS...
-                        </div>
-                    </div>
+                <div class="topbar-right">
+                    <select id="saas-scope-select" onchange="alterarEscopoInstancia(this.value)"
+                        class="saas-node-select">
+                        <option value="admin">GUARDIAN NODE (MASTER)</option>
+                        <option value="CLIENT_01">Sacolão Miranda</option>
+                        <option value="CLIENT_02">PetFlow Master</option>
+                        <option value="CLIENT_FREE">Sessão Demonstrativa</option>
+                    </select>
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:24px">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Calibragem Dinâmica do Sarrafo</span>
-                    </div>
-                    <div class="sleep-wrap">
-                        <div class="sleep-gauge-container">
-                            <svg width="150" height="150" style="transform:rotate(-90deg)">
-                                <circle cx="75" cy="75" r="60" fill="none" stroke="rgba(255,255,255,0.03)"
-                                    stroke-width="12" />
-                                <circle id="gauge-arc-path" cx="75" cy="75" r="60" fill="none" stroke="url(#sleepGrad)"
-                                    stroke-width="8" stroke-dasharray="377" stroke-dashoffset="120"
-                                    stroke-linecap="round" />
+            <div class="content">
+                <div class="greeting">
+                    <h1>Axiom Sentinel Central</h1>
+                    <p>Telemetria reativa integrada à sua VPS.</p>
+                </div>
+
+                <div class="grid-main">
+
+                    <div class="card" style="grid-column:1">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                                Pulso de Ticks (Velo-Force)
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                            <div>
+                                <div class="hr-value" id="kpi-banca">$ 0.00</div>
+                                <div class="hr-time" style="color:#ff4d6d66">Banca Corretora Deriv Ativa</div>
+                            </div>
+                        </div>
+                        <div class="wave-container">
+                            <svg class="wave-svg" viewBox="0 0 300 38" preserveAspectRatio="none">
                                 <defs>
-                                    <linearGradient id="sleepGrad" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="var(--blue)" />
-                                        <stop offset="60%" stop-color="var(--purple)" />
-                                        <stop offset="100%" stop-color="var(--orange)" />
+                                    <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#ff4d6d" stop-opacity=".3" />
+                                        <stop offset="100%" stop-color="#ff4d6d" stop-opacity="0" />
                                     </linearGradient>
                                 </defs>
+                                <path
+                                    d="M0 28 Q10 28 14 28 Q18 28 20 22 Q22 16 25 4 Q26 1 27 2 Q28 3 30 10 Q32 17 34 22 Q36 26 38 28 Q60 28 70 28 Q74 28 76 22 Q78 16 81 5 Q82 2 83 3 Q84 4 86 11 Q88 18 90 22 Q92 26 94 28 Q130 28 140 28 L300 28 L300 38 L0 38 Z"
+                                    fill="url(#wg)" />
+                                <path
+                                    d="M0 28 Q10 28 14 28 Q18 28 20 22 Q22 16 25 4 Q26 1 27 2 Q28 3 30 10 Q32 17 34 22 Q36 26 38 28 Q60 28 70 28 Q74 28 76 22 Q78 16 81 5 Q82 2 83 3 Q84 4 86 11 Q88 18 90 22 Q92 26 94 28 Q130 28 140 28"
+                                    fill="none" stroke="#ff4d6d" stroke-width="1.5" />
                             </svg>
+                        </div>
+                        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--glass-border)">
+                            <div class="card-title" style="margin-bottom:8px">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffd166"
+                                    stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                                Margem Livre Operacional
+                            </div>
+                            <div class="energy-bar-wrap">
+                                <span class="energy-label">0%</span>
+                                <div class="energy-bar">
+                                    <div class="energy-fill" style="width:82%"></div>
+                                </div>
+                                <span class="energy-label">100%</span>
+                                <span class="energy-badge">82%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column:2">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)"
+                                    stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                </svg>
+                                Curva de Performance Acumulada
+                            </div>
+                            <div class="date-badge" id="lbl-data-hoje">📅 Hoje</div>
+                        </div>
+                        <div style="display:flex;gap:8px;position:relative">
                             <div
-                                style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:40px">
-                                <span style="font-size:22px;font-weight:700" id="txt-gauge-status">8.7</span>
-                                <span style="font-size:11px;color:var(--text-secondary)">ADX</span>
+                                style="display:flex;flex-direction:column;justify-content:space-between;padding:4px 0 24px;font-size:9.5px;color:var(--text-dim);min-width:54px">
+                                <span>Agressivo</span><span>Moderado</span><span>Controlado</span><span>Seguro</span>
+                            </div>
+                            <div style="flex:1;position:relative;height:110px">
+                                <canvas id="chartEquityRealtime" style="width:100%;height:100%"></canvas>
+                                <div id="demo-lock-layer"
+                                    class="absolute inset-0 bg-black/95 backdrop-blur-md hidden flex-col justify-center items-center rounded-xl z-20">
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">🔒
+                                        Histórico Ocultado na Sessão Grátis</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="sleep-metrics">
-                            <div class="sleep-row">
-                                <div class="sleep-label-wrap">
-                                    <div class="sleep-dot" style="background:var(--blue)"></div><span>Forex
-                                        Comercial</span>
-                                </div><span class="sleep-val">> 3.8 ADX</span>
-                            </div>
-                            <div class="sleep-row">
-                                <div class="sleep-label-wrap">
-                                    <div class="sleep-dot" style="background:var(--purple)"></div><span>Índices
-                                        Sintéticos</span>
-                                </div><span class="sleep-val">> 8.7 ADX</span>
-                            </div>
-                            <div class="sleep-row">
-                                <div class="sleep-label-wrap">
-                                    <div class="sleep-dot" style="background:var(--orange)"></div><span>Coice
-                                        Mínimo</span>
-                                </div><span class="sleep-val">> 1.50 Mola</span>
-                            </div>
+                        <div style="display:flex;gap:16px;margin-top:10px">
+                            <div
+                                style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)">
+                                <span
+                                    style="display:inline-block;width:20px;height:2px;background:var(--orange)"></span>Líquido
+                                Realizado</div>
+                            <div
+                                style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)">
+                                <span
+                                    style="display:inline-block;width:20px;height:2px;background:var(--blue);border-top:1px dashed var(--blue)"></span>Balanço
+                                Previsto</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card ring-card">
-                    <div class="card-header">
-                        <span class="card-title" style="color:var(--orange)">Evolution Gateway</span>
-                    </div>
-                    <div class="ring-content">
-                        <div class="ring-visual">📡</div>
-                        <div class="ring-details">
-                            <h4 class="ring-name">Instância Ativa</h4>
-                            <p class="ring-desc">Relay alerts rodando em v23.6 sem delay de transmissão.</p>
+                    <div class="card circle-card" style="grid-column:3;grid-row:1">
+                        <div class="card-title" style="margin-bottom:12px;justify-content:center">Win Rate</div>
+                        <div class="circle-wrap">
+                            <div class="circle-bg" id="ring-winrate" style="--pct:0%">
+                                <div class="circle-inner">
+                                    <div class="circle-val" id="lbl-winrate-pct">0%</div>
+                                    <div class="circle-label">Assert</div>
+                                </div>
+                            </div>
+                            <div class="pulse-dot" style="top:50%;left:50%;margin:-4px 0 0 -4px"></div>
                         </div>
-                        <button onclick="window.open('https://track.deriv.com/_16GbgDTBVBN6W2e/1/', '_blank')"
-                            class="ring-btn">Vincular Broker ↗</button>
+                        <div style="font-size:11px;color:var(--text-dim)">Taxa de Acerto Realtime</div>
                     </div>
-                </div>
-            </div>
 
-            <div class="card terminal-card">
-                <div class="terminal-header">
-                    <span class="terminal-title">Direct-Feed Realtime Telemetry</span>
-                    <div class="terminal-status">
-                        <div class="terminal-dot"></div>Websocket Conectado
+                    <div class="card activity-card" style="grid-column:1;grid-row:2">
+                        <div class="card-header">
+                            <div class="card-title" style="color:#ff9d6a">🔥 P&L Retorno Líquido</div>
+                        </div>
+                        <div class="big-steps" id="lbl-pl-bruto">$ 0.00</div>
+                        <div class="act-sub">Lucro Diário Acumulado</div>
+                        <div class="act-bpm">
+                            <div class="bpm-dot"></div><span id="lbl-turno-label">Calculando Ticks VPS...</span>
+                        </div>
+                        <div class="bar-chart-mini" id="act-bars"></div>
+                        <div class="act-stats">
+                            <div class="act-stat">🎯 TP: $100.00</div>
+                            <div class="act-stat">🛑 SL: $50.00</div>
+                        </div>
                     </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Timestamp</th>
-                                <th>Ativo Target</th>
-                                <th>Direção</th>
-                                <th>Resultado</th>
-                                <th style="text-align:right">P&L Líquido</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-feed-rows">
-                        </tbody>
-                    </table>
+
+                    <div class="card sleep-card" style="grid-column:2;grid-row:2">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)"
+                                    stroke-width="2">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                                </svg>
+                                Monitor de Disciplina
+                            </div>
+                            <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px}"
+                                id="lbl-adx-target">
+                                ⚡ ADX Target
+                            </div>
+                        </div>
+                        <div class="sleep-time">
+                            <span>🌐 Turno Comercial: Forex</span>
+                            <span>⚡ Turno Noturno: Sintéticos</span>
+                        </div>
+                        <div class="sleep-chart">
+                            <svg width="100%" viewBox="0 0 320 90" preserveAspectRatio="xMidYMid meet">
+                                <defs>
+                                    <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="#9b7cff" />
+                                        <stop offset="40%" stop-color="#4a9eff" />
+                                        <stop offset="100%" stop-color="#3fffa2" />
+                                    </linearGradient>
+                                </defs>
+                                <g stroke="#ffffff12" stroke-width="0.5">
+                                    <line x1="160" y1="10" x2="160" y2="20" />
+                                    <line x1="236" y1="28" x2="229" y2="35" />
+                                    <line x1="270" y1="80" x2="260" y2="80" />
+                                    <line x1="50" y1="80" x2="60" y2="80" />
+                                </g>
+                                <path d="M 50 80 A 110 90 0 0 1 270 80" fill="none" stroke="#ffffff08" stroke-width="14"
+                                    stroke-linecap="round" />
+                                <path d="M 50 80 A 110 90 0 0 1 270 80" fill="none" stroke="url(#arcGrad)"
+                                    stroke-width="6" stroke-linecap="round" />
+                                <path id="gauge-arc-path" d="M 50 80 A 110 90 0 0 1 180 20" fill="none" stroke="#3fffa2"
+                                    stroke-width="6" stroke-linecap="round" opacity=".9" />
+                                <text x="160" y="52" text-anchor="middle" font-size="11" fill="#8899cc"
+                                    font-family="Outfit">Agressividade</text>
+                                <text x="160" y="72" text-anchor="middle" font-size="22" fill="#f0f4ff"
+                                    font-weight="600" font-family="Outfit" id="txt-gauge-status">8.7 ADX</text>
+                            </svg>
+                        </div>
+                        <div class="sleep-stages">
+                            <div class="sleep-stage"><span
+                                    style="color:var(--text-secondary);width:80px;font-size:11px">Forex ADX</span>
+                                <div class="stage-bar-wrap">
+                                    <div class="stage-bar stage-rem" style="width:38%"></div>
+                                </div>
+                            </div>
+                            <div class="sleep-stage"><span
+                                    style="color:var(--text-secondary);width:80px;font-size:11px">Sintéticos ADX</span>
+                                <div class="stage-bar-wrap">
+                                    <div class="stage-bar stage-deep" style="width:87%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card circle-card" style="grid-column:3;grid-row:2">
+                        <div class="card-title" style="margin-bottom:12px;justify-content:center">Fator Coice</div>
+                        <div class="circle-wrap">
+                            <div class="circle-bg hrv-circle-bg" id="ring-coice" style="--pct:50%">
+                                <div class="circle-inner">
+                                    <div class="circle-val" id="lbl-coice-val">1.50</div>
+                                    <div class="circle-label">Mola</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-dim)">Tração de Vetor Recuada</div>
+                    </div>
+
+                    <div class="card upsell-card" style="grid-column:3;grid-row:1/3;display:flex;flex-direction:column">
+                        <div class="ring-visual">
+                            <div class="ring-glow"></div>
+                            <div class="ring-img"
+                                style="display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+                        </div>
+                        <div class="upsell-title">Evolution API</div>
+                        <div class="upsell-sub">Gateway de Transmissão Ativo</div>
+                        <div class="upsell-feat">
+                            <div class="feat-icon" style="background:#4a9eff20;color:var(--blue)">⚡</div>v23.6 Core<span
+                                class="feat-arrow">›</span>
+                        </div>
+                        <div class="upsell-feat">
+                            <div class="feat-icon" style="background:#3fffa220;color:var(--green)">●</div>WhatsApp
+                            OK<span class="feat-arrow">›</span>
+                        </div>
+                        <div style="margin-top:auto;padding-top:12px">
+                            <button onclick="window.open('https://track.deriv.com/_16GbgDTBVBN6W2e/1/', '_blank')"
+                                style="width:100%;padding:10px;border-radius:10px;border:1px solid #ffd16640;background:linear-gradient(135deg,#ffd16615,#ff7d3b10);color:var(--yellow);font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif">Vincular
+                                Broker ↗</button>
+                        </div>
+                    </div>
+
+                    <div class="card terminal-card">
+                        <div class="terminal-header">
+                            <span class="terminal-title">Direct-Feed Realtime Telemetry</span>
+                            <div class="terminal-status">
+                                <div class="terminal-dot"></div>Websocket Conectado
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Ativo Target</th>
+                                        <th>Direção</th>
+                                        <th>Resultado</th>
+                                        <th style="text-align:right">P&L Líquido</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-feed-rows">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        const _URL = 'https://xzlotpwqpdjwzqerdyfb.supabase.co';
-        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0';
-        const supabase = window.supabase.createClient(_URL, _KEY);
-
-        let globalCache = [];
-        let chartInstance = null;
-        let SCOPE_ATIVO = "admin";
-
-        // Estrelas Idênticas do Aurea Original
-        const sg = document.getElementById('stars-group');
+        // Gerador Nativo de Estrelas do Aurea
+        const group = document.getElementById('stars-group');
         for (let i = 0; i < 120; i++) {
             const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             c.setAttribute('cx', Math.random() * 1400); c.setAttribute('cy', Math.random() * 900);
             const r = Math.random() < .15 ? (Math.random() * .8 + .3) : (Math.random() * .4 + .1);
-            c.setAttribute('r', r); c.setAttribute('fill', '#fff');
-            c.setAttribute('opacity', Math.random() * .6 + .1);
+            c.setAttribute('r', r); c.setAttribute('fill', '#fff'); c.setAttribute('opacity', Math.random() * .6 + .1);
             c.style.animation = `twinkle ${(Math.random() * 3 + 2).toFixed(1)}s ease-in-out ${(Math.random() * 4).toFixed(1)}s infinite`;
-            sg.appendChild(c);
+            group.appendChild(c);
         }
 
-        function alternarEscopoNode(val) {
-            SCOPE_ATIVO = val;
-            renderizarMétricasCompletas();
+        // Relógio Sincronizado com Horário de Brasília/Matelândia
+        setInterval(() => {
+            const dataLocal = new Date();
+            document.getElementById('relogio-txt').innerText = dataLocal.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' — ' + dataLocal.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        }, 1000);
+
+        let globalCache = [];
+        let chartInstance = null;
+        let INSTANCIA_ATIVA = "admin";
+
+        function alterarEscopoInstancia(val) {
+            INSTANCIA_ATIVA = val;
+            processarMétricasEcrã();
         }
 
-        async function carregarPipelineRealtime() {
+        async function carregarPipelineSoberano() {
             const { data, error } = await supabase.from('trade_history').select('*').order('created_at', { ascending: false });
             if (!error && data) {
                 globalCache = data;
-                renderizarMétricasCompletas();
+                processarMétricasEcrã();
             }
         }
 
-        function renderizarMétricasCompletas() {
+        function processarMétricasEcrã() {
             let filtered = globalCache;
 
             const hora = new Date().getHours();
-            const labelTurno = document.getElementById('lbl-estado-turno');
+            const labelTurno = document.getElementById('lbl-turno-label');
             const txtGauge = document.getElementById('txt-gauge-status');
             const pathGauge = document.getElementById('gauge-arc-path');
+            const targetADXText = document.getElementById('lbl-adx-target');
 
+            // Regra Estrita de Mudança Visual de Turno conforme a VPS v23.6
             if (hora >= 5 && hora < 18) {
-                labelTurno.innerText = "🌐 TURNO OPERACIONAL INTERNO: FOREX COMERCIAL";
-                txtGauge.innerText = "3.8";
-                pathGauge.style.strokeDashoffset = "240";
+                labelTurno.innerText = "🌐 TURNO ATIVO: FOREX COMERCIAL";
+                txtGauge.innerText = "3.8 ADX";
+                targetADXText.innerText = "⚡ ADX Target > 3.8";
+                pathGauge.setAttribute('d', 'M 50 80 A 110 90 0 0 1 120 40');
+                pathGauge.setAttribute('stroke', 'var(--blue)');
             } else {
-                labelTurno.innerText = "⚡ TURNO OPERACIONAL INTERNO: ÍNDICES SINTÉTICOS";
-                txtGauge.innerText = "8.7";
-                pathGauge.style.strokeDashoffset = "100";
+                labelTurno.innerText = "⚡ TURNO ATIVO: ÍNDICES SINTÉTICOS";
+                txtGauge.innerText = "8.7 ADX";
+                targetADXText.innerText = "⚡ ADX Target > 8.7";
+                pathGauge.setAttribute('d', 'M 50 80 A 110 90 0 0 1 240 35');
+                pathGauge.setAttribute('stroke', 'var(--orange)');
             }
 
-            if (SCOPE_ATIVO === 'admin') {
+            if (INSTANCIA_ATIVA === 'admin') {
                 document.getElementById('kpi-banca').innerText = `$ ${filtered.reduce((acc, t) => acc + (t.valor * 2), 3500).toFixed(2)}`;
             } else {
-                filtered = globalCache.filter(t => t.user_id === SCOPE_ATIVO || (!t.user_id && SCOPE_ATIVO === 'CLIENT_01'));
-                if (SCOPE_ATIVO === 'CLIENT_FREE') {
+                filtered = globalCache.filter(t => t.user_id === INSTANCIA_ATIVA || (!t.user_id && INSTANCIA_ATIVA === 'CLIENT_01'));
+                if (INSTANCIA_ATIVA === 'CLIENT_FREE') {
                     filtered = filtered.slice(0, 2);
                     document.getElementById('kpi-banca').innerText = "$ 10.00 (Demo)";
                 } else {
@@ -1014,54 +1430,59 @@
             const winrate = filtered.length > 0 ? Math.round((wins / filtered.length) * 100) : 0;
             const coiceUltimo = filtered.length > 0 ? filtered[0].coice : 1.50;
 
-            // Injeção de Anéis Cônicos Originais com Cores Fiéis
+            // Injeção de Dados nos Anéis de Conic-Gradient Nativo do Aurea
             document.getElementById('lbl-winrate-pct').innerText = `${winrate}%`;
-            document.getElementById('ring-winrate').style.background = `conic-gradient(var(--blue) 0 ${winrate}%, rgba(255,255,255,0.04) ${winrate}% 100%)`;
+            document.getElementById('ring-winrate').style.setProperty('--pct', `${winrate}%`);
 
             document.getElementById('lbl-coice-val').innerText = coiceUltimo;
-            const coicePct = Math.min((coiceUltimo / 3) * 100, 100);
-            document.getElementById('ring-coice').style.background = `conic-gradient(var(--orange) 0 ${coicePct}%, rgba(255,255,255,0.04) ${coicePct}% 100%)`;
+            const coicePercentual = Math.min((coiceUltimo / 3) * 100, 100);
+            document.getElementById('ring-coice').style.setProperty('--pct', `${coicePercentual}%`);
 
-            document.getElementById('lbl-pl-bruto').innerHTML = `$ ${líquido.toFixed(2)} <span class="activity-unit">Hoje</span>`;
+            document.getElementById('lbl-pl-bruto').innerHTML = `$ ${líquido.toFixed(2)}`;
+            document.getElementById('lbl-pl-bruto').className = `big-steps ${líquido >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
 
-            // Histórico de Barras Originais
+            // Geração das Barras de Volume Diário do Card de Atividade Original
             const barWrap = document.getElementById('act-bars');
             barWrap.innerHTML = filtered.slice(0, 14).map(t => {
-                const h = Math.min(Math.abs(t.valor) * 5, 80);
-                const cor = t.resultado === 'WIN' ? 'var(--green)' : 'var(--red)';
-                return `<div class="bar-item" style="height:${h + 10}px; background:${cor}"></div>`;
+                const h = Math.min(Math.abs(t.valor) * 4.5, 48);
+                return `<div class="bar-item bar-col ${t.resultado === 'WIN' ? '' : 'high'}" style="height:${h + 6}px; background:${t.resultado === 'WIN' ? 'var(--green)' : 'var(--red)'}"></div>`;
             }).join('');
 
-            // Tabela Feed
+            // Tabela Feed Reativa
             document.getElementById('table-feed-rows').innerHTML = filtered.map(t => {
                 const isWin = t.resultado === 'WIN';
                 return `
     <tr>
       <td>${t.created_at ? new Date(t.created_at).toLocaleTimeString() : '00:00:00'}</td>
       <td style="font-weight:600;color:var(--text-primary)">${t.ativo}</td>
-      <td>${t.valor >= 0 ? 'CALL  COMPRA' : 'PUT  VENDA'}</td>
+      <td>${t.valor >= 0 ? 'CALL (COMPRA) 📈' : 'PUT (VENDA) 📉'}</td>
       <td><span class="badge-res ${isWin ? 'badge-win' : 'badge-loss'}">${t.resultado}</span></td>
       <td style="text-align:right;font-weight:600;color:${isWin ? 'var(--green)' : 'var(--red)'}">${isWin ? '+' : ''}${t.valor.toFixed(2)}</td>
     </tr>`;
             }).join('');
 
-            if (SCOPE_ATIVO !== 'CLIENT_FREE') {
-                renderizarGraficoAreaLinear(filtered.slice(0, 12).reverse());
+            // Trava de Gráfico para Conta Demonstração
+            const lockLayer = document.getElementById('demo-lock-layer');
+            if (INSTANCIA_ATIVA === 'CLIENT_FREE') {
+                lockLayer.classList.remove('hidden');
+            } else {
+                lockLayer.classList.add('hidden');
+                renderizarGraficoLinearAurea(filtered.slice(0, 14).reverse());
             }
         }
 
-        function renderizarGraficoAreaLinear(data) {
+        function renderizarGraficoLinearAurea(data) {
             const ctx = document.getElementById('chartEquityRealtime').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            let acc = 0;
-            const pontos = data.map(t => { acc += t.valor; return acc; });
+            let acumulador = 0;
+            const coordenadas = data.map(t => { acumulador += t.valor; return acumulador; });
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => i + 1),
                     datasets: [{
-                        data: pontos, borderColor: '#ff7d3b', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 0
+                        data: coordenadas, borderColor: '#ff7d3b', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 0
                     }]
                 },
                 options: {
@@ -1073,11 +1494,12 @@
             });
         }
 
+        // Escuta via Canal Realtime Stream v4 do Supabase
         supabase.channel('aurea-core').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trade_history' }, () => {
-            carregarPipelineRealtime();
+            carregarPipelineSoberano();
         }).subscribe();
 
-        window.onload = carregarPipelineRealtime;
+        window.onload = carregarPipelineSoberano;
     </script>
 </body>
 
