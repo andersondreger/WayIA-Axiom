@@ -3,335 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Sovereign UI v1.0 | Antigravity Platform</title>
+    <title>Axiom Sovereign | Painel de Controle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
-        /* --- ESTILIZAÇÃO MESTRE AXIOM SOVEREIGN (ORIGEM DA IMAGEM) --- */
         :root {
-            --bg-deep-space: #0a0a0a;  /* Fundo ultra escuro da nossa origem visual */
-            --bg-card-fintech: #141414; /* Blocos de operação */
-            --axiom-neon: #deff9a;    /* O verde limão elétrico FinTech */
-            --text-main: #f5f5f5;      /* Texto de alta leitura */
-            --text-muted-fin: #8a9a86; /* Cinza esverdeado para parâmetros */
-            --border-glow: rgba(222, 255, 154, 0.1);
+            --bg-base: #060907;
+            --bg-surface: #0b110e;
+            --axiom-neon: #39e68d;
+            --axiom-neon-glow: rgba(57, 230, 141, 0.15);
+            --border-color: rgba(57, 230, 141, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #6b7f75;
         }
 
         body {
             margin: 0;
-            background-color: var(--bg-deep-space);
-            color: var(--text-main);
-            font-family: 'Urbanist', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* --- Barra Lateral de Comando (Sidebar) --- */
+        /* --- SIDEBAR --- */
         .sidebar {
             width: 260px;
-            height: 100%;
-            background-color: #0d0d0d;
-            border-right: 1px solid var(--border-glow);
-            padding: 40px 25px;
+            background-color: #040605;
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        .logo-area {
-            font-size: 26px;
+        .brand-title {
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .logo-area span { color: var(--axiom-neon); }
-
-        .menu-list { flex-grow: 1; margin-top: 50px; }
-        .menu-item {
-            padding: 16px 18px;
-            border-radius: 14px;
-            color: var(--text-muted-fin);
-            text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 12px;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+        .brand-title span { color: var(--axiom-neon); }
+
+        .nav-menu { margin-top: 40px; flex-grow: 1; }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            transition: all 0.2s;
         }
-
-        .menu-item.active, .menu-item:hover {
-            background-color: var(--bg-card-fintech);
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--bg-surface);
             color: var(--axiom-neon);
-            border: 1px solid var(--border-glow);
+            box-shadow: inset 0 0 0 1px var(--border-color);
         }
 
-        /* --- Conteúdo Central de Alta Performance --- */
-        .main-content {
+        .system-status {
+            background: var(--bg-surface);
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--axiom-neon);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--axiom-neon);
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-wrapper {
             flex-grow: 1;
-            padding: 50px;
+            padding: 40px;
             box-sizing: border-box;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
         }
 
-        .dashboard-header {
+        .header-section {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 50px;
-        }
-
-        .user-status {
-            display: flex;
             align-items: center;
-            gap: 15px;
-            background: var(--bg-card-fintech);
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--border-glow);
         }
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            background-color: var(--axiom-neon);
-            box-shadow: 0 0 10px var(--axiom-neon);
+        .header-info h1 { margin: 0; font-size: 28px; font-weight: 700; }
+        .header-info p { margin: 5px 0 0; color: var(--text-secondary); font-size: 14px; }
+
+        .banca-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 20px 30px;
+            border-radius: 16px;
+            min-width: 240px;
+        }
+        .banca-card p { margin: 0; font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .banca-card h2 { margin: 5px 0 0; font-size: 32px; font-family: 'JetBrains Mono', monospace; color: var(--axiom-neon); }
+
+        /* --- GRID PRINCIPAL --- */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
+            gap: 30px;
         }
 
-        .balance-card {
-            background: var(--bg-card-fintech);
-            border: 1px solid var(--border-glow);
-            padding: 25px 40px;
+        .chart-panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            text-align: right;
+            padding: 25px;
         }
-        .banca-label { font-size: 14px; color: var(--text-muted-fin); text-transform: uppercase; letter-spacing: 1px; }
-        .banca-valor { font-size: 36px; font-weight: 700; color: var(--axiom-neon); font-family: 'JetBrains Mono', monospace; }
 
-        /* --- Grade de Módulos (Estilo App Builder + Axiom Core) --- */
-        .builder-modules-grid {
+        .modules-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .module-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border 0.3s;
+        }
+        .module-card:hover { border-color: rgba(57, 230, 141, 0.3); }
+
+        .module-details h4 { margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .module-details h4 i { color: var(--axiom-neon); }
+        .module-meta { margin-top: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; color: var(--text-secondary); }
+        .module-meta span strong { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+
+        /* Switch Estilizado */
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1a2620; border-radius: 34px; transition: 0.3s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #4b6356; border-radius: 50%; transition: 0.3s; }
+        input:checked + .slider { background-color: var(--axiom-neon); }
+        input:checked + .slider:before { transform: translateX(22px); background-color: var(--bg-base); }
+
+        /* --- DATA TABLES ROW --- */
+        .tables-row {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-
-        .card-axiom-module {
-            background-color: var(--bg-card-fintech);
-            border: 1px solid var(--border-glow);
-            border-radius: 24px;
-            padding: 30px;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        .card-axiom-module:hover { border-color: var(--axiom-neon); transform: translateY(-3px); }
-
-        .module-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .module-title-wrap { display: flex; align-items: center; gap: 15px; }
-        .module-title { font-size: 22px; font-weight: 600; color: var(--text-main); }
-        .icon-active { color: var(--axiom-neon); }
-        .icon-inactive { color: #555; }
-
-        /* Switch Elétrico FinTech */
-        .switch-fintech { position: relative; display: inline-block; width: 54px; height: 28px; }
-        .switch-fintech input { opacity: 0; width: 0; height: 0; }
-        .slider-fintech { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2a2a2a; transition: .4s; border-radius: 34px; }
-        .slider-fintech:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider-fintech { background-color: var(--axiom-neon); }
-        input:checked + .slider-fintech:before { transform: translateX(26px); background-color: var(--bg-deep-space); }
-
-        .param-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-        .param-label { color: var(--text-muted-fin); }
-        .param-value { font-family: 'JetBrains Mono', monospace; color: var(--text-main); font-weight: 500; }
-
-        /* --- Analytics & Histórico FinTech --- */
-        .analytics-wrap {
-            display: grid;
-            grid-template-columns: 2.2fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 30px;
         }
 
-        .chart-block, .history-block {
-            background-color: var(--bg-card-fintech);
-            border: 1px solid var(--border-glow);
-            border-radius: 24px;
-            padding: 30px;
+        .table-panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
         }
+        .table-panel h3 { margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 600; }
 
-        .history-list { list-style: none; padding: 0; margin: 0; }
-        .history-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 18px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            font-size: 15px;
-        }
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
-        .item-active { font-weight: 600; color: var(--text-main); }
-        .item-time { color: var(--text-muted-fin); font-size: 13px; }
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .badge-win { background-color: rgba(222, 255, 154, 0.1); color: var(--axiom-neon); }
-        .badge-loss { background-color: rgba(255, 154, 154, 0.1); color: #ff9a9a; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { color: var(--text-secondary); font-weight: 500; padding-bottom: 12px; border-bottom: 1px solid rgba(57, 230, 141, 0.05); }
+        td { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        
+        .win-badge { color: var(--axiom-neon); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .loss-badge { color: #ff6b6b; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <div>
-            <div class="logo-area">Axiom<span>Sovereign</span></div>
-            <div class="menu-list">
-                <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Dashboard Builder</a>
-                <a href="#" class="menu-item"><i class="fas fa-sliders-h"></i> Config Risk</a>
-                <a href="#" class="menu-item"><i class="fas fa-history"></i> Auditoria de Trades</a>
-                <a href="#" class="menu-item"><i class="fab fa-whatsapp"></i> Minha Evolution API</a>
+            <div class="brand-title"><i class="fas fa-cube" style="color:var(--axiom-neon);"></i> Axiom<span>Sovereign</span></div>
+            <div class="nav-menu">
+                <a href="#" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard Builder</a>
+                <a href="#" class="nav-link"><i class="fas fa-shield-alt"></i> Config Risk</a>
+                <a href="#" class="nav-link"><i class="fas fa-receipt"></i> Auditoria de Trades</a>
+                <a href="#" class="nav-link"><i class="fab fa-whatsapp"></i> Minha Evolution API</a>
             </div>
         </div>
-        <div class="user-status">
-            <div class="status-dot"></div>
-            <span style="font-size:14px;">Monitorando Ticks Públicos</span>
+        <div class="system-status">
+            <div class="pulse-dot"></div>
+            <span style="font-size: 13px; color: var(--text-secondary);">Stream Pública Sincronizada</span>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="dashboard-header">
-            <div>
-                <h1 style="margin:0; font-size: 36px; font-weight: 600; letter-spacing: -0.5px;">Painel de Controle</h1>
-                <p style="margin:5px 0 0; color: var(--text-muted-fin); font-size: 16px;">Estrutura de elite baseada no modelo Ascensão/Queda nativo da Deriv.</p>
+    <div class="main-wrapper">
+        <div class="header-section">
+            <div class="header-info">
+                <h1>Painel de Controle</h1>
+                <p>Estrutura de alta fidelidade baseada na especificação Ascensão/Queda da Deriv.</p>
             </div>
-            <div class="balance-card">
-                <div class="banca-label">Banca Virtual (Demo)</div>
-                <div class="banca-valor">USD <span id="balance-display-live">10,000.00</span></div>
+            <div class="banca-card">
+                <p>Banca Dinâmica (Demo)</p>
+                <h2>USD <span id="balance-live">10,000.00</span></h2>
             </div>
         </div>
 
-        <div class="builder-modules-grid">
-            
-            <div class="card-axiom-module">
-                <div class="module-head">
-                    <div class="module-title-wrap">
-                        <i class="fas fa-signal icon-active"></i>
-                        <div class="module-title">Índice Volatilidade 100</div>
+        <div class="workspace-grid">
+            <div class="chart-panel">
+                <div id="performance-chart"></div>
+            </div>
+
+            <div class="modules-panel">
+                <div class="module-card">
+                    <div class="module-details">
+                        <h4><i class="fas fa-bolt"></i> Índice Volatilidade 100</h4>
+                        <div class="module-meta">
+                            <span>Filtro: <strong>ADX 5.5</strong></span>
+                            <span>Mecânica: <strong>Coice 0.80</strong></span>
+                        </div>
                     </div>
-                    <label class="switch-fintech">
-                        <input type="checkbox" id="switch-R_100" checked>
-                        <span class="slider-fintech"></span>
-                    </label>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
                 </div>
-                <div class="param-row"><span class="param-label">Métrica Mestre (VPS Core)</span><span class="param-value" style="color:var(--axiom-neon);">ADX 5.5</span></div>
-                <div class="param-row"><span class="param-label">Fator Trava Cinemática</span><span class="param-value">Coice 0.80</span></div>
-                <div class="param-row"><span class="param-label">Expiração Contrato Nativo</span><span class="param-value">60s (1m)</span></div>
-                <div class="param-row"><span class="param-label">Diferencial</span><span class="param-value">Nativo Deriv</span></div>
-            </div>
-
-            <div class="card-axiom-module">
-                <div class="module-head">
-                    <div class="module-title-wrap">
-                        <i class="fas fa-signal icon-inactive"></i>
-                        <div class="module-title">Índice Volatilidade 10</div>
+                <div class="module-card">
+                    <div class="module-details">
+                        <h4><i class="fas fa-bolt"></i> Índice Volatilidade 10</h4>
+                        <div class="module-meta">
+                            <span>Filtro: <strong>ADX 5.5</strong></span>
+                            <span>Mecânica: <strong>Coice 0.80</strong></span>
+                        </div>
                     </div>
-                    <label class="switch-fintech">
-                        <input type="checkbox" id="switch-R_10">
-                        <span class="slider-fintech"></span>
-                    </label>
+                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
                 </div>
-                <div class="param-row"><span class="param-label">Métrica Mestre (VPS Core)</span><span class="param-value">ADX 5.5</span></div>
-                <div class="param-row"><span class="param-label">Fator Trava Cinemática</span><span class="param-value">Coice 0.80</span></div>
-                <div class="param-row"><span class="param-label">Expiração Contrato Nativo</span><span class="param-value">60s (1m)</span></div>
-                <div class="param-row"><span class="param-label">Diferencial</span><span class="param-value">Nativo Deriv</span></div>
+                <div class="module-card">
+                    <div class="module-details">
+                        <h4><i class="fas fa-bolt"></i> Índice Volatilidade 50</h4>
+                        <div class="module-meta">
+                            <span>Filtro: <strong>ADX 5.5</strong></span>
+                            <span>Mecânica: <strong>Coice 0.80</strong></span>
+                        </div>
+                    </div>
+                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="tables-row">
+            <div class="table-panel">
+                <h3>Relatórios de Auditoria</h3>
+                <table>
+                    <thead><tr><th>Ativo</th><th>Estratégia</th><th>Métrica</th><th>Resultado</th></tr></thead>
+                    <tbody>
+                        <tr><td>R_100</td><td>Axiom Sovereign</td><td>ADX 5.72</td><td class="win-badge">+ USD 9.50</td></tr>
+                        <tr><td>R_10</td><td>Axiom Sovereign</td><td>ADX 6.10</td><td class="win-badge">+ USD 9.50</td></tr>
+                    </tbody>
+                </table>
             </div>
 
-            </div>
-
-        <div class="analytics-wrap">
-            <div class="chart-block">
-                <h3 style="margin-top:0; font-weight: 500; font-size:20px; margin-bottom: 25px;">Curva de Performance Capital Acumulado</h3>
-                <div id="chart-fintech-performance"></div>
-            </div>
-            
-            <div class="history-block">
-                <h3 style="margin-top:0; font-weight: 500; font-size:20px; margin-bottom: 25px;">Últimas Operações (Antigravity Direct)</h3>
-                <ul class="history-list">
-                    <li class="history-item">
-                        <div class="item-info"><span class="item-active">R_100 (CALL)</span><span class="item-time">14:52:10 - ADX: 5.72 / Coice: 0.83</span></div>
-                        <span class="status-badge badge-win">+ USD 9.50</span>
-                    </li>
-                    <li class="history-item">
-                        <div class="item-info"><span class="item-active">R_10 (PUT)</span><span class="item-time">14:48:05 - ADX: 6.10 / Coice: 0.91</span></div>
-                        <span class="status-badge badge-win">+ USD 9.50</span>
-                    </li>
-                    <li class="history-item">
-                        <div class="item-info"><span class="item-active">R_50 (CALL)</span><span class="item-time">14:31:44 - ADX: 5.51 / Coice: 0.80</span></div>
-                        <span class="status-badge badge-loss">- USD 10.00</span>
-                    </li>
-                </ul>
+            <div class="table-panel">
+                <h3>Últimas Operações (Antigravity Direct)</h3>
+                <table>
+                    <thead><tr><th>Data/Hora</th><th>Operação</th><th>ADX</th><th>Fator Coice</th></tr></thead>
+                    <tbody>
+                        <tr><td>25/05 19:21</td><td>CALL</td><td>5.72</td><td>0.83</td></tr>
+                        <tr><td>25/05 19:14</td><td>PUT</td><td>6.10</td><td>0.91</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. INICIALIZAÇÃO DO GRÁFICO ESTILO FINTECH (ORIGEM VISUAL)
+        // Gráfico Estilo FinTech Neon
         var options = {
-            series: [{
-                name: 'Equidade Total (Demo)',
-                data: [10000, 10009.5, 10019, 10009, 10018.5, 10028] // Exemplo Dinâmico do Supabase
-            }],
-            chart: { type: 'area', height: 320, toolbar: { show: false }, background: 'transparent', zoom: { enabled: false } },
-            colors: ['#deff9a'],
-            stroke: { curve: 'smooth', width: 3, lineCap: 'round' },
+            series: [{ name: 'Equidade da Conta', data: [10000, 10009.5, 10019, 10009, 10018.5, 10028] }],
+            chart: { type: 'area', height: 310, toolbar: { show: false }, background: 'transparent' },
+            colors: ['#39e68d'],
+            stroke: { curve: 'smooth', width: 3 },
             dataLabels: { enabled: false },
-            grid: { borderColor: 'rgba(255,255,255,0.04)', padding: { left: 10, right: 10 } },
-            xaxis: { categories: ['14:00', '14:10', '14:20', '14:30', '14:40', '14:50'], labels: { style: { colors: '#8a9a86', fontFamily: 'JetBrains Mono' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: { colors: '#8a9a86', fontFamily: 'JetBrains Mono' } } },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0 } },
-            tooltip: { theme: 'dark', style: { fontFamily: 'Urbanist' } }
+            grid: { borderColor: 'rgba(57, 230, 141, 0.03)' },
+            xaxis: { categories: ['19:00', '19:05', '19:10', '19:15', '19:20', '19:25'], labels: { style: { colors: '#6b7f75', fontFamily: 'JetBrains Mono' } }, axisBorder: { show: false } },
+            yaxis: { labels: { style: { colors: '#6b7f75', fontFamily: 'JetBrains Mono' } } },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.15, opacityTo: 0 } },
+            tooltip: { theme: 'dark' }
         };
-
-        var chart = new ApexCharts(document.querySelector("#chart-fintech-performance"), options);
+        var chart = new ApexCharts(document.querySelector("#performance-chart"), options);
         chart.render();
 
-        // 2. CONEXÃO WEBSOCKET DESCENTRALIZADA COM A DERIV (NOSSA ORIGEM DE DADOS)
-        const DERIV_APP_ID = '33544'; // Seu App ID Mestre do SaaS
-        const derivSocket = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
-
-        derivSocket.onopen = function(e) {
-            console.log("🏛️ Conectado ao Túnel Nativo da Deriv no Antigravity.");
-            
-            // Capturar o token do cliente Demo/Real (Sessão do Antigravity connected to Supabase)
-            // Aqui entra a lógica do seu frontend para puxar o token real
-            const USER_DERIV_TOKEN = "TESTE_OAUTH_TOKEN_DA_DERIV"; 
-            
-            derivSocket.send(JSON.stringify({ "authorize": USER_DERIV_TOKEN }));
+        // CONEXÃO REAL-TIME WEBSOCKET COM A DERIV
+        const socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+        socket.onopen = function() {
+            // Substitua pelo token real dinâmico obtido na sessão do Supabase do cliente
+            const CLIENT_TOKEN = "SEU_TOKEN_DEMO_AQUI"; 
+            socket.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
         };
-
-        derivSocket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            const balanceDisplay = document.getElementById('balance-display-live');
-
-            // Autenticação aceita -> Pede o Saldo e assina atualizações contínuas
-            if (data.msg_type === 'authorize') {
-                console.log("🔓 Conta do cliente validada com sucesso via OAuth da Deriv.");
-                derivSocket.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
+        socket.onmessage = function(msg) {
+            const res = JSON.parse(msg.data);
+            if (res.msg_type === 'authorize') {
+                socket.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
             }
-
-            // Atualização de Saldo recebida -> Joga na tela instantaneamente (Estilo App Builder)
-            if (data.msg_type === 'balance') {
-                const saldoReal = data.balance.balance;
-                const moeda = data.balance.currency;
-                
-                // Atualiza o componente visual idêntico ao do App Builder e Origem de Imagem
-                balanceDisplay.innerText = `${parseFloat(saldoReal).toFixed(2)}`;
+            if (res.msg_type === 'balance') {
+                document.getElementById('balance-live').innerText = parseFloat(res.balance.balance).toFixed(2);
             }
-        };
-
-        derivSocket.onerror = function(error) {
-            console.error(`[❌ Deriv WebSocket Error]: ${error.message}`);
         };
     </script>
 </body>
