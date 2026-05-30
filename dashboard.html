@@ -728,22 +728,21 @@
             performanceChart.render();
         }
 
-        // --- CONEXÃO DIRETA DO FRONT COM O SEU SUPABASE VIA FETCH ---
+        // --- CONEXÃO COM A API LOCAL (EVITA COMPLICAÇÕES DE CORS EXTERNO) ---
         async function buscarDadosDoSupabase() {
             try {
-                const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
+                const URL_LOCAL = "/api/trade-history";
 
-                // Usando a chave mestre de escrita/leitura que validamos da sua VPS
-                const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0";
-
-                const resposta = await fetch(URL_SUPABASE, {
+                const resposta = await fetch(URL_LOCAL, {
                     method: 'GET',
                     headers: {
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": `Bearer ${SUPABASE_KEY}`,
                         "Content-Type": "application/json"
                     }
                 });
+
+                if (!resposta.ok) {
+                    throw new Error(`Erro HTTP: ${resposta.status}`);
+                }
 
                 const trades = await resposta.json();
 
@@ -770,16 +769,17 @@
                 });
 
                 trades.forEach(trade => {
-                    if (trade.resultado === "WIN" || trade.resultado === "win") wins++;
+                    const resultadoTrade = (trade.resultado || "").toUpperCase();
+                    if (resultadoTrade === "WIN") wins++;
                     else losses++;
 
                     const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                    const classeBadge = (trade.resultado === "WIN" || trade.resultado === "win") ? "win-badge" : "loss-badge";
+                    const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
 
                     tabelaSupabase.innerHTML += `
                         <tr>
-                            <td><strong>${trade.ativo}</strong></td>
+                            <td><strong>${trade.ativo || 'N/A'}</strong></td>
                             <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
                             <td class="${classeBadge}">${prefixoSinal}${Math.abs(trade.valor).toFixed(2)}</td>
                         </tr>
@@ -802,7 +802,7 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${taxaAssertividade}%`;
 
-                // Força o ApexCharts a renderizar a montanha neon baseada no array do Supabase
+                // Força o ApexCharts a renderizar a montanha neon baseada no array retornado
                 ApexCharts.exec('chart-neon', 'updateOptions', {
                     xaxis: { categories: temposLabels },
                     colors: [wins >= losses ? '#39e68d' : '#ff6b6b']
