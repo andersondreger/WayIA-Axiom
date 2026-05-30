@@ -23,7 +23,6 @@
             --text-secondary: #6b7f75;
         }
 
-        /* Classe utilitária para o modo Light dinâmico solicitado */
         .light-mode {
             --bg-base: #f8fafc;
             --bg-surface: #ffffff;
@@ -105,24 +104,6 @@
             background-color: var(--bg-surface);
             color: var(--axiom-neon);
             box-shadow: inset 0 0 0 1px var(--border-color);
-        }
-
-        .system-status {
-            background: var(--bg-surface);
-            padding: 15px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--axiom-neon);
-            border-radius: 50%;
-            box-shadow: 0 0 12px var(--axiom-neon);
         }
 
         /* --- MAIN CONTENT WRAPPER --- */
@@ -377,7 +358,7 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* --- SEÇÕES OCULTAS (GESTÃO DE PERFIL) --- */
+        /* --- SEÇÕES INTERNAS DO APP --- */
         .content-section {
             display: none;
         }
@@ -388,17 +369,11 @@
             gap: 30px;
         }
 
-        /* Componentes de Perfil Whitelabel */
+        /* Componentes de Perfil */
         .profile-container {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 30px;
-        }
-
-        @media(max-width: 768px) {
-            .profile-container {
-                grid-template-columns: 1fr;
-            }
         }
 
         .avatar-card {
@@ -423,7 +398,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            object-cover: cover;
+            object-fit: cover;
             border: 2px solid var(--axiom-neon);
         }
 
@@ -440,7 +415,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: none;
         }
 
         .form-card {
@@ -494,12 +468,7 @@
             border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
             width: fit-content;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
         }
 
         .email-verified-tag {
@@ -509,7 +478,6 @@
             padding: 4px 8px;
             border-radius: 6px;
             width: fit-content;
-            margin-top: 4px;
             font-weight: 600;
         }
 
@@ -525,13 +493,13 @@
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -583,7 +551,7 @@
             <div class="metrics-row">
                 <div class="metric-mini-card">
                     <p>Disparos Totais</p>
-                    <h3 id="meta-total" style="color: var(--text-primary);">0</h3>
+                    <h3 id="meta-total">0</h3>
                 </div>
                 <div class="metric-mini-card" style="border-bottom: 3px solid var(--axiom-neon);">
                     <p style="color: var(--axiom-neon);">Retornos Wins</p>
@@ -649,8 +617,7 @@
                                 <th>Resultado</th>
                             </tr>
                         </thead>
-                        <tbody id="supabase-table-body">
-                        </tbody>
+                        <tbody id="supabase-table-body"></tbody>
                     </table>
                 </div>
 
@@ -664,8 +631,7 @@
                                 <th>Fator Coice</th>
                             </tr>
                         </thead>
-                        <tbody id="antigravity-table-body">
-                        </tbody>
+                        <tbody id="antigravity-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -674,7 +640,7 @@
         <div id="secao-perfil" class="content-section">
             <div class="header-info">
                 <h1>Gestão de Perfil</h1>
-                <p>Gerencie suas credenciais de segurança, identidade corporativa e customizações.</p>
+                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferências.</p>
             </div>
 
             <div class="profile-container">
@@ -683,9 +649,7 @@
                         <img id="profile-avatar-preview" class="avatar-img"
                             src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop"
                             alt="Avatar Preview">
-                        <label class="avatar-upload-btn" for="input-avatar-file">
-                            <i class="fas fa-camera"></i>
-                        </label>
+                        <label class="avatar-upload-btn" for="input-avatar-file"><i class="fas fa-camera"></i></label>
                         <input type="file" id="input-avatar-file" style="display: none;" accept="image/*"
                             onchange="processarTrocaAvatar(event)">
                     </div>
@@ -747,10 +711,9 @@
     <script>
         let performanceChart;
 
-        // --- INSTANCIAÇÃO E CONFIGURAÇÃO INICIAL DO APEXCHARTS ---
         function inicializarGraficoVazio() {
             var options = {
-                series: [{ name: 'Equidade da Conta (R$)', data: [] }],
+                series: [{ name: 'Equidade da Conta ($)', data: [] }],
                 chart: { id: 'chart-neon', type: 'area', height: 310, toolbar: { show: false }, background: 'transparent' },
                 colors: ['#39e68d'],
                 stroke: { curve: 'smooth', width: 3 },
@@ -765,11 +728,23 @@
             performanceChart.render();
         }
 
-        // --- CONEXÃO DINÂMICA COMPLETA COM A ROTA DA VPS (ANTIGRAVITY) ---
+        // --- CONEXÃO DIRETA DO FRONT COM O SEU SUPABASE VIA FETCH ---
         async function buscarDadosDoSupabase() {
             try {
-                // Rota unificada que seu servidor Antigravity serve
-                const resposta = await fetch('/api/trade-history');
+                const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
+
+                // Usando a chave mestre de escrita/leitura que validamos da sua VPS
+                const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0";
+
+                const resposta = await fetch(URL_SUPABASE, {
+                    method: 'GET',
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
                 const trades = await resposta.json();
 
                 const tabelaSupabase = document.getElementById("supabase-table-body");
@@ -780,50 +755,45 @@
 
                 let wins = 0;
                 let losses = 0;
-                let liquidoAcumulado = 0;
+                let liquidoAcumulado = 10000; // Começa da banca padrão de demonstração para desenhar a curva
 
                 let saldosHistoricos = [];
                 let temposLabels = [];
 
-                // Processa ordenação cronológica reversa para montar o gráfico de linha neon
                 const tradesCronologicos = [...trades].reverse();
                 tradesCronologicos.forEach((trade) => {
                     liquidoAcumulado += trade.valor;
-                    saldosHistoricos.push(liquidoAcumulado);
+                    saldosHistoricos.push(parseFloat(liquidoAcumulado.toFixed(2)));
 
                     const horaMinutos = new Date(trade.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     temposLabels.push(horaMinutos);
                 });
 
-                // Alimenta os dados físicos na tela do usuário
                 trades.forEach(trade => {
-                    if (trade.resultado === "WIN") wins++;
+                    if (trade.resultado === "WIN" || trade.resultado === "win") wins++;
                     else losses++;
 
                     const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                    const classeBadge = trade.resultado === "WIN" ? "win-badge" : "loss-badge";
+                    const classeBadge = (trade.resultado === "WIN" || trade.resultado === "win") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
 
-                    // Injeta na tabela do Supabase
                     tabelaSupabase.innerHTML += `
                         <tr>
                             <td><strong>${trade.ativo}</strong></td>
-                            <td>ADX ${trade.adx_no_tiro.toFixed(2)}</td>
+                            <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
                             <td class="${classeBadge}">${prefixoSinal}${Math.abs(trade.valor).toFixed(2)}</td>
                         </tr>
                     `;
 
-                    // Injeta na tabela complementar do Antigravity Direct
                     tabelaAntigravity.innerHTML += `
                         <tr>
                             <td>${dataCompleta}</td>
                             <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${trade.valor > 0 ? 'CALL' : 'PUT'}</td>
-                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${(trade.adx_no_tiro * 0.08).toFixed(2)}</td>
+                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${trade.adx_no_tiro ? (trade.adx_no_tiro * 0.08).toFixed(2) : '0.00'}</td>
                         </tr>
                     `;
                 });
 
-                // Atualiza os painéis matemáticos superiores
                 const total = wins + losses;
                 const taxaAssertividade = total > 0 ? Math.round((wins / total) * 100) : 0;
 
@@ -832,21 +802,20 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${taxaAssertividade}%`;
 
-                // Recarrega o gráfico ApexCharts em tempo real
+                // Força o ApexCharts a renderizar a montanha neon baseada no array do Supabase
                 ApexCharts.exec('chart-neon', 'updateOptions', {
                     xaxis: { categories: temposLabels },
-                    colors: [liquidoAcumulado >= 0 ? '#39e68d' : '#ff6b6b']
+                    colors: [wins >= losses ? '#39e68d' : '#ff6b6b']
                 });
                 ApexCharts.exec('chart-neon', 'updateSeries', [{
                     data: saldosHistoricos
                 }]);
 
             } catch (erro) {
-                console.error("Aviso: Rota local /api/trade-history aguardando compilação no Antigravity Backend.", erro);
+                console.error("Aviso de sincronização da malha de dados:", erro);
             }
         }
 
-        // --- SISTEMA INTERATIVO DE ALTERNAÇÃO DE TELAS (SIDEBAR CORRIGIDA) ---
         function alternarSecao(idSecaoAlvo) {
             document.querySelectorAll('.content-section').forEach(secao => secao.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -859,7 +828,6 @@
             }
         }
 
-        // --- GERENCIAMENTO DE PERFIL: COMPONENTE DE AVATAR DINÂMICO ---
         function processarTrocaAvatar(event) {
             const arquivo = event.target.files[0];
             if (arquivo) {
@@ -875,15 +843,14 @@
             const confirmaSenha = document.getElementById("input-confirm-password").value;
 
             if (novaSenha && novaSenha !== confirmaSenha) {
-                alert("Erro: O campo de confirmação não confere com a nova senha digitada.");
+                alert("Erro: Confirmação de senha incorreta.");
                 return;
             }
 
             document.getElementById("sidebar-username").innerText = novoNome;
-            alert("Sucesso: Dados cadastrais alterados e sincronizados com a segurança da VPS!");
+            alert("Sucesso: Informações atualizadas!");
         }
 
-        // --- COMPONENTE ALTERNADOR DE TEMAS (DARK / CLEAN) ---
         function toggleTemaVisual() {
             const corpoDoc = document.body;
             const txtTema = document.getElementById("theme-text");
@@ -900,7 +867,7 @@
             }
         }
 
-        // --- CONEXÃO DO BUILDER COM O WEBSOCKET DA DERIV ---
+        // --- CONEXÃO REAL-TIME WEBSOCKET DA DERIV COMMITTED ---
         const socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
         socket.onopen = function () {
             const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
@@ -916,12 +883,10 @@
             }
         };
 
-        // LOOP DE INICIALIZAÇÃO
         window.onload = () => {
             inicializarGraficoVazio();
             buscarDadosDoSupabase();
-            // Polling de atualização de dados a cada 30 segundos
-            setInterval(buscarDadosDoSupabase, 30000);
+            setInterval(buscarDadosDoSupabase, 30000); // Polling automático a cada 30 segundos
         };
     </script>
 </body>
