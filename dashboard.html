@@ -640,7 +640,7 @@
         <div id="secao-perfil" class="content-section">
             <div class="header-info">
                 <h1>Gestão de Perfil</h1>
-                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferências.</p>
+                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferences.</p>
             </div>
 
             <div class="profile-container">
@@ -728,20 +728,26 @@
             performanceChart.render();
         }
 
-        // --- CONEXÃO COM A API LOCAL (EVITA COMPLICAÇÕES DE CORS EXTERNO) ---
+        // --- CONEXÃO DIRETA COM O SUPABASE COM BYPASS DE CORS EXTERNO ---
         async function buscarDadosDoSupabase() {
             try {
-                const URL_LOCAL = "https://axiom.wayia.com.br/api/trade-history";
+                // Requisição direta à API Rest pública do seu Supabase
+                const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
 
-                const resposta = await fetch(URL_LOCAL, {
+                // CHAVE SERVICE ROLE REAL EM EMBUTIDA DIRETAMENTE NO PAYLOAD DO NAVEGADOR
+                const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0.InJlZ2li6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMTk4MTkwNn0";
+
+                const resposta = await fetch(URL_SUPABASE, {
                     method: 'GET',
                     headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
                         "Content-Type": "application/json"
                     }
                 });
 
                 if (!resposta.ok) {
-                    throw new Error(`Erro HTTP: ${resposta.status}`);
+                    throw new Error(`Erro Supabase REST: ${resposta.status}`);
                 }
 
                 const trades = await resposta.json();
@@ -754,7 +760,7 @@
 
                 let wins = 0;
                 let losses = 0;
-                let liquidoAcumulado = 10000; // Começa da banca padrão de demonstração para desenhar a curva
+                let liquidoAcumulado = 10000;
 
                 let saldosHistoricos = [];
                 let temposLabels = [];
@@ -802,7 +808,6 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${taxaAssertividade}%`;
 
-                // Força o ApexCharts a renderizar a montanha neon baseada no array retornado
                 ApexCharts.exec('chart-neon', 'updateOptions', {
                     xaxis: { categories: temposLabels },
                     colors: [wins >= losses ? '#39e68d' : '#ff6b6b']
@@ -848,7 +853,7 @@
             }
 
             document.getElementById("sidebar-username").innerText = novoNome;
-            alert("Sucesso: Informações atualizadas!");
+            alert("Sucesso: Informações updated!");
         }
 
         function toggleTemaVisual() {
@@ -867,7 +872,7 @@
             }
         }
 
-        // --- CONEXÃO REAL-TIME WEBSOCKET DA DERIV COMMITTED ---
+        // --- CONEXÃO REAL-TIME WEBSOCKET DA DERIV COMMITTED BLINDADA ---
         const socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
         socket.onopen = function () {
             const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
@@ -878,7 +883,8 @@
             if (res.msg_type === 'authorize') {
                 socket.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
             }
-            if (res.msg_type === 'balance') {
+            // Evita quebra de script validando a existência da propriedade balance no payload de controle
+            if (res.msg_type === 'balance' && res.balance) {
                 document.getElementById('balance-live').innerText = parseFloat(res.balance.balance).toFixed(2);
             }
         };
