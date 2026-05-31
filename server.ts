@@ -1,27 +1,54 @@
-// --- 📊 ENDPOINT DE HISTÓRICO PARA O DASHBOARD (CORRIGIDO) ---
-app.get("/api/trade-history", async (req, res) => {
-  console.log("📊 Dashboard solicitou o histórico de trades do Supabase!");
+import express from "express";
+import { createServer as createViteServer } from "vite";
+import axios from "axios";
+import cors from "cors";
 
-  const SUPABASE_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
-  const SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjMxNzAyMSwiZXhwIjoyMDg3ODkzMDIxfQ.61am9-3Am8PhNx2XXnLrr20vBIELj6hPo7tDLXT0DhQ";
+async function startServer() {
+  const app = express();
+  const PORT = 3001;
 
-  try {
-    const respostaSupabase = await axiom.get(SUPABASE_URL, {
-      headers: {
-        "apikey": SERVICE_ROLE_KEY,
-        "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
-        "Content-Type": "application/json" // 🟢 Corrigido de "application/json/icon" para o padrão
-      },
-      timeout: 10000
-    });
+  app.use(express.json());
+  app.use(cors());
 
-    // Libera explicitamente as permissões de leitura para o navegador ler os dados sem travar no CORS
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Content-Type", "application/json");
+  // 1. SEU PROXY DA EVOLUTION API
+  app.post("/api/evo-proxy-v2", async (req, res) => {
+    // ... seu código do proxy mantido intacto ...
+  });
 
-    return res.status(200).json(respostaSupabase.data);
-  } catch (error: any) {
-    console.error("❌ Erro ao buscar dados do Supabase no Backend:", error.message);
-    return res.status(500).json({ error: "Falha na ponte Antigravity -> Supabase" });
-  }
-});
+  // 2. ENDPOINT DE HISTÓRICO (Declarado estritamente antes do middleware do Vite)
+  app.get("/api/trade-history", async (req, res) => {
+    console.log("📊 Requisição recebida com sucesso na rota interna!");
+    const SUPABASE_URL = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
+    const SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InlseXZlX3JvbGUiLCJpYXQiOjE3MzE5ODE5MDZ9...";
+
+    try {
+      const respostaSupabase = await axios.get(SUPABASE_URL, {
+        headers: {
+          "apikey": SERVICE_ROLE_KEY,
+          "Authorization": `Bearer ${SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 10000
+      });
+      
+      res.setHeader("Content-Type", "application/json");
+      return res.status(200).json(respostaSupabase.data);
+    } catch (error: any) {
+      console.error("❌ Erro Supabase:", error.message);
+      return res.status(500).json({ error: "Erro na conexão" });
+    }
+  });
+
+  // 3. MIDDLEWARES DO VITE (Sempre no final do arquivo, capturando o que sobra)
+  const vite = await createViteServer({
+    server: { middlewareMode: true },
+    appType: "spa"
+  });
+  app.use(vite.middlewares);
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log("✅ Servidor Maestro Axiom operando de forma integrada!");
+  });
+}
+
+startServer();
