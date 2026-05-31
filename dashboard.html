@@ -731,7 +731,7 @@
         // --- CONEXÃO COM A API LOCAL (EVITA COMPLICAÇÕES DE CORS EXTERNO) ---
         async function buscarDadosDoSupabase() {
             try {
-                const URL_LOCAL = "/api/trade-history";
+                const URL_LOCAL = "https://axiom.wayia.com.br/api/trade-history";
 
                 const resposta = await fetch(URL_LOCAL, {
                     method: 'GET',
