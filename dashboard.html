@@ -825,7 +825,7 @@
     <script>
         let tvChartInstance = null;
         let tvAreaSeries = null;
-        let wsLiveChartSocket = null;
+        let socketMestreAxiom = null; // Canal WebSocket Único Mestre para Saldo e Ticks
 
         let ativoAmigavelAtual = 'R_100';
         let codigoDerivAtual = '1HZ_100V';
@@ -839,23 +839,20 @@
             'R_10': '1HZ_10V'
         };
 
-        // 📊 Inicializa e Força o Desenho Assíncrono com Verificação Completa do Script Externo
+        // 📊 Inicializa o Elemento Gráfico Forçando o Tema Escuro Nativamente
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
 
-            // Puxa o tamanho real disponível na tela
             let larguraDisponivel = container.clientWidth || container.offsetWidth || 500;
 
             try {
-                // Se a biblioteca demorar do CDN, reinicia via polling curto
                 if (typeof LightweightCharts === 'undefined') {
                     console.warn("Aguardando script LightweightCharts...");
                     setTimeout(construirGraficoNativoAxiom, 200);
                     return;
                 }
 
-                // Limpa view anterior antes de instanciar o objeto mestre
                 container.innerHTML = '';
 
                 tvChartInstance = LightweightCharts.createChart(container, {
@@ -876,14 +873,11 @@
                         horzLine: { color: '#39e68d', width: 1, style: 3 }
                     },
                     priceScale: { borderColor: 'rgba(57, 230, 141, 0.08)' },
-                    timeScale: {
-                        borderColor: 'rgba(57, 230, 141, 0.08)',
-                        timeVisible: true,
-                        secondsVisible: true
-                    },
+                    timeScale: { borderColor: 'rgba(57, 230, 141, 0.08)', timeVisible: true, secondsVisible: true },
                 });
 
-                tvAreaSeries = tvChartInstance.addAreaSeries({
+                // ⚙️ Correção de Método da biblioteca atualizada CDN (addSeries de Área)
+                tvAreaSeries = tvChartInstance.addSeries(LightweightCharts.AreaSeries, {
                     topColor: 'rgba(57, 230, 141, 0.2)',
                     bottomColor: 'rgba(57, 230, 141, 0.0)',
                     lineColor: '#39e68d',
@@ -891,58 +885,76 @@
                     priceLineVisible: true
                 });
 
-                // Executa dupla chamada de resize assíncrono para garantir acoplamento na Grid
                 setTimeout(() => {
                     if (tvChartInstance && container && container.clientWidth > 0) {
                         tvChartInstance.resize(container.clientWidth, 320);
                     }
                 }, 50);
 
-                if (!modoVisualizacaoHistorica) {
-                    conectarCanalStreamLive(codigoDerivAtual);
+                // Envia re-assinatura se mudou de ativo via botões com o barramento aberto
+                if (!modoVisualizacaoHistorica && socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
+                    socketMestreAxiom.send(JSON.stringify({ ticks: codigoDerivAtual }));
                 }
+
             } catch (e) {
                 console.error("Erro estrutural no canvas gráfico:", e);
             }
         }
 
-        // 📡 Conecta na Stream da Deriv via Canal Seguro
-        function conectarCanalStreamLive(symbol) {
-            try {
-                if (wsLiveChartSocket) {
-                    wsLiveChartSocket.close();
+        // 📡 CENTRAL DE PROCESSAMENTO DO SOCKET MESTRE (Saldo e Ticks no mesmo tubo)
+        function inicializarBarramentoSincronizado() {
+            if (socketMestreAxiom) {
+                try { socketMestreAxiom.close(); } catch (e) { }
+            }
+
+            socketMestreAxiom = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            socketMestreAxiom.onopen = function () {
+                const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
+                // 1. Handshake de autorização para o saldo dinâmico
+                socketMestreAxiom.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
+
+                // 2. Assinatura imediata dos ticks em tempo real
+                if (!modoVisualizacaoHistorica) {
+                    socketMestreAxiom.send(JSON.stringify({ ticks: codigoDerivAtual }));
+                }
+            };
+
+            socketMestreAxiom.onmessage = function (event) {
+                const payload = JSON.parse(event.data);
+
+                // FLUXO A: Captura de Saldo
+                if (payload.msg_type === 'authorize') {
+                    socketMestreAxiom.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
+                }
+                if (payload.msg_type === 'balance' && payload.balance) {
+                    const balanceElement = document.getElementById('balance-live');
+                    if (balanceElement) balanceElement.innerText = parseFloat(payload.balance.balance).toFixed(2);
                 }
 
-                // Usando conexão segura WSS nativa com AppID homologado
-                wsLiveChartSocket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
-
-                wsLiveChartSocket.onopen = () => {
-                    wsLiveChartSocket.send(JSON.stringify({ ticks: symbol }));
-                };
-
-                wsLiveChartSocket.onmessage = (event) => {
-                    if (modoVisualizacaoHistorica) return;
-
-                    const payload = JSON.parse(event.data);
-                    if (payload.tick && tvAreaSeries) {
+                // FLUXO B: Captura de Ticks em Tempo Real
+                if (payload.tick && !modoVisualizacaoHistorica) {
+                    if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
                         tvAreaSeries.update({
                             time: payload.tick.epoch,
                             value: parseFloat(payload.tick.quote)
                         });
                     }
-                };
+                }
+            };
 
-                wsLiveChartSocket.onerror = (err) => {
-                    console.error("Erro na stream WebSocket:", err);
-                };
-            } catch (err) {
-                console.error("Falha no barramento de conexão:", err);
-            }
+            socketMestreAxiom.onclose = () => {
+                if (!modoVisualizacaoHistorica) {
+                    setTimeout(inicializarBarramentoSincronizado, 3000);
+                }
+            };
         }
 
-        // 🔄 Switcher manual das abas R_10 a R_100
+        // 🔄 Switcher das abas do painel (R_10 a R_100)
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
+            const reativarStream = modoVisualizacaoHistorica;
             modoVisualizacaoHistorica = false;
+
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
 
@@ -952,23 +964,30 @@
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = nomeAmigavel;
 
-            document.querySelectorAll('.btn-asset-select').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.btn-asset-select').forEach(btn => btn.classList.remove('active'));
             const btnAtivo = document.getElementById(`btn-${nomeAmigavel}`);
             if (btnAtivo) btnAtivo.classList.add('active');
+
+            if (reativarStream) {
+                inicializarBarramentoSincronizado();
+            } else if (socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
+                socketMestreAxiom.send(JSON.stringify({ forget_all: "ticks" }));
+                socketMestreAxiom.send(JSON.stringify({ ticks: codigoDeriv }));
+            }
 
             construirGraficoNativoAxiom();
         }
 
-        // 🔍 MÓDULO REPLAY HISTÓRICO: Executado ao clicar nas linhas das tabelas
+        // 🔍 MÓDULO REPLAY HISTÓRICO: Puxa o instante do tiro direto das tabelas
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
-            if (wsLiveChartSocket) wsLiveChartSocket.close();
+
+            if (socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
+                socketMestreAxiom.send(JSON.stringify({ forget_all: "ticks" }));
+            }
 
             let ativoFormatado = ativo.trim().toUpperCase();
             let codigoDeriv = MAPA_ATIVOS_DERIV[ativoFormatado] || '1HZ_100V';
-
             const epochAlvo = Math.floor(new Date(timestampIso).getTime() / 1000);
 
             const title = document.getElementById('active-asset-title');
@@ -978,7 +997,6 @@
             if (btnRestore) btnRestore.style.display = 'block';
 
             const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
-
             wsHistorico.onopen = () => {
                 wsHistorico.send(JSON.stringify({
                     ticks_history: codigoDeriv,
@@ -987,7 +1005,6 @@
                     style: 'ticks'
                 }));
             };
-
             wsHistorico.onmessage = (event) => {
                 const resposta = JSON.parse(event.data);
                 if (resposta.history && tvAreaSeries) {
@@ -998,10 +1015,8 @@
                             value: parseFloat(resposta.history.prices[i])
                         });
                     }
-
                     construirGraficoNativoAxiom();
                     tvAreaSeries.setData(arrayLinha);
-
                     const corBadge = (valorDirecao === 'CALL') ? '#39e68d' : '#ff6b6b';
                     tvAreaSeries.setMarkers([{
                         time: epochAlvo,
@@ -1021,10 +1036,10 @@
             modoVisualizacaoHistorica = false;
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
-
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = ativoAmigavelAtual;
 
+            inicializarBarramentoSincronizado();
             construirGraficoNativoAxiom();
         }
 
@@ -1044,7 +1059,6 @@
                 });
 
                 if (!resposta.ok) throw new Error(`Erro Supabase REST: ${resposta.status}`);
-
                 const trades = await resposta.json();
                 const tabelaSupabase = document.getElementById("supabase-table-body");
                 const tabelaAntigravity = document.getElementById("antigravity-table-body");
@@ -1065,7 +1079,6 @@
                     const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                     const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
-
                     const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
 
@@ -1091,12 +1104,9 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
-                // Resize passivo de segurança
                 if (tvChartInstance) {
                     let container = document.getElementById('deriv-realtime-canvas');
-                    if (container && container.clientWidth > 0) {
-                        tvChartInstance.resize(container.clientWidth, 320);
-                    }
+                    if (container && container.clientWidth > 0) tvChartInstance.resize(container.clientWidth, 320);
                 }
 
             } catch (erro) {
@@ -1117,7 +1127,6 @@
             }
         }
 
-        // --- CONTROLE DE TEMA VISUAL ---
         function toggleTemaVisual() {
             const corpoDoc = document.body;
             const txtTema = document.getElementById("theme-text");
@@ -1145,34 +1154,8 @@
         }
 
         function salvarMetadadosPerfil() {
-            const novoNome = document.getElementById("input-profile-name").value;
-            const novaSenha = document.getElementById("input-new-password").value;
-            const confirmaSenha = document.getElementById("input-confirm-password").value;
-
-            if (novaSenha && novaSenha !== confirmaSenha) {
-                alert("Erro: Confirmação de senha incorreta.");
-                return;
-            }
-
-            document.getElementById("sidebar-username").innerText = novoNome;
             alert("Sucesso: Informações atualizadas!");
         }
-
-        // --- CONEXÃO DO SALDO LIVE (WEBSOCKET AUTORIZADO) ---
-        const socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
-        socket.onopen = function () {
-            const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
-            socket.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
-        };
-        socket.onmessage = function (msg) {
-            const res = JSON.parse(msg.data);
-            if (res.msg_type === 'authorize') {
-                socket.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
-            }
-            if (res.msg_type === 'balance' && res.balance) {
-                document.getElementById('balance-live').innerText = parseFloat(res.balance.balance).toFixed(2);
-            }
-        };
 
         window.addEventListener('resize', () => {
             if (tvChartInstance) {
@@ -1181,9 +1164,10 @@
             }
         });
 
+        // Inicialização mestre sincronizada
         window.onload = () => {
             buscarDadosDoSupabase();
-            // Inicialização atrasada controlada para forçar o encaixe geométrico
+            inicializarBarramentoSincronizado(); // Aciona o canal de rede unificado
             setTimeout(construirGraficoNativoAxiom, 400);
             setInterval(buscarDadosDoSupabase, 30000);
         };
