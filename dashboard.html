@@ -12,7 +12,6 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- 📊 LIBS GRÁFICAS INTEGRADAS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -202,7 +201,7 @@
             }
         }
 
-        /* --- PANEL TELEMETRIA GRÁFICA CORRIGIDO --- */
+        /* --- PANEL TELEMETRIA GRÁFICA --- */
         .chart-panel {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -262,7 +261,6 @@
             color: var(--axiom-neon);
         }
 
-        /* Viewport Wrapper Blindado com CSS Cascading Inline */
         .viewport-wrapper {
             background-color: #040705 !important;
             border-radius: 12px;
@@ -661,7 +659,6 @@
             </div>
 
             <div class="workspace-grid">
-                <!-- 📡 STREAM TELEMETRIA GRÁFICA REAL-TIME BLINDADA COM STYLES INLINE ANTI-TELA BRANCA -->
                 <div class="chart-panel">
                     <div class="chart-header-controls">
                         <div class="chart-engine-title">📡 Stream Telemetria: <span id="active-asset-title">R_100</span>
@@ -683,7 +680,6 @@
                         <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarFluxoTempoReal()">
                             <i class="fas fa-sync-alt"></i> Voltar para o Tempo Real
                         </button>
-                        <!-- Forçado background escuro via CSS inline inline de altíssima prioridade -->
                         <div id="deriv-realtime-canvas"
                             style="width: 100%; height: 320px; background-color: #040705 !important; color: #6b7f75;">
                         </div>
@@ -826,7 +822,6 @@
 
     </div>
 
-    <!-- 🧠 CORE LOGIC ENGINE INTERIOR BLINDADO CONTRA CONFLITOS DE GRID -->
     <script>
         let tvChartInstance = null;
         let tvAreaSeries = null;
@@ -844,27 +839,30 @@
             'R_10': '1HZ_10V'
         };
 
-        // 📊 Inicializa o Elemento Gráfico com Configuração Nativa de Dark Theme Forçada
+        // 📊 Inicializa e Força o Desenho Assíncrono com Verificação Completa do Script Externo
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
-            container.innerHTML = ''; // Reseta renderizações anteriores
 
-            // Força o cálculo de tamanho real dinamicamente
+            // Puxa o tamanho real disponível na tela
             let larguraDisponivel = container.clientWidth || container.offsetWidth || 500;
 
             try {
+                // Se a biblioteca demorar do CDN, reinicia via polling curto
                 if (typeof LightweightCharts === 'undefined') {
-                    console.error("Biblioteca de gráficos indisponível no escopo global.");
-                    container.innerHTML = "<div style='color:#ff6b6b; padding:20px; font-weight:600;'>Aguardando Handshake com Servidor Gráfico...</div>";
+                    console.warn("Aguardando script LightweightCharts...");
+                    setTimeout(construirGraficoNativoAxiom, 200);
                     return;
                 }
+
+                // Limpa view anterior antes de instanciar o objeto mestre
+                container.innerHTML = '';
 
                 tvChartInstance = LightweightCharts.createChart(container, {
                     width: larguraDisponivel,
                     height: 320,
                     layout: {
-                        background: { type: 'vertical', color: '#040705' }, // 💡 Força o tema escuro na raiz da lib
+                        background: { type: 'vertical', color: '#040705' },
                         textColor: '#6b7f75',
                         fontSize: 11
                     },
@@ -893,9 +891,9 @@
                     priceLineVisible: true
                 });
 
-                // Força um redimensionamento assíncrono para encaixar milimetricamente na aba grid
+                // Executa dupla chamada de resize assíncrono para garantir acoplamento na Grid
                 setTimeout(() => {
-                    if (tvChartInstance && container) {
+                    if (tvChartInstance && container && container.clientWidth > 0) {
                         tvChartInstance.resize(container.clientWidth, 320);
                     }
                 }, 50);
@@ -904,17 +902,18 @@
                     conectarCanalStreamLive(codigoDerivAtual);
                 }
             } catch (e) {
-                console.error("Erro estrutural na montagem do canvas gráfico:", e);
+                console.error("Erro estrutural no canvas gráfico:", e);
             }
         }
 
-        // 📡 Conexão Sockets tempo real via WebSocket Mestre
+        // 📡 Conecta na Stream da Deriv via Canal Seguro
         function conectarCanalStreamLive(symbol) {
             try {
                 if (wsLiveChartSocket) {
                     wsLiveChartSocket.close();
                 }
 
+                // Usando conexão segura WSS nativa com AppID homologado
                 wsLiveChartSocket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
 
                 wsLiveChartSocket.onopen = () => {
@@ -932,12 +931,16 @@
                         });
                     }
                 };
+
+                wsLiveChartSocket.onerror = (err) => {
+                    console.error("Erro na stream WebSocket:", err);
+                };
             } catch (err) {
-                console.error("Erro na escuta de ticks em tempo real:", err);
+                console.error("Falha no barramento de conexão:", err);
             }
         }
 
-        // 🔄 Switcher manual dos botões superiores da telemetria
+        // 🔄 Switcher manual das abas R_10 a R_100
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
             modoVisualizacaoHistorica = false;
             const btnRestore = document.getElementById('btn-restore-live');
@@ -958,7 +961,7 @@
             construirGraficoNativoAxiom();
         }
 
-        // 🔍 MÓDULO REPLAY HISTÓRICO: Resgata as velas exatas do tiro do Supabase
+        // 🔍 MÓDULO REPLAY HISTÓRICO: Executado ao clicar nas linhas das tabelas
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
             if (wsLiveChartSocket) wsLiveChartSocket.close();
@@ -1014,7 +1017,6 @@
             };
         }
 
-        // Função corrigida sem espaço de caractere
         function restaurarFluxoTempoReal() {
             modoVisualizacaoHistorica = false;
             const btnRestore = document.getElementById('btn-restore-live');
@@ -1089,7 +1091,7 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
-                // Força o acoplamento do tamanho geométrico do gráfico caso a grid assente após as tabelas
+                // Resize passivo de segurança
                 if (tvChartInstance) {
                     let container = document.getElementById('deriv-realtime-canvas');
                     if (container && container.clientWidth > 0) {
@@ -1181,7 +1183,8 @@
 
         window.onload = () => {
             buscarDadosDoSupabase();
-            setTimeout(construirGraficoNativoAxiom, 300); // Handshake assíncrono para estabilizar a grid
+            // Inicialização atrasada controlada para forçar o encaixe geométrico
+            setTimeout(construirGraficoNativoAxiom, 400);
             setInterval(buscarDadosDoSupabase, 30000);
         };
     </script>
