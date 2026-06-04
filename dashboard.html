@@ -12,7 +12,6 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- 📊 LIBS GRÁFICAS INTEGRADAS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -268,6 +267,7 @@
             border: 1px solid var(--border-color);
             overflow: hidden;
             position: relative;
+            min-height: 320px;
         }
 
         .btn-reset-realtime {
@@ -429,7 +429,7 @@
         }
 
         tr.clickable-row:hover {
-            background: rgba(57, 230, 141, 0.04) !important;
+            background: rgba(57, 230, 141, 0.06) !important;
         }
 
         td {
@@ -659,7 +659,6 @@
             </div>
 
             <div class="workspace-grid">
-                <!-- 📡 STREAM TELEMETRIA GRÁFICA REAL-TIME -->
                 <div class="chart-panel">
                     <div class="chart-header-controls">
                         <div class="chart-engine-title">📡 Stream Telemetria: <span id="active-asset-title">R_100</span>
@@ -821,7 +820,6 @@
 
     </div>
 
-    <!-- 🧠 CORE LOGIC ENGINE (JAVASCRIPT UNIFICADO) -->
     <script>
         let tvChartInstance;
         let tvAreaSeries;
@@ -839,15 +837,18 @@
             'R_10': '1HZ_10V'
         };
 
-        // 📊 Inicializa o Elemento Gráfico Premium Lightweight Charts
+        // 📊 Inicializa o Elemento Gráfico com Correção de Tamanho Inicial Dinâmico
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
-            container.innerHTML = ''; // Reseta viewport anterior
+            container.innerHTML = ''; // Limpa view anterior
+
+            // Força a leitura do tamanho real do container na Grid
+            let larguraDisponivel = container.clientWidth || container.offsetWidth || 500;
 
             try {
                 tvChartInstance = LightweightCharts.createChart(container, {
-                    width: container.clientWidth,
+                    width: larguraDisponivel,
                     height: 320,
                     layout: {
                         backgroundColor: '#040705',
@@ -879,6 +880,13 @@
                     priceLineVisible: true
                 });
 
+                // Executa um resize de segurança imediato após a criação
+                setTimeout(() => {
+                    if (tvChartInstance && container) {
+                        tvChartInstance.resize(container.clientWidth, 320);
+                    }
+                }, 50);
+
                 if (!modoVisualizacaoHistorica) {
                     conectarCanalStreamLive(codigoDerivAtual);
                 }
@@ -887,7 +895,7 @@
             }
         }
 
-        // 📡 Abre Conexão de Sockets em tempo real
+        // 📡 Conexão Sockets tempo real
         function conectarCanalStreamLive(symbol) {
             if (wsLiveChartSocket) {
                 wsLiveChartSocket.close();
@@ -930,7 +938,7 @@
             construirGraficoNativoAxiom();
         }
 
-        // 🔍 MÓDULO REPLAY HISTÓRICO: Puxa o momento do clique no Supabase
+        // 🔍 MÓDULO REPLAY HISTÓRICO: Executado ao clicar nas linhas das tabelas
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
             if (wsLiveChartSocket) wsLiveChartSocket.close();
@@ -983,6 +991,7 @@
             };
         }
 
+        // Correção de sintaxe: Removido o espaço do nome da função
         function restaurarFluxoTempoReal() {
             modoVisualizacaoHistorica = false;
             document.getElementById('btn-restore-live').style.display = 'none';
@@ -990,7 +999,7 @@
             construirGraficoNativoAxiom();
         }
 
-        // --- CONEXÃO DIRETA COM O SUPABASE COM BYPASS DE CORS ---
+        // --- CONEXÃO DIRETA COM O SUPABASE COM RE-ARRANJO DE TAMANHO GRÁFICO DE SEGURANÇA ---
         async function buscarDadosDoSupabase() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
@@ -1031,7 +1040,6 @@
                     const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
 
-                    // Adiciona as linhas dinamicamente injetando a escuta de clique do replay
                     tabelaSupabase.innerHTML += `
                         <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
                             <td><strong>${ativoLimpo}</strong></td>
@@ -1057,6 +1065,14 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${taxaAssertividade}%`;
 
+                // Força o ajuste do tamanho do gráfico caso a grid tenha se assentado depois dos dados
+                if (tvChartInstance) {
+                    let container = document.getElementById('deriv-realtime-canvas');
+                    if (container && container.clientWidth > 0) {
+                        tvChartInstance.resize(container.clientWidth, 320);
+                    }
+                }
+
             } catch (erro) {
                 console.error("Aviso de sincronização da malha de dados:", erro);
             }
@@ -1071,7 +1087,7 @@
 
             if (idSecaoAlvo === 'secao-dashboard') {
                 buscarDadosDoSupabase();
-                setTimeout(construirGraficoNativoAxiom, 100);
+                setTimeout(construirGraficoNativoAxiom, 150);
             }
         }
 
@@ -1134,13 +1150,16 @@
 
         window.addEventListener('resize', () => {
             if (tvChartInstance) {
-                tvChartInstance.resize(document.getElementById('deriv-realtime-canvas').clientWidth, 320);
+                let container = document.getElementById('deriv-realtime-canvas');
+                if (container) {
+                    tvChartInstance.resize(container.clientWidth, 320);
+                }
             }
         });
 
         window.onload = () => {
-            construirGraficoNativoAxiom();
             buscarDadosDoSupabase();
+            setTimeout(construirGraficoNativoAxiom, 200); // Dá um respiro pequeno para o HTML se assentar antes do gráfico se desenhar
             setInterval(buscarDadosDoSupabase, 30000);
         };
     </script>
