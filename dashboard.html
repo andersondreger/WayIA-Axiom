@@ -11,7 +11,10 @@
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
     <style>
         :root {
             --bg-base: #060907;
@@ -185,7 +188,7 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* --- GRID PRINCIPAL --- */
+        /* --- WORKSPACE GRID AVANÇADO --- */
         .workspace-grid {
             display: grid;
             grid-template-columns: 1.8fr 1.2fr;
@@ -198,11 +201,90 @@
             }
         }
 
+        /* --- TELEMETRIA GRAPH COMPONENT --- */
         .chart-panel {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .chart-header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-engine-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-engine-title span {
+            color: var(--axiom-neon);
+        }
+
+        .asset-switcher-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-asset-select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .btn-asset-select:hover {
+            border-color: var(--axiom-neon);
+            color: var(--text-primary);
+        }
+
+        .btn-asset-select.active {
+            background: var(--axiom-neon-glow);
+            border-color: var(--axiom-neon);
+            color: var(--axiom-neon);
+        }
+
+        .viewport-wrapper {
+            background: #040705;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Botão para resetar visualização histórica */
+        .btn-reset-realtime {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            background: #ff7a00;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
         }
 
         .modules-panel {
@@ -339,6 +421,15 @@
             font-weight: 500;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(57, 230, 141, 0.05);
+        }
+
+        tr.clickable-row {
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        tr.clickable-row:hover {
+            background: rgba(57, 230, 141, 0.03);
         }
 
         td {
@@ -569,7 +660,28 @@
 
             <div class="workspace-grid">
                 <div class="chart-panel">
-                    <div id="performance-chart"></div>
+                    <div class="chart-header-controls">
+                        <div class="chart-engine-title">📡 Stream Telemetria: <span id="active-asset-title">R_100</span>
+                        </div>
+                        <div class="asset-switcher-group">
+                            <button id="btn-R_100" class="btn-asset-select active"
+                                onclick="mudarAtivoGrafico('R_100', '1HZ_100V')">R_100</button>
+                            <button id="btn-R_75" class="btn-asset-select"
+                                onclick="mudarAtivoGrafico('R_75', '1HZ_75V')">R_75</button>
+                            <button id="btn-R_50" class="btn-asset-select"
+                                onclick="mudarAtivoGrafico('R_50', '1HZ_50V')">R_50</button>
+                            <button id="btn-R_25" class="btn-asset-select"
+                                onclick="mudarAtivoGrafico('R_25', '1HZ_25V')">R_25</button>
+                            <button id="btn-R_10" class="btn-asset-select"
+                                onclick="mudarAtivoGrafico('R_10', '1HZ_10V')">R_10</button>
+                        </div>
+                    </div>
+                    <div class="viewport-wrapper">
+                        <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarFluxoTempoReal()">
+                            <i class="fas fa-sync-alt"></i> Voltar para o Tempo Real
+                        </button>
+                        <div id="deriv-realtime-canvas" style="width: 100%; height: 320px;"></div>
+                    </div>
                 </div>
 
                 <div class="modules-panel">
@@ -709,32 +821,189 @@
     </div>
 
     <script>
-        let performanceChart;
+        // --- INSTÂNCIAS GLOBAIS DE TELEMETRIA ---
+        let tvChartInstance;
+        let tvAreaSeries;
+        let wsLiveChartSocket;
 
-        function inicializarGraficoVazio() {
-            var options = {
-                series: [{ name: 'Equidade da Conta ($)', data: [] }],
-                chart: { id: 'chart-neon', type: 'area', height: 310, toolbar: { show: false }, background: 'transparent' },
-                colors: ['#39e68d'],
-                stroke: { curve: 'smooth', width: 3 },
-                dataLabels: { enabled: false },
-                grid: { borderColor: 'rgba(57, 230, 141, 0.03)' },
-                xaxis: { categories: [], labels: { style: { colors: '#6b7f75', fontFamily: 'JetBrains Mono' } }, axisBorder: { show: false } },
-                yaxis: { labels: { style: { colors: '#6b7f75', fontFamily: 'JetBrains Mono' } } },
-                fill: { type: 'gradient', gradient: { opacityFrom: 0.15, opacityTo: 0 } },
-                tooltip: { theme: 'dark' }
+        let ativoAmigavelAtual = 'R_100';
+        let codigoDerivAtual = '1HZ_100V';
+        let modoVisualizacaoHistorica = false;
+
+        // Mapeamento Estrito dos Ativos Sintéticos da Grade Axiom
+        const MAPA_ATIVOS_DERIV = {
+            'R_100': '1HZ_100V',
+            'R_75': '1HZ_75V',
+            'R_50': '1HZ_50V',
+            'R_25': '1HZ_25V',
+            'R_10': '1HZ_10V'
+        };
+
+        // Re-mapeamento invertido para consultas assíncronas do Supabase
+        const MAPA_REVERSO_DERIV = {
+            '1HZ_100V': 'R_100',
+            '1HZ_75V': 'R_75',
+            '1HZ_50V': 'R_50',
+            '1HZ_24V': 'R_25', // Tratamento de variações de string do log antigo
+            '1HZ_25V': 'R_25',
+            '1HZ_10V': 'R_10'
+        };
+
+        // 📊 Inicializa o Elemento Gráfico de Linha Contínua Premium
+        function construirGraficoNativoAxiom() {
+            const container = document.getElementById('deriv-realtime-canvas');
+            container.innerHTML = ''; // Limpa view anterior
+
+            tvChartInstance = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: 320,
+                layout: {
+                    backgroundColor: '#040705',
+                    textColor: '#6b7f75',
+                    fontSize: 11
+                },
+                grid: {
+                    vertLines: { color: 'rgba(57, 230, 141, 0.02)' },
+                    horzLines: { color: 'rgba(57, 230, 141, 0.02)' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { color: '#39e68d', width: 1, style: 3 },
+                    horzLine: { color: '#39e68d', width: 1, style: 3 }
+                },
+                priceScale: { borderColor: 'rgba(57, 230, 141, 0.08)' },
+                timeScale: {
+                    borderColor: 'rgba(57, 230, 141, 0.08)',
+                    timeVisible: true,
+                    secondsVisible: true
+                },
+            });
+
+            tvAreaSeries = tvChartInstance.addAreaSeries({
+                topColor: 'rgba(57, 230, 141, 0.2)',
+                bottomColor: 'rgba(57, 230, 141, 0.0)',
+                lineColor: '#39e68d',
+                lineWidth: 2,
+                priceLineVisible: true
+            });
+
+            if (!modoVisualizacaoHistorica) {
+                conectarCanalStreamLive(codigoDerivAtual);
+            }
+        }
+
+        // 📡 Abre Conexão de Sockets direto no Barramento da Deriv
+        function conectarCanalStreamLive(symbol) {
+            if (wsLiveChartSocket) {
+                wsLiveChartSocket.close();
+            }
+
+            wsLiveChartSocket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            wsLiveChartSocket.onopen = () => {
+                wsLiveChartSocket.send(JSON.stringify({ ticks: symbol }));
             };
-            performanceChart = new ApexCharts(document.querySelector("#performance-chart"), options);
-            performanceChart.render();
+
+            wsLiveChartSocket.onmessage = (event) => {
+                if (modoVisualizacaoHistorica) return; // Trava de segurança para impedir sobreposição
+
+                const payload = JSON.parse(event.data);
+                if (payload.tick) {
+                    tvAreaSeries.update({
+                        time: payload.tick.epoch,
+                        value: parseFloat(payload.tick.quote)
+                    });
+                }
+            };
+        }
+
+        // 🔄 Controla o Switcher dos botões no topo do gráfico
+        function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
+            modoVisualizacaoHistorica = false;
+            document.getElementById('btn-restore-live').style.display = 'none';
+
+            ativoAmigavelAtual = nomeAmigavel;
+            codigoDerivAtual = codigoDeriv;
+
+            document.getElementById('active-asset-title').innerHTML = nomeAmigavel;
+
+            document.querySelectorAll('.btn-asset-select').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-${nomeAmigavel}`).classList.add('active');
+
+            construirGraficoNativoAxiom();
+        }
+
+        // 🔍 MÓDULO AUDITORIA HISTÓRICA: Recupera os dados exatos do momento do trade
+        function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
+            modoVisualizacaoHistorica = true;
+            if (wsLiveChartSocket) wsLiveChartSocket.close();
+
+            // Formata o nome do ativo para o padrão do WebSocket
+            let ativoFormatado = ativo.trim().toUpperCase();
+            let codigoDeriv = MAPA_ATIVOS_DERIV[ativoFormatado] || '1HZ_100V';
+
+            // Converte a string ISO do Supabase para Unix Timestamp Epoch
+            const epochAlvo = Math.floor(new Date(timestampIso).getTime() / 1000);
+
+            document.getElementById('active-asset-title').innerHTML = `REPLAY HISTÓRICO: ${ativoFormatado}`;
+            document.getElementById('btn-restore-live').style.display = 'block';
+
+            const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            wsHistorico.onopen = () => {
+                // Solicita a foto estática do mercado (30s antes do tiro até 90s depois)
+                wsHistorico.send(JSON.stringify({
+                    ticks_history: codigoDeriv,
+                    end: epochAlvo + 90,
+                    count: 120,
+                    style: 'ticks'
+                }));
+            };
+
+            wsHistorico.onmessage = (event) => {
+                const resposta = JSON.parse(event.data);
+                if (resposta.history) {
+                    const arrayLinha = [];
+                    for (let i = 0; i < resposta.history.times.length; i++) {
+                        arrayLinha.push({
+                            time: resposta.history.times[i],
+                            value: parseFloat(resposta.history.prices[i])
+                        });
+                    }
+
+                    construirGraficoNativoAxiom(); // Prepara um canvas zerado
+                    tvAreaSeries.setData(arrayLinha);
+
+                    // Insere a flag/mira cirúrgica na linha de preço
+                    const corBadge = (valorDirecao === 'CALL') ? '#39e68d' : '#ff6b6b';
+                    tvAreaSeries.setMarkers([{
+                        time: epochAlvo,
+                        position: 'inLine',
+                        color: corBadge,
+                        shape: 'circle',
+                        text: `TIRO ${valorDirecao}: ${precoSinal}`
+                    }]);
+
+                    tvChartInstance.timeScale().fitContent();
+                }
+                wsHistorico.close();
+            };
+        }
+
+        // 🔄 Reseta o painel trazendo a telemetria ao vivo de volta
+        function restaurarFluxoTempoReal() {
+            modoVisualizacaoHistorica = false;
+            document.getElementById('btn-restore-live').style.display = 'none';
+            document.getElementById('active-asset-title').innerHTML = ativoAmigavelAtual;
+            construirGraficoNativoAxiom();
         }
 
         // --- CONEXÃO DIRETA COM O SUPABASE COM BYPASS DE CORS EXTERNO ---
         async function buscarDadosDoSupabase() {
             try {
-                // Requisição direta à API Rest pública do seu Supabase
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
-
-                // CHAVE SERVICE ROLE REAL EM EMBUTIDA DIRETAMENTE NO PAYLOAD DO NAVEGADOR
                 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjMxNzAyMSwiZXhwIjoyMDg3ODkzMDIxfQ.61am9-3Am8PhNx2XXnLrr20vBIELj6hPo7tDLXT0DhQ";
 
                 const resposta = await fetch(URL_SUPABASE, {
@@ -746,12 +1015,9 @@
                     }
                 });
 
-                if (!resposta.ok) {
-                    throw new Error(`Erro Supabase REST: ${resposta.status}`);
-                }
+                if (!resposta.ok) throw new Error(`Erro Supabase REST: ${resposta.status}`);
 
                 const trades = await resposta.json();
-
                 const tabelaSupabase = document.getElementById("supabase-table-body");
                 const tabelaAntigravity = document.getElementById("antigravity-table-body");
 
@@ -769,7 +1035,6 @@
                 tradesCronologicos.forEach((trade) => {
                     liquidoAcumulado += trade.valor;
                     saldosHistoricos.push(parseFloat(liquidoAcumulado.toFixed(2)));
-
                     const horaMinutos = new Date(trade.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     temposLabels.push(horaMinutos);
                 });
@@ -783,18 +1048,23 @@
                     const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
 
+                    // Cálculo aproximado ou resgate do preço de entrada para alimentar a mira do replay
+                    const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
+                    const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
+
+                    // Renderiza as linhas das duas tabelas injetando a função de clique assíncrono
                     tabelaSupabase.innerHTML += `
-                        <tr>
-                            <td><strong>${trade.ativo || 'N/A'}</strong></td>
+                        <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
+                            <td><strong>${ativoLimpo}</strong></td>
                             <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
                             <td class="${classeBadge}">${prefixoSinal}${Math.abs(trade.valor).toFixed(2)}</td>
                         </tr>
                     `;
 
                     tabelaAntigravity.innerHTML += `
-                        <tr>
+                        <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
                             <td>${dataCompleta}</td>
-                            <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${trade.valor > 0 ? 'CALL' : 'PUT'}</td>
+                            <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
                             <td style="font-family:'JetBrains Mono'; font-size:12px;">${trade.adx_no_tiro ? (trade.adx_no_tiro * 0.08).toFixed(2) : '0.00'}</td>
                         </tr>
                     `;
@@ -807,14 +1077,6 @@
                 document.getElementById("meta-wins").innerText = wins;
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${taxaAssertividade}%`;
-
-                ApexCharts.exec('chart-neon', 'updateOptions', {
-                    xaxis: { categories: temposLabels },
-                    colors: [wins >= losses ? '#39e68d' : '#ff6b6b']
-                });
-                ApexCharts.exec('chart-neon', 'updateSeries', [{
-                    data: saldosHistoricos
-                }]);
 
             } catch (erro) {
                 console.error("Aviso de sincronização da malha de dados:", erro);
@@ -830,6 +1092,7 @@
 
             if (idSecaoAlvo === 'secao-dashboard') {
                 buscarDadosDoSupabase();
+                setTimeout(construirGraficoNativoAxiom, 100);
             }
         }
 
@@ -870,9 +1133,10 @@
                 txtTema.innerText = "Modo Escuro";
                 iconeTema.className = "fas fa-moon";
             }
+            setTimeout(construirGraficoNativoAxiom, 200); // Redesenha o gráfico aplicando as novas variáveis de cor CSS
         }
 
-        // --- CONEXÃO REAL-TIME WEBSOCKET DA DERIV COMMITTED BLINDADA ---
+        // --- CONEXÃO REAL-TIME SUCURSAL DO SALDO (MANTIDO INTACTO) ---
         const socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
         socket.onopen = function () {
             const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
@@ -883,16 +1147,22 @@
             if (res.msg_type === 'authorize') {
                 socket.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
             }
-            // Evita quebra de script validando a existência da propriedade balance no payload de controle
             if (res.msg_type === 'balance' && res.balance) {
                 document.getElementById('balance-live').innerText = parseFloat(res.balance.balance).toFixed(2);
             }
         };
 
+        // Redimensionamento inteligente caso o usuário mude a janela
+        window.addEventListener('resize', () => {
+            if (tvChartInstance) {
+                tvChartInstance.resize(document.getElementById('deriv-realtime-canvas').clientWidth, 320);
+            }
+        });
+
         window.onload = () => {
-            inicializarGraficoVazio();
+            construirGraficoNativoAxiom();
             buscarDadosDoSupabase();
-            setInterval(buscarDadosDoSupabase, 30000); // Polling automático a cada 30 segundos
+            setInterval(buscarDadosDoSupabase, 30000); // Sincroniza tabelas a cada 30 segundos
         };
     </script>
 </body>
