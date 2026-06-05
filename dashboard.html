@@ -822,14 +822,16 @@
 
     </div>
 
+    <!-- 🧠 CORE LOGIC ENGINE (ARQUITETURA DE BARRAMENTO UNIFICADO RECALIBRADO) -->
     <script>
         let tvChartInstance = null;
         let tvAreaSeries = null;
-        let socketMestreAxiom = null; // Canal WebSocket Único Mestre para Saldo e Ticks
+        let socketMestreAxiom = null;
 
         let ativoAmigavelAtual = 'R_100';
         let codigoDerivAtual = '1HZ_100V';
         let modoVisualizacaoHistorica = false;
+        let ultimoTimestampRenderizado = 0;
 
         const MAPA_ATIVOS_DERIV = {
             'R_100': '1HZ_100V',
@@ -839,21 +841,18 @@
             'R_10': '1HZ_10V'
         };
 
-        // 📊 Inicializa o Elemento Gráfico Forçando o Tema Escuro Nativamente
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
 
             let larguraDisponivel = container.clientWidth || container.offsetWidth || 500;
+            container.innerHTML = '';
 
             try {
                 if (typeof LightweightCharts === 'undefined') {
-                    console.warn("Aguardando script LightweightCharts...");
                     setTimeout(construirGraficoNativoAxiom, 200);
                     return;
                 }
-
-                container.innerHTML = '';
 
                 tvChartInstance = LightweightCharts.createChart(container, {
                     width: larguraDisponivel,
@@ -873,10 +872,15 @@
                         horzLine: { color: '#39e68d', width: 1, style: 3 }
                     },
                     priceScale: { borderColor: 'rgba(57, 230, 141, 0.08)' },
-                    timeScale: { borderColor: 'rgba(57, 230, 141, 0.08)', timeVisible: true, secondsVisible: true },
+                    timeScale: {
+                        borderColor: 'rgba(57, 230, 141, 0.08)',
+                        timeVisible: true,
+                        secondsVisible: true,
+                        minBarSpacing: 5
+                    },
                 });
 
-                // ⚙️ Correção de Método da biblioteca atualizada CDN (addSeries de Área)
+                // ⚙️ Correção estrutural do método AreaSeries alinhado ao novo CDN
                 tvAreaSeries = tvChartInstance.addSeries(LightweightCharts.AreaSeries, {
                     topColor: 'rgba(57, 230, 141, 0.2)',
                     bottomColor: 'rgba(57, 230, 141, 0.0)',
@@ -889,19 +893,20 @@
                     if (tvChartInstance && container && container.clientWidth > 0) {
                         tvChartInstance.resize(container.clientWidth, 320);
                     }
-                }, 50);
+                }, 100);
 
-                // Envia re-assinatura se mudou de ativo via botões com o barramento aberto
+                // Disparador de fluxo contínuo obrigatório
                 if (!modoVisualizacaoHistorica && socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
-                    socketMestreAxiom.send(JSON.stringify({ ticks: codigoDerivAtual }));
+                    socketMestreAxiom.send(JSON.stringify({
+                        ticks: codigoDerivAtual,
+                        subscribe: 1
+                    }));
                 }
-
             } catch (e) {
                 console.error("Erro estrutural no canvas gráfico:", e);
             }
         }
 
-        // 📡 CENTRAL DE PROCESSAMENTO DO SOCKET MESTRE (Saldo e Ticks no mesmo tubo)
         function inicializarBarramentoSincronizado() {
             if (socketMestreAxiom) {
                 try { socketMestreAxiom.close(); } catch (e) { }
@@ -911,19 +916,19 @@
 
             socketMestreAxiom.onopen = function () {
                 const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
-                // 1. Handshake de autorização para o saldo dinâmico
                 socketMestreAxiom.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
 
-                // 2. Assinatura imediata dos ticks em tempo real
                 if (!modoVisualizacaoHistorica) {
-                    socketMestreAxiom.send(JSON.stringify({ ticks: codigoDerivAtual }));
+                    socketMestreAxiom.send(JSON.stringify({
+                        ticks: codigoDerivAtual,
+                        subscribe: 1
+                    }));
                 }
             };
 
             socketMestreAxiom.onmessage = function (event) {
                 const payload = JSON.parse(event.data);
 
-                // FLUXO A: Captura de Saldo
                 if (payload.msg_type === 'authorize') {
                     socketMestreAxiom.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
                 }
@@ -932,13 +937,17 @@
                     if (balanceElement) balanceElement.innerText = parseFloat(payload.balance.balance).toFixed(2);
                 }
 
-                // FLUXO B: Captura de Ticks em Tempo Real
                 if (payload.tick && !modoVisualizacaoHistorica) {
                     if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
-                        tvAreaSeries.update({
-                            time: payload.tick.epoch,
-                            value: parseFloat(payload.tick.quote)
-                        });
+                        const tempoEpoch = parseInt(payload.tick.epoch);
+
+                        if (tempoEpoch > ultimoTimestampRenderizado) {
+                            tvAreaSeries.update({
+                                time: tempoEpoch,
+                                value: parseFloat(payload.tick.quote)
+                            });
+                            ultimoTimestampRenderizado = tempoEpoch;
+                        }
                     }
                 }
             };
@@ -950,10 +959,10 @@
             };
         }
 
-        // 🔄 Switcher das abas do painel (R_10 a R_100)
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
             const reativarStream = modoVisualizacaoHistorica;
             modoVisualizacaoHistorica = false;
+            ultimoTimestampRenderizado = 0;
 
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
@@ -972,13 +981,15 @@
                 inicializarBarramentoSincronizado();
             } else if (socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
                 socketMestreAxiom.send(JSON.stringify({ forget_all: "ticks" }));
-                socketMestreAxiom.send(JSON.stringify({ ticks: codigoDeriv }));
+                socketMestreAxiom.send(JSON.stringify({
+                    ticks: codigoDeriv,
+                    subscribe: 1
+                }));
             }
 
             construirGraficoNativoAxiom();
         }
 
-        // 🔍 MÓDULO REPLAY HISTÓRICO: Puxa o instante do tiro direto das tabelas
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
 
@@ -1034,6 +1045,7 @@
 
         function restaurarFluxoTempoReal() {
             modoVisualizacaoHistorica = false;
+            ultimoTimestampRenderizado = 0;
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
             const title = document.getElementById('active-asset-title');
@@ -1043,7 +1055,6 @@
             construirGraficoNativoAxiom();
         }
 
-        // --- CONEXÃO REST DE ALTA FIDELIDADE COM O SUPABASE ---
         async function buscarDadosDoSupabase() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
@@ -1108,7 +1119,6 @@
                     let container = document.getElementById('deriv-realtime-canvas');
                     if (container && container.clientWidth > 0) tvChartInstance.resize(container.clientWidth, 320);
                 }
-
             } catch (erro) {
                 console.error("Aviso de sincronização da malha de dados:", erro);
             }
@@ -1154,7 +1164,7 @@
         }
 
         function salvarMetadadosPerfil() {
-            alert("Sucesso: Informações atualizadas!");
+            alert("Sucesso: Informações updated!");
         }
 
         window.addEventListener('resize', () => {
@@ -1164,10 +1174,9 @@
             }
         });
 
-        // Inicialização mestre sincronizada
         window.onload = () => {
             buscarDadosDoSupabase();
-            inicializarBarramentoSincronizado(); // Aciona o canal de rede unificado
+            inicializarBarramentoSincronizado();
             setTimeout(construirGraficoNativoAxiom, 400);
             setInterval(buscarDadosDoSupabase, 30000);
         };
