@@ -640,7 +640,7 @@
             </div>
 
             <div class="metrics-row">
-                <div class="metric-mini-card">
+                <div class="metrics-mini-card">
                     <p>Disparos Totais</p>
                     <h3 id="meta-total">0</h3>
                 </div>
@@ -822,11 +822,11 @@
 
     </div>
 
-    <!-- 🧠 CORE LOGIC ENGINE (ARQUITETURA DE BARRAMENTO UNIFICADO RECALIBRADO) -->
     <script>
         let tvChartInstance = null;
         let tvAreaSeries = null;
-        let socketMestreAxiom = null;
+        let socketSaldoPrivado = null;  // Canal A: Cuida estritamente da Banca (Com Autorização)
+        let socketTicksPublico = null;  // Canal B: Cuida estritamente dos Ticks (Livre de Rejeição de ID)
 
         let ativoAmigavelAtual = 'R_100';
         let codigoDerivAtual = '1HZ_100V';
@@ -841,6 +841,7 @@
             'R_10': '1HZ_10V'
         };
 
+        // 📊 Inicializa o Objeto Gráfico com Layout Escuro Consolidado
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
@@ -876,11 +877,10 @@
                         borderColor: 'rgba(57, 230, 141, 0.08)',
                         timeVisible: true,
                         secondsVisible: true,
-                        minBarSpacing: 5
+                        minBarSpacing: 6
                     },
                 });
 
-                // ⚙️ Correção estrutural do método AreaSeries alinhado ao novo CDN
                 tvAreaSeries = tvChartInstance.addSeries(LightweightCharts.AreaSeries, {
                     topColor: 'rgba(57, 230, 141, 0.2)',
                     bottomColor: 'rgba(57, 230, 141, 0.0)',
@@ -895,9 +895,9 @@
                     }
                 }, 100);
 
-                // Disparador de fluxo contínuo obrigatório
-                if (!modoVisualizacaoHistorica && socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
-                    socketMestreAxiom.send(JSON.stringify({
+                // Dispara a subscrição contínua no canal limpo de ticks públicos
+                if (!modoVisualizacaoHistorica && socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
+                    socketTicksPublico.send(JSON.stringify({
                         ticks: codigoDerivAtual,
                         subscribe: 1
                     }));
@@ -907,40 +907,61 @@
             }
         }
 
-        function inicializarBarramentoSincronizado() {
-            if (socketMestreAxiom) {
-                try { socketMestreAxiom.close(); } catch (e) { }
+        // 📡 CANAL A: Abre o barramento exclusivo para o Saldo (Autorizado com o seu Token)
+        function inicializarCanalSaldoPrivado() {
+            if (socketSaldoPrivado) {
+                try { socketSaldoPrivado.close(); } catch (e) { }
             }
 
-            socketMestreAxiom = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+            socketSaldoPrivado = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
 
-            socketMestreAxiom.onopen = function () {
+            socketSaldoPrivado.onopen = function () {
                 const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
-                socketMestreAxiom.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
+                socketSaldoPrivado.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
+            };
 
+            socketSaldoPrivado.onmessage = function (event) {
+                const payload = JSON.parse(event.data);
+                if (payload.msg_type === 'authorize') {
+                    socketSaldoPrivado.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
+                }
+                if (payload.msg_type === 'balance' && payload.balance) {
+                    const balanceElement = document.getElementById('balance-live');
+                    if (balanceElement) balanceElement.innerText = parseFloat(payload.balance.balance).toFixed(2);
+                }
+            };
+
+            socketSaldoPrivado.onclose = () => {
+                setTimeout(inicializarCanalSaldoPrivado, 4000);
+            };
+        }
+
+        // 📡 CANAL B: Abre o barramento público e livre focado APENAS em puxar os ticks do gráfico
+        function inicializarCanalTicksPublico() {
+            if (socketTicksPublico) {
+                try { socketTicksPublico.close(); } catch (e) { }
+            }
+
+            // Usando AppID mestre genérico para streams públicas para não dar conflito na Deriv
+            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            socketTicksPublico.onopen = function () {
                 if (!modoVisualizacaoHistorica) {
-                    socketMestreAxiom.send(JSON.stringify({
+                    socketTicksPublico.send(JSON.stringify({
                         ticks: codigoDerivAtual,
                         subscribe: 1
                     }));
                 }
             };
 
-            socketMestreAxiom.onmessage = function (event) {
+            socketTicksPublico.onmessage = function (event) {
                 const payload = JSON.parse(event.data);
-
-                if (payload.msg_type === 'authorize') {
-                    socketMestreAxiom.send(JSON.stringify({ "balance": 1, "subscribe": 1 }));
-                }
-                if (payload.msg_type === 'balance' && payload.balance) {
-                    const balanceElement = document.getElementById('balance-live');
-                    if (balanceElement) balanceElement.innerText = parseFloat(payload.balance.balance).toFixed(2);
-                }
 
                 if (payload.tick && !modoVisualizacaoHistorica) {
                     if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
                         const tempoEpoch = parseInt(payload.tick.epoch);
 
+                        // Trava matemática de segurança: impede travamento por ticks repetidos
                         if (tempoEpoch > ultimoTimestampRenderizado) {
                             tvAreaSeries.update({
                                 time: tempoEpoch,
@@ -952,13 +973,14 @@
                 }
             };
 
-            socketMestreAxiom.onclose = () => {
+            socketTicksPublico.onclose = () => {
                 if (!modoVisualizacaoHistorica) {
-                    setTimeout(inicializarBarramentoSincronizado, 3000);
+                    setTimeout(inicializarCanalTicksPublico, 3000);
                 }
             };
         }
 
+        // 🔄 Alternador das Abas de Ativos (R_10 a R_100)
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
             const reativarStream = modoVisualizacaoHistorica;
             modoVisualizacaoHistorica = false;
@@ -978,10 +1000,11 @@
             if (btnAtivo) btnAtivo.classList.add('active');
 
             if (reativarStream) {
-                inicializarBarramentoSincronizado();
-            } else if (socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
-                socketMestreAxiom.send(JSON.stringify({ forget_all: "ticks" }));
-                socketMestreAxiom.send(JSON.stringify({
+                inicializarCanalTicksPublico();
+            } else if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
+                // Limpa canal e abre a nova assinatura limpa
+                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
+                socketTicksPublico.send(JSON.stringify({
                     ticks: codigoDeriv,
                     subscribe: 1
                 }));
@@ -990,11 +1013,12 @@
             construirGraficoNativoAxiom();
         }
 
+        // 🔍 MÓDULO REPLAY HISTÓRICO
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
 
-            if (socketMestreAxiom && socketMestreAxiom.readyState === WebSocket.OPEN) {
-                socketMestreAxiom.send(JSON.stringify({ forget_all: "ticks" }));
+            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
+                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
             }
 
             let ativoFormatado = ativo.trim().toUpperCase();
@@ -1051,10 +1075,11 @@
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = ativoAmigavelAtual;
 
-            inicializarBarramentoSincronizado();
+            inicializarCanalTicksPublico();
             construirGraficoNativoAxiom();
         }
 
+        // --- CONEXÃO REST COM O SUPABASE ---
         async function buscarDadosDoSupabase() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
@@ -1164,7 +1189,7 @@
         }
 
         function salvarMetadadosPerfil() {
-            alert("Sucesso: Informações updated!");
+            alert("Sucesso: Informações atualizadas!");
         }
 
         window.addEventListener('resize', () => {
@@ -1174,9 +1199,11 @@
             }
         });
 
+        // Inicialização mestre com isolamento assíncrono de canais
         window.onload = () => {
             buscarDadosDoSupabase();
-            inicializarBarramentoSincronizado();
+            inicializarCanalSaldoPrivado();  // Abre Barramento A
+            inicializarCanalTicksPublico();  // Abre Barramento B
             setTimeout(construirGraficoNativoAxiom, 400);
             setInterval(buscarDadosDoSupabase, 30000);
         };
