@@ -47,7 +47,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- SIDEBAR --- */
         .sidebar {
             width: 260px;
             background-color: #040605;
@@ -109,7 +108,6 @@
             box-shadow: inset 0 0 0 1px var(--border-color);
         }
 
-        /* --- MAIN CONTENT WRAPPER --- */
         .main-wrapper {
             flex-grow: 1;
             padding: 40px;
@@ -161,7 +159,6 @@
             color: var(--axiom-neon);
         }
 
-        /* --- METRICAS CARD ROW --- */
         .metrics-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -188,7 +185,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* --- GRID DE TRABALHO --- */
         .workspace-grid {
             display: grid;
             grid-template-columns: 1.8fr 1.2fr;
@@ -201,7 +197,6 @@
             }
         }
 
-        /* --- PANEL TELEMETRIA GRÁFICA --- */
         .chart-panel {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -335,7 +330,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -382,7 +376,6 @@
             background-color: var(--bg-base);
         }
 
-        /* --- DATA TABLES ROW --- */
         .tables-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -449,7 +442,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* --- SEÇÕES INTERNAS DO APP --- */
         .content-section {
             display: none;
         }
@@ -460,7 +452,6 @@
             gap: 30px;
         }
 
-        /* Componentes de Perfil */
         .profile-container {
             display: grid;
             grid-template-columns: 1fr 2fr;
@@ -888,13 +879,12 @@
                     priceLineVisible: true
                 });
 
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     if (tvChartInstance && container && container.clientWidth > 0) {
                         tvChartInstance.resize(container.clientWidth, 320);
                     }
-                }, 100);
+                });
 
-                // Força assinatura inicial ao acoplar o canvas
                 if (!modoVisualizacaoHistorica && socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
                     socketTicksPublico.send(JSON.stringify({
                         ticks: codigoDerivAtual,
@@ -906,7 +896,6 @@
             }
         }
 
-        // 📡 CANAL A: Abre o barramento exclusivo para o Saldo (Autorizado com o seu Token)
         function inicializarCanalSaldoPrivado() {
             if (socketSaldoPrivado) {
                 try { socketSaldoPrivado.close(); } catch (e) { }
@@ -935,12 +924,12 @@
             };
         }
 
-        // 📡 CANAL B: Ticks Públicos (Utilizando o app_id universal 1111 para quebrar o bloqueio de concorrência)
         function inicializarCanalTicksPublico() {
             if (socketTicksPublico) {
                 try { socketTicksPublico.close(); } catch (e) { }
             }
 
+            // 🛠️ FIX SEGUNDO ESPECIFICAÇÃO DA DERIV: app_id público universal 1111 para isolar a concorrência da VPS
             socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1111');
 
             socketTicksPublico.onopen = function () {
@@ -957,14 +946,15 @@
 
                 if (payload.tick && !modoVisualizacaoHistorica) {
                     if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
-                        const tempoEpoch = parseInt(payload.tick.epoch);
+                        // 🛠️ FIX DA DOCUMENTAÇÃO: Multiplica por 1000 transformando o epoch de segundos para milisegundos exigidos pelo CDN gráfico
+                        const tempoEpochMili = parseInt(payload.tick.epoch) * 1000;
 
-                        if (tempoEpoch > ultimoTimestampRenderizado) {
+                        if (tempoEpochMili > ultimoTimestampRenderizado) {
                             tvAreaSeries.update({
-                                time: tempoEpoch,
+                                time: tempoEpochMili,
                                 value: parseFloat(payload.tick.quote)
                             });
-                            ultimoTimestampRenderizado = tempoEpoch;
+                            ultimoTimestampRenderizado = tempoEpochMili;
                         }
                     }
                 }
@@ -977,7 +967,6 @@
             };
         }
 
-        // 🔄 Alternador das Abas de Ativos com limpeza e reinicialização imediata de fluxo
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
             modoVisualizacaoHistorica = false;
             ultimoTimestampRenderizado = 0;
@@ -1008,7 +997,6 @@
             construirGraficoNativoAxiom();
         }
 
-        // 🔍 MÓDULO REPLAY HISTÓRICO
         function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
             modoVisualizacaoHistorica = true;
 
@@ -1018,7 +1006,7 @@
 
             let ativoFormatado = ativo.trim().toUpperCase();
             let codigoDeriv = MAPA_ATIVOS_DERIV[ativoFormatado] || '1HZ_100V';
-            const epochAlvo = Math.floor(new Date(timestampIso).getTime() / 1000);
+            const epochAlvoMili = new Date(timestampIso).getTime();
 
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = `REPLAY HISTÓRICO: ${ativoFormatado}`;
@@ -1030,7 +1018,7 @@
             wsHistorico.onopen = () => {
                 wsHistorico.send(JSON.stringify({
                     ticks_history: codigoDeriv,
-                    end: epochAlvo + 90,
+                    end: Math.floor(epochAlvoMili / 1000) + 90,
                     count: 120,
                     style: 'ticks'
                 }));
@@ -1041,7 +1029,7 @@
                     const arrayLinha = [];
                     for (let i = 0; i < resposta.history.times.length; i++) {
                         arrayLinha.push({
-                            time: resposta.history.times[i],
+                            time: resposta.history.times[i] * 1000,
                             value: parseFloat(resposta.history.prices[i])
                         });
                     }
@@ -1049,7 +1037,7 @@
                     tvAreaSeries.setData(arrayLinha);
                     const corBadge = (valorDirecao === 'CALL') ? '#39e68d' : '#ff6b6b';
                     tvAreaSeries.setMarkers([{
-                        time: epochAlvo,
+                        time: epochAlvoMili,
                         position: 'inLine',
                         color: corBadge,
                         shape: 'circle',
@@ -1074,7 +1062,6 @@
             construirGraficoNativoAxiom();
         }
 
-        // --- CONEXÃO REST COM O SUPABASE ---
         async function buscarDadosDoSupabase() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
@@ -1096,9 +1083,8 @@
 
                 if (!tabelaSupabase || !tabelaAntigravity) return;
 
-                tabelaSupabase.innerHTML = "";
-                tabelaAntigravity.innerHTML = "";
-
+                let htmlSupabase = "";
+                let htmlAntigravity = "";
                 let wins = 0;
                 let losses = 0;
 
@@ -1113,7 +1099,7 @@
                     const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
 
-                    tabelaSupabase.innerHTML += `
+                    htmlSupabase += `
                         <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
                             <td><strong>${ativoLimpo}</strong></td>
                             <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
@@ -1121,7 +1107,7 @@
                         </tr>
                     `;
 
-                    tabelaAntigravity.innerHTML += `
+                    htmlAntigravity += `
                         <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
                             <td>${dataCompleta}</td>
                             <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
@@ -1129,6 +1115,9 @@
                         </tr>
                     `;
                 });
+
+                tabelaSupabase.innerHTML = htmlSupabase;
+                tabelaAntigravity.innerHTML = htmlAntigravity;
 
                 document.getElementById("meta-total").innerText = wins + losses;
                 document.getElementById("meta-wins").innerText = wins;
@@ -1190,7 +1179,6 @@
             }
         });
 
-        // Inicialização mestre com isolamento assíncrono de canais
         window.onload = () => {
             buscarDadosDoSupabase();
             inicializarCanalSaldoPrivado();
