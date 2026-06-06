@@ -825,8 +825,8 @@
     <script>
         let tvChartInstance = null;
         let tvAreaSeries = null;
-        let socketSaldoPrivado = null;  // Canal A: Cuida estritamente da Banca (Com Autorização)
-        let socketTicksPublico = null;  // Canal B: Cuida estritamente dos Ticks (Livre de Rejeição de ID)
+        let socketSaldoPrivado = null;
+        let socketTicksPublico = null;
 
         let ativoAmigavelAtual = 'R_100';
         let codigoDerivAtual = '1HZ_100V';
@@ -841,7 +841,6 @@
             'R_10': '1HZ_10V'
         };
 
-        // 📊 Inicializa o Objeto Gráfico com Layout Escuro Consolidado
         function construirGraficoNativoAxiom() {
             const container = document.getElementById('deriv-realtime-canvas');
             if (!container) return;
@@ -895,7 +894,7 @@
                     }
                 }, 100);
 
-                // Dispara a subscrição contínua no canal limpo de ticks públicos
+                // Força assinatura inicial ao acoplar o canvas
                 if (!modoVisualizacaoHistorica && socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
                     socketTicksPublico.send(JSON.stringify({
                         ticks: codigoDerivAtual,
@@ -936,14 +935,13 @@
             };
         }
 
-        // 📡 CANAL B: Abre o barramento público e livre focado APENAS em puxar os ticks do gráfico
+        // 📡 CANAL B: Ticks Públicos (Utilizando o app_id universal 1111 para quebrar o bloqueio de concorrência)
         function inicializarCanalTicksPublico() {
             if (socketTicksPublico) {
                 try { socketTicksPublico.close(); } catch (e) { }
             }
 
-            // Usando AppID mestre genérico para streams públicas para não dar conflito na Deriv
-            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1111');
 
             socketTicksPublico.onopen = function () {
                 if (!modoVisualizacaoHistorica) {
@@ -961,7 +959,6 @@
                     if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
                         const tempoEpoch = parseInt(payload.tick.epoch);
 
-                        // Trava matemática de segurança: impede travamento por ticks repetidos
                         if (tempoEpoch > ultimoTimestampRenderizado) {
                             tvAreaSeries.update({
                                 time: tempoEpoch,
@@ -980,9 +977,8 @@
             };
         }
 
-        // 🔄 Alternador das Abas de Ativos (R_10 a R_100)
+        // 🔄 Alternador das Abas de Ativos com limpeza e reinicialização imediata de fluxo
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
-            const reativarStream = modoVisualizacaoHistorica;
             modoVisualizacaoHistorica = false;
             ultimoTimestampRenderizado = 0;
 
@@ -999,15 +995,14 @@
             const btnAtivo = document.getElementById(`btn-${nomeAmigavel}`);
             if (btnAtivo) btnAtivo.classList.add('active');
 
-            if (reativarStream) {
-                inicializarCanalTicksPublico();
-            } else if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                // Limpa canal e abre a nova assinatura limpa
+            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
                 socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
                 socketTicksPublico.send(JSON.stringify({
                     ticks: codigoDeriv,
                     subscribe: 1
                 }));
+            } else {
+                inicializarCanalTicksPublico();
             }
 
             construirGraficoNativoAxiom();
@@ -1031,7 +1026,7 @@
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'block';
 
-            const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+            const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1111');
             wsHistorico.onopen = () => {
                 wsHistorico.send(JSON.stringify({
                     ticks_history: codigoDeriv,
@@ -1140,10 +1135,6 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
-                if (tvChartInstance) {
-                    let container = document.getElementById('deriv-realtime-canvas');
-                    if (container && container.clientWidth > 0) tvChartInstance.resize(container.clientWidth, 320);
-                }
             } catch (erro) {
                 console.error("Aviso de sincronização da malha de dados:", erro);
             }
@@ -1202,8 +1193,8 @@
         // Inicialização mestre com isolamento assíncrono de canais
         window.onload = () => {
             buscarDadosDoSupabase();
-            inicializarCanalSaldoPrivado();  // Abre Barramento A
-            inicializarCanalTicksPublico();  // Abre Barramento B
+            inicializarCanalSaldoPrivado();
+            inicializarCanalTicksPublico();
             setTimeout(construirGraficoNativoAxiom, 400);
             setInterval(buscarDadosDoSupabase, 30000);
         };
