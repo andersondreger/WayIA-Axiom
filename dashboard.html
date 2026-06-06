@@ -46,7 +46,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- SIDEBAR --- */
         .sidebar {
             width: 260px;
             background-color: #040605;
@@ -108,7 +107,6 @@
             box-shadow: inset 0 0 0 1px var(--border-color);
         }
 
-        /* --- MAIN CONTENT WRAPPER --- */
         .main-wrapper {
             flex-grow: 1;
             padding: 40px;
@@ -160,7 +158,6 @@
             color: var(--axiom-neon);
         }
 
-        /* --- METRICAS CARD ROW --- */
         .metrics-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -187,7 +184,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* --- GRID DE TRABALHO --- */
         .workspace-grid {
             display: grid;
             grid-template-columns: 1.8fr 1.2fr;
@@ -200,7 +196,6 @@
             }
         }
 
-        /* --- PANEL TELEMETRIA GRÁFICA --- */
         .chart-panel {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -446,138 +441,6 @@
             flex-direction: column;
             gap: 30px;
         }
-
-        .profile-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-        }
-
-        .avatar-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            text-align: center;
-        }
-
-        .avatar-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-        }
-
-        .avatar-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--axiom-neon);
-        }
-
-        .avatar-upload-btn {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background-color: var(--axiom-neon);
-            color: var(--bg-base);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .form-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .form-group input {
-            background-color: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--axiom-neon);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .btn-primary {
-            background-color: var(--axiom-neon);
-            color: var(--bg-base);
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            width: fit-content;
-        }
-
-        .email-verified-tag {
-            font-size: 11px;
-            color: var(--axiom-neon);
-            background-color: var(--axiom-neon-glow);
-            padding: 4px 8px;
-            border-radius: 6px;
-            width: fit-content;
-            font-weight: 600;
-        }
-
-        .profile-footer {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .theme-toggle-btn {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-        }
     </style>
 </head>
 
@@ -590,10 +453,6 @@
             <div class="nav-menu">
                 <button onclick="alternarSecao('secao-dashboard')" id="btn-secao-dashboard" class="nav-link active"><i
                         class="fas fa-chart-line"></i> Dashboard Builder</button>
-                <button onclick="alternarSecao('secao-perfil')" id="btn-secao-perfil" class="nav-link"><i
-                        class="fas fa-user-circle"></i> Gestão de Perfil</button>
-                <button onclick="alternarSecao('secao-risk')" id="btn-secao-risk" class="nav-link"><i
-                        class="fas fa-shield-alt"></i> Config Risk / Token</button>
             </div>
         </div>
 
@@ -604,9 +463,6 @@
                 alt="Avatar">
             <div style="flex-grow: 1;">
                 <div style="font-size: 13px; font-weight: 600;" id="sidebar-username">Anderson S.</div>
-                <button onclick="toggleTemaVisual()" class="theme-toggle-btn" style="margin-top: 4px;">
-                    <i id="theme-icon" class="fas fa-sun"></i> <span id="theme-text">Modo Clean</span>
-                </button>
             </div>
         </div>
     </div>
@@ -647,7 +503,8 @@
             <div class="workspace-grid">
                 <div class="chart-panel">
                     <div class="chart-header-controls">
-                        <div class="chart-engine-title">📡 Telemetria Axiom: <span id="active-asset-title">R_100</span>
+                        <div class="chart-engine-title">📡 Telemetria Real-Time: <span
+                                id="active-asset-title">R_100</span>
                         </div>
                         <div class="asset-switcher-group">
                             <button id="btn-R_100" class="btn-asset-select active"
@@ -706,7 +563,7 @@
 
             <div class="tables-row">
                 <div class="table-panel">
-                    <h3>Relatórios de Auditoria (Supabase)</h3>
+                    <h3>Relatórios de Auditoria (Clique para Replay)</h3>
                     <table>
                         <thead>
                             <tr>
@@ -720,7 +577,7 @@
                 </div>
 
                 <div class="table-panel">
-                    <h3>Últimas Operações (Clique na Linha para Ver o Gráfico Anexo)</h3>
+                    <h3>Últimas Operações (Clique para Replay)</h3>
                     <table>
                         <thead>
                             <tr>
@@ -734,79 +591,9 @@
                 </div>
             </div>
         </div>
-
-        <div id="secao-perfil" class="content-section">
-            <div class="header-info">
-                <h1>Gestão de Perfil</h1>
-                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferências.</p>
-            </div>
-
-            <div class="profile-container">
-                <div class="avatar-card">
-                    <div class="avatar-wrapper">
-                        <img id="profile-avatar-preview" class="avatar-img"
-                            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop"
-                            alt="Avatar Preview">
-                        <label class="avatar-upload-btn" for="input-avatar-file"><i class="fas fa-camera"></i></label>
-                        <input type="file" id="input-avatar-file" style="display: none;" accept="image/*"
-                            onchange="processarTrocaAvatar(event)">
-                    </div>
-                    <div>
-                        <h4 style="margin: 0; font-size: 16px;">Sua Foto de Identidade</h4>
-                        <p style="margin: 5px 0 0; font-size: 12px; color: var(--text-secondary);">Formatos suportados:
-                            PNG, JPG.</p>
-                    </div>
-                </div>
-
-                <div class="form-card">
-                    <div class="form-group">
-                        <label>E-mail Corporativo</label>
-                        <input type="email" value="anderson.silva@wayiaflow.com.br" disabled
-                            style="opacity: 0.6; cursor: not-allowed;">
-                        <span class="email-verified-tag"><i class="fas fa-check-circle"></i> E-mail Autenticado e
-                            Confirmado</span>
-                    </div>
-                    <div class="form-group">
-                        <label>Nome do Assinante</label>
-                        <input type="text" id="input-profile-name" value="Anderson Silva">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nova Senha</label>
-                            <input type="password" id="input-new-password" placeholder="Mínimo 8 dígitos">
-                        </div>
-                        <div class="form-group">
-                            <label>Confirmar Nova Senha</label>
-                            <input type="password" id="input-confirm-password" placeholder="Repita a senha">
-                        </div>
-                    </div>
-                    <button onclick="salvarMetadadosPerfil()" class="btn-primary">Atualizar Perfil Soberano</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="secao-risk" class="content-section">
-            <div class="header-info">
-                <h1>Configuração de Instância e Credenciais</h1>
-                <p>Vinculação estrita dos tokens gerados no ecossistema do Builder da Deriv.</p>
-            </div>
-            <div class="form-card" style="max-width: 600px;">
-                <div class="form-group">
-                    <label>App ID Cadastrado</label>
-                    <input type="text" id="deriv-app-id" value="1089">
-                </div>
-                <div class="form-group">
-                    <label>Token Privado de Negociação</label>
-                    <input type="password" id="deriv-token" value="pat_de14f1635678d3f9ef16802225c9dc318b61088e">
-                </div>
-                <button onclick="alert('Instância sincronizada com sucesso!')" class="btn-primary">Salvar chaves da
-                    Deriv</button>
-            </div>
-        </div>
-
     </div>
 
-    <!-- 🧠 CORE LOGIC ENGINE V6: ARQUITETURA HÍBRIDA (TEMPO REAL VIA DERIV + REPLAY VIA BANCO) -->
+    <!-- 🧠 CORE BLINDADO DE PRODUÇÃO CONTRA DADOS NULOS -->
     <script>
         let chartInstance = null;
         let socketSaldoPrivado = null;
@@ -817,7 +604,6 @@
         let codigoDerivAtual = '1HZ_100V';
         let modoVisualizacaoHistorica = false;
 
-        // Memória local para guardar os últimos 20 ticks e fazer a linha andar no tempo real
         let bufferTicksTempoReal = [];
 
         const MAPA_ATIVOS_DERIV = {
@@ -837,7 +623,7 @@
                 chart: {
                     type: 'area',
                     height: 300,
-                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 300 } },
+                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 200 } },
                     toolbar: { show: false },
                     background: 'transparent'
                 },
@@ -847,7 +633,7 @@
                     type: 'gradient',
                     gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05, stops: [0, 90, 100] }
                 },
-                series: [{ name: 'Preço / Métrica', data: [] }],
+                series: [{ name: 'Preço', data: [] }],
                 xaxis: {
                     type: 'category',
                     labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
@@ -886,11 +672,9 @@
             socketSaldoPrivado.onclose = () => { setTimeout(inicializarCanalSaldoPrivado, 4000); };
         }
 
-        // 📡 CONEXÃO DE TEMPO REAL: Puxa direto da Deriv sem travar com a VPS
         function inicializarCanalTicksPublico() {
             if (socketTicksPublico) { try { socketTicksPublico.close(); } catch (e) { } }
 
-            // Usando app_id de produção limpo para conexões do navegador
             socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
 
             socketTicksPublico.onopen = function () {
@@ -908,7 +692,7 @@
                         const precoAtual = parseFloat(payload.tick.quote);
 
                         bufferTicksTempoReal.push({ x: horaMinutoSegundo, y: precoAtual });
-                        if (bufferTicksTempoReal.length > 20) bufferTicksTempoReal.shift();
+                        if (bufferTicksTempoReal.length > 25) bufferTicksTempoReal.shift();
 
                         if (chartInstance) {
                             chartInstance.updateSeries([{
@@ -931,7 +715,7 @@
         function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
             modoVisualizacaoHistorica = false;
             ativoAmigavelAtual = nomeAmigavel;
-            codigoDerivAtual = codigoDeriv;
+            codigoDerivAtual = code = codigoDeriv;
             bufferTicksTempoReal = [];
 
             const title = document.getElementById('active-asset-title');
@@ -954,17 +738,15 @@
             construirGraficoApex();
         }
 
-        // 🎯 RETORNO DO GRÁFICO ANEXO: Chamado ao clicar em uma linha da tabela de operações
         function exibirGraficoAnexoDaEntrada(ativo, timestampIso, valorDirecao, fatorCoice, resultado) {
             modoVisualizacaoHistorica = true;
 
-            // Derruba a stream ao vivo para congelar a tela no replay
             if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
                 socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
             }
 
             const title = document.getElementById('active-asset-title');
-            if (title) title.innerHTML = `ANEXO: ${ativo} (${resultado}) - COICE: ${fatorCoice}`;
+            if (title) title.innerHTML = `ANEXO HISTÓRICO: ${ativo} (${resultado}) - COICE: ${fatorCoice}`;
 
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'block';
@@ -998,7 +780,7 @@
                         colors: [resultado === 'WIN' ? '#39e68d' : '#ff6b6b']
                     });
                     chartInstance.updateSeries([{
-                        name: `Preço no Tiro ${valorDirecao}`,
+                        name: `Preço no Contrato ${valorDirecao}`,
                         data: valoresPreco
                     }]);
                 }
@@ -1040,30 +822,35 @@
                 let losses = 0;
 
                 trades.forEach(trade => {
-                    const resultadoTrade = (trade.resultado || "").toUpperCase();
+                    // 🛡️ TRATAMENTO ABSOLUTO ANTI-QUEBRA (FALLBACK CONTRA CAMPOS NULOS)
+                    const resultadoTrade = (trade.resultado || "LOSS").toUpperCase();
                     if (resultadoTrade === "WIN") wins++;
                     else losses++;
 
-                    const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                    const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
-                    const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
-                    const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
+                    const timestampSeguro = trade.timestamp ? new Date(trade.timestamp) : new Date();
+                    const dataCompleta = timestampSeguro.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                    const valorReal = parseFloat(trade.valor || 0);
+                    const prefixoSinal = valorReal >= 0 ? "+ USD " : "- USD ";
+                    const direcaoCalculada = (trade.direcao || (valorReal >= 0 ? 'CALL' : 'PUT')).toUpperCase();
+
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
                     const coiceFormatado = trade.coice_no_tiro ? parseFloat(trade.coice_no_tiro).toFixed(2) : '0.00';
+                    const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
 
+                    // Injeta a string montada blindada contra null-pointers
                     htmlSupabase += `
-                        <tr>
+                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp || ''}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
                             <td><strong>${ativoLimpo}</strong></td>
-                            <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
-                            <td class="${classeBadge}">${prefixoSinal}${Math.abs(trade.valor).toFixed(2)}</td>
+                            <td>ADX ${trade.adx_no_tiro ? parseFloat(trade.adx_no_tiro).toFixed(2) : '0.00'}</td>
+                            <td class="${classeBadge}">${prefixoSinal}${Math.abs(valorReal).toFixed(2)}</td>
                         </tr>
                     `;
 
-                    // 🛠️ MAPEAMENTO INTERATIVO: Ao clicar na linha, chama a renderização da foto anexa do trade passado
                     htmlAntigravity += `
-                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
+                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp || ''}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
                             <td>${dataCompleta}</td>
-                            <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
+                            <td style="color: ${valorReal >= 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
                             <td style="font-family:'JetBrains Mono'; font-size:12px;">${coiceFormatado}</td>
                         </tr>
                     `;
@@ -1078,16 +865,11 @@
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
             } catch (erro) {
-                console.error("Erro na sincronização:", erro);
+                console.error("Aviso de sincronização da malha de dados:", erro);
             }
         }
 
         function alternarSecao(idSecaoAlvo) {
-            document.querySelectorAll('.content-section').forEach(secao => secao.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            document.getElementById(idSecaoAlvo).classList.add('active');
-            document.getElementById(`btn-${idSecaoAlvo}`).classList.add('active');
-
             if (idSecaoAlvo === 'secao-dashboard') {
                 sincronizarMalhaCompleta();
                 setTimeout(construirGraficoApex, 100);
@@ -1096,30 +878,9 @@
 
         function toggleTemaVisual() {
             const corpoDoc = document.body;
-            const txtTema = document.getElementById("theme-text");
-            const iconeTema = document.getElementById("theme-icon");
-
-            if (corpoDoc.classList.contains("light-mode")) {
-                corpoDoc.classList.remove("light-mode");
-                if (txtTema) txtTema.innerText = "Modo Clean";
-                if (iconeTema) iconeTema.className = "fas fa-sun";
-            } else {
-                corpoDoc.classList.add("light-mode");
-                if (txtTema) txtTema.innerText = "Modo Escuro";
-                if (iconeTema) iconeTema.className = "fas fa-moon";
-            }
+            if (corpoDoc.classList.contains("light-mode")) corpoDoc.classList.remove("light-mode");
+            else corpoDoc.classList.add("light-mode");
         }
-
-        function processarTrocaAvatar(event) {
-            const arquivo = event.target.files[0];
-            if (arquivo) {
-                const urlImagem = URL.createObjectURL(arquivo);
-                document.getElementById("profile-avatar-preview").src = urlImagem;
-                document.getElementById("sidebar-avatar").src = urlImagem;
-            }
-        }
-
-        function salvarMetadadosPerfil() { alert("Sucesso: Informações updated!"); }
 
         window.onload = () => {
             construirGraficoApex();
