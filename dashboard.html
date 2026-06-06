@@ -12,7 +12,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- 📊 Motores Gráficos Universais -->
+    <!-- 📊 Motor Gráfico Universal ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         :root {
@@ -269,6 +269,23 @@
             min-height: 320px;
         }
 
+        .btn-reset-realtime {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            background: #ff7a00;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+        }
+
         .modules-panel {
             display: flex;
             flex-direction: column;
@@ -317,7 +334,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -364,7 +380,6 @@
             background-color: var(--bg-base);
         }
 
-        /* --- DATA TABLES ROW --- */
         .tables-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -632,24 +647,25 @@
             <div class="workspace-grid">
                 <div class="chart-panel">
                     <div class="chart-header-controls">
-                        <div class="chart-engine-title">📡 Métrica de Coice Real (Supabase): <span
-                                id="active-asset-title">R_100</span>
+                        <div class="chart-engine-title">📡 Telemetria Axiom: <span id="active-asset-title">R_100</span>
                         </div>
                         <div class="asset-switcher-group">
                             <button id="btn-R_100" class="btn-asset-select active"
-                                onclick="mudarAtivoGrafico('R_100')">R_100</button>
+                                onclick="mudarAtivoGrafico('R_100', '1HZ_100V')">R_100</button>
                             <button id="btn-R_75" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_75')">R_75</button>
+                                onclick="mudarAtivoGrafico('R_75', '1HZ_75V')">R_75</button>
                             <button id="btn-R_50" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_50')">R_50</button>
+                                onclick="mudarAtivoGrafico('R_50', '1HZ_50V')">R_50</button>
                             <button id="btn-R_25" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_25')">R_25</button>
+                                onclick="mudarAtivoGrafico('R_25', '1HZ_25V')">R_25</button>
                             <button id="btn-R_10" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_10')">R_10</button>
+                                onclick="mudarAtivoGrafico('R_10', '1HZ_10V')">R_10</button>
                         </div>
                     </div>
                     <div class="viewport-wrapper" style="padding: 10px; box-sizing: border-box;">
-                        <!-- 🎯 CANVA APEXCHARTS: Imune a rejeições de rede ou timestamps repetidos -->
+                        <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarTempoReal()">
+                            <i class="fas fa-sync-alt"></i> Voltar para o Tempo Real
+                        </button>
                         <div id="deriv-realtime-canvas" style="width: 100%; height: 320px;"></div>
                     </div>
                 </div>
@@ -704,7 +720,7 @@
                 </div>
 
                 <div class="table-panel">
-                    <h3>Últimas Operações (Antigravity Direct)</h3>
+                    <h3>Últimas Operações (Clique na Linha para Ver o Gráfico Anexo)</h3>
                     <table>
                         <thead>
                             <tr>
@@ -790,14 +806,28 @@
 
     </div>
 
-    <!-- 🧠 CORE LOGIC ENGINE V5: APEXCHARTS IMMUNE ENGINE -->
+    <!-- 🧠 CORE LOGIC ENGINE V6: ARQUITETURA HÍBRIDA (TEMPO REAL VIA DERIV + REPLAY VIA BANCO) -->
     <script>
         let chartInstance = null;
         let socketSaldoPrivado = null;
-        let loopDadosId = null;
-        let ativoAmigavelAtual = 'R_100';
+        let socketTicksPublico = null;
+        let loopSupabaseId = null;
 
-        // Inicializa o gráfico usando o robusto ApexCharts
+        let ativoAmigavelAtual = 'R_100';
+        let codigoDerivAtual = '1HZ_100V';
+        let modoVisualizacaoHistorica = false;
+
+        // Memória local para guardar os últimos 20 ticks e fazer a linha andar no tempo real
+        let bufferTicksTempoReal = [];
+
+        const MAPA_ATIVOS_DERIV = {
+            'R_100': '1HZ_100V',
+            'R_75': '1HZ_75V',
+            'R_50': '1HZ_50V',
+            'R_25': '1HZ_25V',
+            'R_10': '1HZ_10V'
+        };
+
         function construirGraficoApex() {
             const el = document.getElementById('deriv-realtime-canvas');
             if (!el) return;
@@ -807,9 +837,8 @@
                 chart: {
                     type: 'area',
                     height: 300,
-                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 400 } },
+                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 300 } },
                     toolbar: { show: false },
-                    sparkline: { enabled: false },
                     background: 'transparent'
                 },
                 colors: ['#39e68d'],
@@ -818,7 +847,7 @@
                     type: 'gradient',
                     gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05, stops: [0, 90, 100] }
                 },
-                series: [{ name: 'Fator Coice', data: [] }],
+                series: [{ name: 'Preço / Métrica', data: [] }],
                 xaxis: {
                     type: 'category',
                     labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
@@ -826,7 +855,8 @@
                     axisTicks: { show: false }
                 },
                 yaxis: {
-                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } }
+                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
+                    forceNiceScale: true
                 },
                 grid: { borderColor: 'rgba(57, 230, 141, 0.03)' },
                 tooltip: { theme: 'dark' }
@@ -836,11 +866,8 @@
             chartInstance.render();
         }
 
-        // Conecta o barramento exclusivo da banca
         function inicializarCanalSaldoPrivado() {
-            if (socketSaldoPrivado) {
-                try { socketSaldoPrivado.close(); } catch (e) { }
-            }
+            if (socketSaldoPrivado) { try { socketSaldoPrivado.close(); } catch (e) { } }
             socketSaldoPrivado = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
             socketSaldoPrivado.onopen = function () {
                 const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
@@ -859,19 +886,133 @@
             socketSaldoPrivado.onclose = () => { setTimeout(inicializarCanalSaldoPrivado, 4000); };
         }
 
-        function mudarAtivoGrafico(nomeAmigavel) {
+        // 📡 CONEXÃO DE TEMPO REAL: Puxa direto da Deriv sem travar com a VPS
+        function inicializarCanalTicksPublico() {
+            if (socketTicksPublico) { try { socketTicksPublico.close(); } catch (e) { } }
+
+            // Usando app_id de produção limpo para conexões do navegador
+            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            socketTicksPublico.onopen = function () {
+                if (!modoVisualizacaoHistorica) {
+                    socketTicksPublico.send(JSON.stringify({ ticks: codigoDerivAtual, subscribe: 1 }));
+                }
+            };
+
+            socketTicksPublico.onmessage = function (event) {
+                const payload = JSON.parse(event.data);
+
+                if (payload.tick && !modoVisualizacaoHistorica) {
+                    if (payload.tick.symbol === codigoDerivAtual) {
+                        const horaMinutoSegundo = new Date(payload.tick.epoch * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        const precoAtual = parseFloat(payload.tick.quote);
+
+                        bufferTicksTempoReal.push({ x: horaMinutoSegundo, y: precoAtual });
+                        if (bufferTicksTempoReal.length > 20) bufferTicksTempoReal.shift();
+
+                        if (chartInstance) {
+                            chartInstance.updateSeries([{
+                                name: 'Preço ao Vivo',
+                                data: bufferTicksTempoReal.map(t => t.y)
+                            }]);
+                            chartInstance.updateOptions({
+                                xaxis: { categories: bufferTicksTempoReal.map(t => t.x) }
+                            });
+                        }
+                    }
+                }
+            };
+
+            socketTicksPublico.onclose = () => {
+                if (!modoVisualizacaoHistorica) setTimeout(inicializarCanalTicksPublico, 3000);
+            };
+        }
+
+        function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
+            modoVisualizacaoHistorica = false;
             ativoAmigavelAtual = nomeAmigavel;
+            codigoDerivAtual = codigoDeriv;
+            bufferTicksTempoReal = [];
+
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = nomeAmigavel;
+
+            const btnRestore = document.getElementById('btn-restore-live');
+            if (btnRestore) btnRestore.style.display = 'none';
 
             document.querySelectorAll('.btn-asset-select').forEach(btn => btn.classList.remove('active'));
             const btnAtivo = document.getElementById(`btn-${nomeAmigavel}`);
             if (btnAtivo) btnAtivo.classList.add('active');
 
-            sincronizarMalhaCompleta();
+            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
+                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
+                socketTicksPublico.send(JSON.stringify({ ticks: codigoDeriv, subscribe: 1 }));
+            } else {
+                inicializarCanalTicksPublico();
+            }
+
+            construirGraficoApex();
         }
 
-        // Alimenta as tabelas e o gráfico de forma unificada direto do Supabase
+        // 🎯 RETORNO DO GRÁFICO ANEXO: Chamado ao clicar em uma linha da tabela de operações
+        function exibirGraficoAnexoDaEntrada(ativo, timestampIso, valorDirecao, fatorCoice, resultado) {
+            modoVisualizacaoHistorica = true;
+
+            // Derruba a stream ao vivo para congelar a tela no replay
+            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
+                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
+            }
+
+            const title = document.getElementById('active-asset-title');
+            if (title) title.innerHTML = `ANEXO: ${ativo} (${resultado}) - COICE: ${fatorCoice}`;
+
+            const btnRestore = document.getElementById('btn-restore-live');
+            if (btnRestore) btnRestore.style.display = 'block';
+
+            const epochAlvo = Math.floor(new Date(timestampIso).getTime() / 1000);
+            const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+            wsHistorico.onopen = () => {
+                wsHistorico.send(JSON.stringify({
+                    ticks_history: MAPA_ATIVOS_DERIV[ativo] || '1HZ_100V',
+                    end: epochAlvo + 40,
+                    count: 30,
+                    style: 'ticks'
+                }));
+            };
+
+            wsHistorico.onmessage = (event) => {
+                const resposta = JSON.parse(event.data);
+                if (resposta.history && chartInstance) {
+                    let valoresPreco = [];
+                    let timestampsRotulos = [];
+
+                    for (let i = 0; i < resposta.history.times.length; i++) {
+                        let horaExata = new Date(resposta.history.times[i] * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        valoresPreco.push(parseFloat(resposta.history.prices[i]).toFixed(2));
+                        timestampsRotulos.push(horaExata);
+                    }
+
+                    chartInstance.updateOptions({
+                        xaxis: { categories: timestampsRotulos },
+                        colors: [resultado === 'WIN' ? '#39e68d' : '#ff6b6b']
+                    });
+                    chartInstance.updateSeries([{
+                        name: `Preço no Tiro ${valorDirecao}`,
+                        data: valoresPreco
+                    }]);
+                }
+                wsHistorico.close();
+            };
+        }
+
+        function restaurarTempoReal() {
+            modoVisualizacaoHistorica = false;
+            const btnRestore = document.getElementById('btn-restore-live');
+            if (btnRestore) btnRestore.style.display = 'none';
+            mudarAtivoGrafico(ativoAmigavelAtual, codigoDerivAtual);
+        }
+
         async function sincronizarMalhaCompleta() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
@@ -898,20 +1039,17 @@
                 let wins = 0;
                 let losses = 0;
 
-                let valoresEixoY = [];
-                let rotasEixoX = [];
-
                 trades.forEach(trade => {
                     const resultadoTrade = (trade.resultado || "").toUpperCase();
                     if (resultadoTrade === "WIN") wins++;
                     else losses++;
 
                     const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                    const horaMinuto = new Date(trade.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
                     const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
+                    const coiceFormatado = trade.coice_no_tiro ? parseFloat(trade.coice_no_tiro).toFixed(2) : '0.00';
 
                     htmlSupabase += `
                         <tr>
@@ -921,19 +1059,14 @@
                         </tr>
                     `;
 
+                    // 🛠️ MAPEAMENTO INTERATIVO: Ao clicar na linha, chama a renderização da foto anexa do trade passado
                     htmlAntigravity += `
-                        <tr>
+                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
                             <td>${dataCompleta}</td>
                             <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
-                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${trade.coice_no_tiro ? trade.coice_no_tiro.toFixed(2) : '0.00'}</td>
+                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${coiceFormatado}</td>
                         </tr>
                     `;
-
-                    // Puxa as últimas 15 coordenadas do ativo ativo para o gráfico
-                    if (ativoLimpo === ativoAmigavelAtual && valoresEixoY.length < 15) {
-                        valoresEixoY.push(parseFloat(trade.coice_no_tiro || 0).toFixed(2));
-                        rotasEixoX.push(horaMinuto);
-                    }
                 });
 
                 tabelaSupabase.innerHTML = htmlSupabase;
@@ -943,17 +1076,6 @@
                 document.getElementById("meta-wins").innerText = wins;
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
-
-                // Faz o update limpo no ApexCharts ordenando cronologicamente (da esquerda para a direita)
-                if (chartInstance && valoresEixoY.length > 0) {
-                    chartInstance.updateOptions({
-                        xaxis: { categories: rotasEixoX.reverse() }
-                    });
-                    chartInstance.updateSeries([{
-                        name: 'Fator Coice',
-                        data: valoresEixoY.reverse()
-                    }]);
-                }
 
             } catch (erro) {
                 console.error("Erro na sincronização:", erro);
@@ -997,15 +1119,16 @@
             }
         }
 
-        function salvarMetadadosPerfil() { alert("Sucesso: Informações atualizadas!"); }
+        function salvarMetadadosPerfil() { alert("Sucesso: Informações updated!"); }
 
         window.onload = () => {
             construirGraficoApex();
             inicializarCanalSaldoPrivado();
+            inicializarCanalTicksPublico();
             sincronizarMalhaCompleta();
 
-            if (loopDadosId) clearInterval(loopDadosId);
-            loopDadosId = setInterval(sincronizarMalhaCompleta, 5000);
+            if (loopSupabaseId) clearInterval(loopSupabaseId);
+            loopSupabaseId = setInterval(sincronizarMalhaCompleta, 5000);
         };
     </script>
 </body>
