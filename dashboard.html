@@ -12,9 +12,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- 📊 Motores Gráficos Universais -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/4.1.1/lightweight-charts.standalone.production.js"></script>
     <style>
         :root {
             --bg-base: #060907;
@@ -47,6 +46,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        /* --- SIDEBAR --- */
         .sidebar {
             width: 260px;
             background-color: #040605;
@@ -108,6 +108,7 @@
             box-shadow: inset 0 0 0 1px var(--border-color);
         }
 
+        /* --- MAIN CONTENT WRAPPER --- */
         .main-wrapper {
             flex-grow: 1;
             padding: 40px;
@@ -159,6 +160,7 @@
             color: var(--axiom-neon);
         }
 
+        /* --- METRICAS CARD ROW --- */
         .metrics-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -185,6 +187,7 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
+        /* --- GRID DE TRABALHO --- */
         .workspace-grid {
             display: grid;
             grid-template-columns: 1.8fr 1.2fr;
@@ -197,6 +200,7 @@
             }
         }
 
+        /* --- PANEL TELEMETRIA GRÁFICA --- */
         .chart-panel {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -265,23 +269,6 @@
             min-height: 320px;
         }
 
-        .btn-reset-realtime {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 10;
-            background: #ff7a00;
-            color: #fff;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            display: none;
-            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
-        }
-
         .modules-panel {
             display: flex;
             flex-direction: column;
@@ -330,6 +317,7 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
+        /* Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -376,6 +364,7 @@
             background-color: var(--bg-base);
         }
 
+        /* --- DATA TABLES ROW --- */
         .tables-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -414,15 +403,6 @@
             font-weight: 500;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(57, 230, 141, 0.05);
-        }
-
-        tr.clickable-row {
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        tr.clickable-row:hover {
-            background: rgba(57, 230, 141, 0.06) !important;
         }
 
         td {
@@ -652,28 +632,25 @@
             <div class="workspace-grid">
                 <div class="chart-panel">
                     <div class="chart-header-controls">
-                        <div class="chart-engine-title">📡 Stream Telemetria: <span id="active-asset-title">R_100</span>
+                        <div class="chart-engine-title">📡 Métrica de Coice Real (Supabase): <span
+                                id="active-asset-title">R_100</span>
                         </div>
                         <div class="asset-switcher-group">
                             <button id="btn-R_100" class="btn-asset-select active"
-                                onclick="mudarAtivoGrafico('R_100', '1HZ_100V')">R_100</button>
+                                onclick="mudarAtivoGrafico('R_100')">R_100</button>
                             <button id="btn-R_75" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_75', '1HZ_75V')">R_75</button>
+                                onclick="mudarAtivoGrafico('R_75')">R_75</button>
                             <button id="btn-R_50" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_50', '1HZ_50V')">R_50</button>
+                                onclick="mudarAtivoGrafico('R_50')">R_50</button>
                             <button id="btn-R_25" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_25', '1HZ_25V')">R_25</button>
+                                onclick="mudarAtivoGrafico('R_25')">R_25</button>
                             <button id="btn-R_10" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_10', '1HZ_10V')">R_10</button>
+                                onclick="mudarAtivoGrafico('R_10')">R_10</button>
                         </div>
                     </div>
-                    <div class="viewport-wrapper">
-                        <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarFluxoTempoReal()">
-                            <i class="fas fa-sync-alt"></i> Voltar para o Tempo Real
-                        </button>
-                        <div id="deriv-realtime-canvas"
-                            style="width: 100%; height: 320px; background-color: #040705 !important; color: #6b7f75;">
-                        </div>
+                    <div class="viewport-wrapper" style="padding: 10px; box-sizing: border-box;">
+                        <!-- 🎯 CANVA APEXCHARTS: Imune a rejeições de rede ou timestamps repetidos -->
+                        <div id="deriv-realtime-canvas" style="width: 100%; height: 320px;"></div>
                     </div>
                 </div>
 
@@ -682,8 +659,8 @@
                         <div class="module-details">
                             <h4><i class="fas fa-bolt"></i> Índice Volatilidade 100</h4>
                             <div class="module-meta">
-                                <span>Filtro: <strong>ADX 5.5</strong></span>
-                                <span>Mecânica: <strong>Coice 0.80</strong></span>
+                                <span>Filtro: <strong>ADX 4.50</strong></span>
+                                <span>Mecânica: <strong>Coice 2.20</strong></span>
                             </div>
                         </div>
                         <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
@@ -692,8 +669,8 @@
                         <div class="module-details">
                             <h4><i class="fas fa-bolt"></i> Índice Volatilidade 75</h4>
                             <div class="module-meta">
-                                <span>Filtro: <strong>ADX 5.5</strong></span>
-                                <span>Mecânica: <strong>Coice 0.80</strong></span>
+                                <span>Filtro: <strong>ADX 4.50</strong></span>
+                                <span>Mecânica: <strong>Coice 2.20</strong></span>
                             </div>
                         </div>
                         <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
@@ -702,8 +679,8 @@
                         <div class="module-details">
                             <h4><i class="fas fa-bolt"></i> Índice Volatilidade 50</h4>
                             <div class="module-meta">
-                                <span>Filtro: <strong>ADX 5.5</strong></span>
-                                <span>Mecânica: <strong>Coice 0.80</strong></span>
+                                <span>Filtro: <strong>ADX 4.50</strong></span>
+                                <span>Mecânica: <strong>Coice 2.20</strong></span>
                             </div>
                         </div>
                         <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
@@ -745,7 +722,7 @@
         <div id="secao-perfil" class="content-section">
             <div class="header-info">
                 <h1>Gestão de Perfil</h1>
-                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferences.</p>
+                <p>Gerencie suas credenciais de segurança, identidade corporativa e preferências.</p>
             </div>
 
             <div class="profile-container">
@@ -813,101 +790,62 @@
 
     </div>
 
+    <!-- 🧠 CORE LOGIC ENGINE V5: APEXCHARTS IMMUNE ENGINE -->
     <script>
-        let tvChartInstance = null;
-        let tvAreaSeries = null;
+        let chartInstance = null;
         let socketSaldoPrivado = null;
-        let socketTicksPublico = null;
-
+        let loopDadosId = null;
         let ativoAmigavelAtual = 'R_100';
-        let codigoDerivAtual = '1HZ_100V';
-        let modoVisualizacaoHistorica = false;
-        let ultimoTimestampRenderizado = 0;
 
-        const MAPA_ATIVOS_DERIV = {
-            'R_100': '1HZ_100V',
-            'R_75': '1HZ_75V',
-            'R_50': '1HZ_50V',
-            'R_25': '1HZ_25V',
-            'R_10': '1HZ_10V'
-        };
+        // Inicializa o gráfico usando o robusto ApexCharts
+        function construirGraficoApex() {
+            const el = document.getElementById('deriv-realtime-canvas');
+            if (!el) return;
+            el.innerHTML = '';
 
-        function construirGraficoNativoAxiom() {
-            const container = document.getElementById('deriv-realtime-canvas');
-            if (!container) return;
+            const options = {
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 400 } },
+                    toolbar: { show: false },
+                    sparkline: { enabled: false },
+                    background: 'transparent'
+                },
+                colors: ['#39e68d'],
+                stroke: { curve: 'smooth', width: 3 },
+                fill: {
+                    type: 'gradient',
+                    gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05, stops: [0, 90, 100] }
+                },
+                series: [{ name: 'Fator Coice', data: [] }],
+                xaxis: {
+                    type: 'category',
+                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                },
+                yaxis: {
+                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } }
+                },
+                grid: { borderColor: 'rgba(57, 230, 141, 0.03)' },
+                tooltip: { theme: 'dark' }
+            };
 
-            let larguraDisponivel = container.clientWidth || container.offsetWidth || 500;
-            container.innerHTML = '';
-
-            try {
-                if (typeof LightweightCharts === 'undefined') {
-                    setTimeout(construirGraficoNativoAxiom, 200);
-                    return;
-                }
-
-                tvChartInstance = LightweightCharts.createChart(container, {
-                    width: larguraDisponivel,
-                    height: 320,
-                    layout: {
-                        background: { type: 'vertical', color: '#040705' },
-                        textColor: '#6b7f75',
-                        fontSize: 11
-                    },
-                    grid: {
-                        vertLines: { color: 'rgba(57, 230, 141, 0.02)' },
-                        horzLines: { color: 'rgba(57, 230, 141, 0.02)' },
-                    },
-                    crosshair: {
-                        mode: LightweightCharts.CrosshairMode.Normal,
-                        vertLine: { color: '#39e68d', width: 1, style: 3 },
-                        horzLine: { color: '#39e68d', width: 1, style: 3 }
-                    },
-                    priceScale: { borderColor: 'rgba(57, 230, 141, 0.08)' },
-                    timeScale: {
-                        borderColor: 'rgba(57, 230, 141, 0.08)',
-                        timeVisible: true,
-                        secondsVisible: true,
-                        minBarSpacing: 6
-                    },
-                });
-
-                tvAreaSeries = tvChartInstance.addSeries(LightweightCharts.AreaSeries, {
-                    topColor: 'rgba(57, 230, 141, 0.2)',
-                    bottomColor: 'rgba(57, 230, 141, 0.0)',
-                    lineColor: '#39e68d',
-                    lineWidth: 2,
-                    priceLineVisible: true
-                });
-
-                requestAnimationFrame(() => {
-                    if (tvChartInstance && container && container.clientWidth > 0) {
-                        tvChartInstance.resize(container.clientWidth, 320);
-                    }
-                });
-
-                if (!modoVisualizacaoHistorica && socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                    socketTicksPublico.send(JSON.stringify({
-                        ticks: codigoDerivAtual,
-                        subscribe: 1
-                    }));
-                }
-            } catch (e) {
-                console.error("Erro estrutural no canvas gráfico:", e);
-            }
+            chartInstance = new ApexCharts(el, options);
+            chartInstance.render();
         }
 
+        // Conecta o barramento exclusivo da banca
         function inicializarCanalSaldoPrivado() {
             if (socketSaldoPrivado) {
                 try { socketSaldoPrivado.close(); } catch (e) { }
             }
-
             socketSaldoPrivado = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
-
             socketSaldoPrivado.onopen = function () {
                 const CLIENT_TOKEN = "pat_de14f1635678d3f9ef16802225c9dc318b61088e921840f78cf158922efad4e3";
                 socketSaldoPrivado.send(JSON.stringify({ "authorize": CLIENT_TOKEN }));
             };
-
             socketSaldoPrivado.onmessage = function (event) {
                 const payload = JSON.parse(event.data);
                 if (payload.msg_type === 'authorize') {
@@ -918,65 +856,11 @@
                     if (balanceElement) balanceElement.innerText = parseFloat(payload.balance.balance).toFixed(2);
                 }
             };
-
-            socketSaldoPrivado.onclose = () => {
-                setTimeout(inicializarCanalSaldoPrivado, 4000);
-            };
+            socketSaldoPrivado.onclose = () => { setTimeout(inicializarCanalSaldoPrivado, 4000); };
         }
 
-        function inicializarCanalTicksPublico() {
-            if (socketTicksPublico) {
-                try { socketTicksPublico.close(); } catch (e) { }
-            }
-
-            // 🛠️ FIX SEGUNDO ESPECIFICAÇÃO DA DERIV: app_id público universal 1111 para isolar a concorrência da VPS
-            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1111');
-
-            socketTicksPublico.onopen = function () {
-                if (!modoVisualizacaoHistorica) {
-                    socketTicksPublico.send(JSON.stringify({
-                        ticks: codigoDerivAtual,
-                        subscribe: 1
-                    }));
-                }
-            };
-
-            socketTicksPublico.onmessage = function (event) {
-                const payload = JSON.parse(event.data);
-
-                if (payload.tick && !modoVisualizacaoHistorica) {
-                    if (payload.tick.symbol === codigoDerivAtual && tvAreaSeries) {
-                        // 🛠️ FIX DA DOCUMENTAÇÃO: Multiplica por 1000 transformando o epoch de segundos para milisegundos exigidos pelo CDN gráfico
-                        const tempoEpochMili = parseInt(payload.tick.epoch) * 1000;
-
-                        if (tempoEpochMili > ultimoTimestampRenderizado) {
-                            tvAreaSeries.update({
-                                time: tempoEpochMili,
-                                value: parseFloat(payload.tick.quote)
-                            });
-                            ultimoTimestampRenderizado = tempoEpochMili;
-                        }
-                    }
-                }
-            };
-
-            socketTicksPublico.onclose = () => {
-                if (!modoVisualizacaoHistorica) {
-                    setTimeout(inicializarCanalTicksPublico, 3000);
-                }
-            };
-        }
-
-        function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
-            modoVisualizacaoHistorica = false;
-            ultimoTimestampRenderizado = 0;
-
-            const btnRestore = document.getElementById('btn-restore-live');
-            if (btnRestore) btnRestore.style.display = 'none';
-
+        function mudarAtivoGrafico(nomeAmigavel) {
             ativoAmigavelAtual = nomeAmigavel;
-            codigoDerivAtual = codigoDeriv;
-
             const title = document.getElementById('active-asset-title');
             if (title) title.innerHTML = nomeAmigavel;
 
@@ -984,85 +868,11 @@
             const btnAtivo = document.getElementById(`btn-${nomeAmigavel}`);
             if (btnAtivo) btnAtivo.classList.add('active');
 
-            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
-                socketTicksPublico.send(JSON.stringify({
-                    ticks: codigoDeriv,
-                    subscribe: 1
-                }));
-            } else {
-                inicializarCanalTicksPublico();
-            }
-
-            construirGraficoNativoAxiom();
+            sincronizarMalhaCompleta();
         }
 
-        function invocarReplayHistorico(ativo, timestampIso, valorDirecao, precoSinal) {
-            modoVisualizacaoHistorica = true;
-
-            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
-            }
-
-            let ativoFormatado = ativo.trim().toUpperCase();
-            let codigoDeriv = MAPA_ATIVOS_DERIV[ativoFormatado] || '1HZ_100V';
-            const epochAlvoMili = new Date(timestampIso).getTime();
-
-            const title = document.getElementById('active-asset-title');
-            if (title) title.innerHTML = `REPLAY HISTÓRICO: ${ativoFormatado}`;
-
-            const btnRestore = document.getElementById('btn-restore-live');
-            if (btnRestore) btnRestore.style.display = 'block';
-
-            const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1111');
-            wsHistorico.onopen = () => {
-                wsHistorico.send(JSON.stringify({
-                    ticks_history: codigoDeriv,
-                    end: Math.floor(epochAlvoMili / 1000) + 90,
-                    count: 120,
-                    style: 'ticks'
-                }));
-            };
-            wsHistorico.onmessage = (event) => {
-                const resposta = JSON.parse(event.data);
-                if (resposta.history && tvAreaSeries) {
-                    const arrayLinha = [];
-                    for (let i = 0; i < resposta.history.times.length; i++) {
-                        arrayLinha.push({
-                            time: resposta.history.times[i] * 1000,
-                            value: parseFloat(resposta.history.prices[i])
-                        });
-                    }
-                    construirGraficoNativoAxiom();
-                    tvAreaSeries.setData(arrayLinha);
-                    const corBadge = (valorDirecao === 'CALL') ? '#39e68d' : '#ff6b6b';
-                    tvAreaSeries.setMarkers([{
-                        time: epochAlvoMili,
-                        position: 'inLine',
-                        color: corBadge,
-                        shape: 'circle',
-                        text: `TIRO ${valorDirecao}: ${precoSinal}`
-                    }]);
-
-                    if (tvChartInstance) tvChartInstance.timeScale().fitContent();
-                }
-                wsHistorico.close();
-            };
-        }
-
-        function restaurarFluxoTempoReal() {
-            modoVisualizacaoHistorica = false;
-            ultimoTimestampRenderizado = 0;
-            const btnRestore = document.getElementById('btn-restore-live');
-            if (btnRestore) btnRestore.style.display = 'none';
-            const title = document.getElementById('active-asset-title');
-            if (title) title.innerHTML = ativoAmigavelAtual;
-
-            inicializarCanalTicksPublico();
-            construirGraficoNativoAxiom();
-        }
-
-        async function buscarDadosDoSupabase() {
+        // Alimenta as tabelas e o gráfico de forma unificada direto do Supabase
+        async function sincronizarMalhaCompleta() {
             try {
                 const URL_SUPABASE = "https://xzlotpwqpdjwzqerdyfb.supabase.co/rest/v1/trade_history?order=timestamp.desc";
                 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6bG90cHdxcGRqd3pxZXJkeWZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjMxNzAyMSwiZXhwIjoyMDg3ODkzMDIxfQ.61am9-3Am8PhNx2XXnLrr20vBIELj6hPo7tDLXT0DhQ";
@@ -1076,11 +886,11 @@
                     }
                 });
 
-                if (!resposta.ok) throw new Error(`Erro Supabase REST: ${resposta.status}`);
+                if (!resposta.ok) throw new Error(`Erro REST`);
                 const trades = await resposta.json();
+
                 const tabelaSupabase = document.getElementById("supabase-table-body");
                 const tabelaAntigravity = document.getElementById("antigravity-table-body");
-
                 if (!tabelaSupabase || !tabelaAntigravity) return;
 
                 let htmlSupabase = "";
@@ -1088,19 +898,23 @@
                 let wins = 0;
                 let losses = 0;
 
+                let valoresEixoY = [];
+                let rotasEixoX = [];
+
                 trades.forEach(trade => {
                     const resultadoTrade = (trade.resultado || "").toUpperCase();
                     if (resultadoTrade === "WIN") wins++;
                     else losses++;
 
                     const dataCompleta = new Date(trade.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const horaMinuto = new Date(trade.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
                     const prefixoSinal = trade.valor > 0 ? "+ USD " : "- USD ";
                     const direcaoCalculada = trade.valor > 0 ? 'CALL' : 'PUT';
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
 
                     htmlSupabase += `
-                        <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
+                        <tr>
                             <td><strong>${ativoLimpo}</strong></td>
                             <td>ADX ${trade.adx_no_tiro ? trade.adx_no_tiro.toFixed(2) : '0.00'}</td>
                             <td class="${classeBadge}">${prefixoSinal}${Math.abs(trade.valor).toFixed(2)}</td>
@@ -1108,12 +922,18 @@
                     `;
 
                     htmlAntigravity += `
-                        <tr class="clickable-row" onclick="invocarReplayHistorico('${ativoLimpo}', '${trade.timestamp}', '${direcaoCalculada}', '${Math.abs(trade.valor).toFixed(2)}')">
+                        <tr>
                             <td>${dataCompleta}</td>
                             <td style="color: ${trade.valor > 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
-                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${trade.adx_no_tiro ? (trade.adx_no_tiro * 0.08).toFixed(2) : '0.00'}</td>
+                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${trade.coice_no_tiro ? trade.coice_no_tiro.toFixed(2) : '0.00'}</td>
                         </tr>
                     `;
+
+                    // Puxa as últimas 15 coordenadas do ativo ativo para o gráfico
+                    if (ativoLimpo === ativoAmigavelAtual && valoresEixoY.length < 15) {
+                        valoresEixoY.push(parseFloat(trade.coice_no_tiro || 0).toFixed(2));
+                        rotasEixoX.push(horaMinuto);
+                    }
                 });
 
                 tabelaSupabase.innerHTML = htmlSupabase;
@@ -1124,21 +944,31 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
+                // Faz o update limpo no ApexCharts ordenando cronologicamente (da esquerda para a direita)
+                if (chartInstance && valoresEixoY.length > 0) {
+                    chartInstance.updateOptions({
+                        xaxis: { categories: rotasEixoX.reverse() }
+                    });
+                    chartInstance.updateSeries([{
+                        name: 'Fator Coice',
+                        data: valoresEixoY.reverse()
+                    }]);
+                }
+
             } catch (erro) {
-                console.error("Aviso de sincronização da malha de dados:", erro);
+                console.error("Erro na sincronização:", erro);
             }
         }
 
         function alternarSecao(idSecaoAlvo) {
             document.querySelectorAll('.content-section').forEach(secao => secao.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-
             document.getElementById(idSecaoAlvo).classList.add('active');
             document.getElementById(`btn-${idSecaoAlvo}`).classList.add('active');
 
             if (idSecaoAlvo === 'secao-dashboard') {
-                buscarDadosDoSupabase();
-                setTimeout(construirGraficoNativoAxiom, 150);
+                sincronizarMalhaCompleta();
+                setTimeout(construirGraficoApex, 100);
             }
         }
 
@@ -1156,7 +986,6 @@
                 if (txtTema) txtTema.innerText = "Modo Escuro";
                 if (iconeTema) iconeTema.className = "fas fa-moon";
             }
-            setTimeout(construirGraficoNativoAxiom, 200);
         }
 
         function processarTrocaAvatar(event) {
@@ -1168,23 +997,15 @@
             }
         }
 
-        function salvarMetadadosPerfil() {
-            alert("Sucesso: Informações atualizadas!");
-        }
-
-        window.addEventListener('resize', () => {
-            if (tvChartInstance) {
-                let container = document.getElementById('deriv-realtime-canvas');
-                if (container) tvChartInstance.resize(container.clientWidth, 320);
-            }
-        });
+        function salvarMetadadosPerfil() { alert("Sucesso: Informações atualizadas!"); }
 
         window.onload = () => {
-            buscarDadosDoSupabase();
+            construirGraficoApex();
             inicializarCanalSaldoPrivado();
-            inicializarCanalTicksPublico();
-            setTimeout(construirGraficoNativoAxiom, 400);
-            setInterval(buscarDadosDoSupabase, 30000);
+            sincronizarMalhaCompleta();
+
+            if (loopDadosId) clearInterval(loopDadosId);
+            loopDadosId = setInterval(sincronizarMalhaCompleta, 5000);
         };
     </script>
 </body>
