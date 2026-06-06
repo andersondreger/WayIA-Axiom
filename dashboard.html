@@ -12,7 +12,6 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- 📊 Motor Gráfico Universal ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         :root {
@@ -25,16 +24,6 @@
             --text-secondary: #6b7f75;
         }
 
-        .light-mode {
-            --bg-base: #f8fafc;
-            --bg-surface: #ffffff;
-            --axiom-neon: #10b981;
-            --axiom-neon-glow: rgba(16, 185, 129, 0.1);
-            --border-color: rgba(0, 0, 0, 0.06);
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-        }
-
         body {
             margin: 0;
             background-color: var(--bg-base);
@@ -43,7 +32,6 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         .sidebar {
@@ -55,11 +43,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: background-color 0.3s;
-        }
-
-        .light-mode .sidebar {
-            background-color: #ffffff;
         }
 
         .brand-title {
@@ -90,17 +73,12 @@
             border-radius: 12px;
             font-weight: 500;
             margin-bottom: 8px;
-            transition: all 0.2s;
             background: none;
             border: none;
             width: 100%;
             text-align: left;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 14px;
         }
 
-        .nav-link:hover,
         .nav-link.active {
             background-color: var(--bg-surface);
             color: var(--axiom-neon);
@@ -121,6 +99,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .header-info h1 {
@@ -148,7 +128,6 @@
             font-size: 13px;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .banca-card h2 {
@@ -186,14 +165,8 @@
 
         .workspace-grid {
             display: grid;
-            grid-template-columns: 1.8fr 1.2fr;
+            grid-template-columns: 1fr;
             gap: 30px;
-        }
-
-        @media(max-width: 992px) {
-            .workspace-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .chart-panel {
@@ -219,11 +192,6 @@
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .chart-engine-title span {
-            color: var(--axiom-neon);
         }
 
         .asset-switcher-group {
@@ -241,12 +209,6 @@
             font-size: 12px;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
-            transition: all 0.2s ease;
-        }
-
-        .btn-asset-select:hover {
-            border-color: var(--axiom-neon);
-            color: var(--text-primary);
         }
 
         .btn-asset-select.active {
@@ -259,15 +221,15 @@
             background-color: #040705 !important;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            overflow: hidden;
-            position: relative;
-            min-height: 320px;
+            min-height: 340px;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         .btn-reset-realtime {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 40px;
+            left: 45px;
             z-index: 10;
             background: #ff7a00;
             color: #fff;
@@ -278,113 +240,13 @@
             font-weight: 700;
             cursor: pointer;
             display: none;
-            box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
-        }
-
-        .modules-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .module-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: border 0.3s;
-        }
-
-        .module-card:hover {
-            border-color: rgba(57, 230, 141, 0.3);
-        }
-
-        .module-details h4 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .module-details h4 i {
-            color: var(--axiom-neon);
-        }
-
-        .module-meta {
-            margin-top: 8px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .module-meta span strong {
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #1a2620;
-            border-radius: 34px;
-            transition: 0.3s;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #4b6356;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        input:checked+.slider {
-            background-color: var(--axiom-neon);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(22px);
-            background-color: var(--bg-base);
         }
 
         .tables-row {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
-        }
-
-        @media(max-width: 768px) {
-            .tables-row {
-                grid-template-columns: 1fr;
-            }
+            margin-top: 10px;
         }
 
         .table-panel {
@@ -392,6 +254,7 @@
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 25px;
+            overflow-x: auto;
         }
 
         .table-panel h3 {
@@ -415,8 +278,17 @@
             border-bottom: 1px solid rgba(57, 230, 141, 0.05);
         }
 
+        tr.clickable-row {
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        tr.clickable-row:hover {
+            background: rgba(57, 230, 141, 0.06) !important;
+        }
+
         td {
-            padding: 12px 0;
+            padding: 12px 6px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.02);
         }
 
@@ -431,16 +303,6 @@
             font-weight: 600;
             font-family: 'JetBrains Mono', monospace;
         }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
     </style>
 </head>
 
@@ -451,198 +313,139 @@
             <div class="brand-title"><i class="fas fa-cube" style="color:var(--axiom-neon);"></i>
                 Axiom<span>Sovereign</span></div>
             <div class="nav-menu">
-                <button onclick="alternarSecao('secao-dashboard')" id="btn-secao-dashboard" class="nav-link active"><i
-                        class="fas fa-chart-line"></i> Dashboard Builder</button>
+                <button class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard Builder</button>
             </div>
         </div>
-
         <div class="profile-footer">
-            <img id="sidebar-avatar"
-                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop"
-                style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--axiom-neon);"
-                alt="Avatar">
-            <div style="flex-grow: 1;">
-                <div style="font-size: 13px; font-weight: 600;" id="sidebar-username">Anderson S.</div>
-            </div>
+            <div style="font-size: 13px; font-weight: 600;">Anderson S.</div>
         </div>
     </div>
 
     <div class="main-wrapper">
+        <div class="header-section">
+            <div class="header-info">
+                <h1>Painel de Controle</h1>
+                <p>Mapeamento de telemetria analítica integrado diretamente ao Supabase.</p>
+            </div>
+            <div class="banca-card">
+                <p>Banca Dinâmica (Live)</p>
+                <h2>USD <span id="balance-live">10,000.00</span></h2>
+            </div>
+        </div>
 
-        <div id="secao-dashboard" class="content-section active">
-            <div class="header-section">
-                <div class="header-info">
-                    <h1>Painel de Controle</h1>
-                    <p>Estrutura de alta fidelidade baseada na especificação Ascensão/Queda da Deriv.</p>
+        <div class="metrics-row">
+            <div class="metric-mini-card">
+                <p>Disparos Totais</p>
+                <h3 id="meta-total">0</h3>
+            </div>
+            <div class="metric-mini-card" style="border-bottom: 3px solid var(--axiom-neon);">
+                <p style="color: var(--axiom-neon);">Retornos Wins</p>
+                <h3 id="meta-wins" style="color: var(--axiom-neon);">0</h3>
+            </div>
+            <div class="metric-mini-card" style="border-bottom: 3px solid #ff6b6b;">
+                <p style="color: #ff6b6b;">Retornos Losses</p>
+                <h3 id="meta-losses" style="color: #ff6b6b;">0</h3>
+            </div>
+            <div class="metric-mini-card">
+                <p>Aproveitamento Líquido</p>
+                <h3 id="meta-assertividade" style="color: #3abff8;">0%</h3>
+            </div>
+        </div>
+
+        <div class="workspace-grid">
+            <div class="chart-panel">
+                <div class="chart-header-controls">
+                    <div class="chart-engine-title">📡 Métrica Histórica (Supabase): <span
+                            id="active-asset-title">R_100</span></div>
+                    <div class="asset-switcher-group">
+                        <button id="btn-R_100" class="btn-asset-select active"
+                            onclick="mudarAtivoGrafico('R_100', '1HZ_100V')">R_100</button>
+                        <button id="btn-R_75" class="btn-asset-select"
+                            onclick="mudarAtivoGrafico('R_75', '1HZ_75V')">R_75</button>
+                        <button id="btn-R_50" class="btn-asset-select"
+                            onclick="mudarAtivoGrafico('R_50', '1HZ_50V')">R_50</button>
+                        <button id="btn-R_25" class="btn-asset-select"
+                            onclick="mudarAtivoGrafico('R_25', '1HZ_25V')">R_25</button>
+                        <button id="btn-R_10" class="btn-asset-select"
+                            onclick="mudarAtivoGrafico('R_10', '1HZ_10V')">R_10</button>
+                    </div>
                 </div>
-                <div class="banca-card">
-                    <p>Banca Dinâmica (Live)</p>
-                    <h2>USD <span id="balance-live">10,000.00</span></h2>
+                <div class="viewport-wrapper">
+                    <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarTempoReal()">
+                        <i class="fas fa-sync-alt"></i> Voltar ao Fluxo Geral
+                    </button>
+                    <div id="apex-chart-canvas"></div>
                 </div>
             </div>
+        </div>
 
-            <div class="metrics-row">
-                <div class="metrics-mini-card">
-                    <p>Disparos Totais</p>
-                    <h3 id="meta-total">0</h3>
-                </div>
-                <div class="metric-mini-card" style="border-bottom: 3px solid var(--axiom-neon);">
-                    <p style="color: var(--axiom-neon);">Retornos Wins</p>
-                    <h3 id="meta-wins" style="color: var(--axiom-neon);">0</h3>
-                </div>
-                <div class="metric-mini-card" style="border-bottom: 3px solid #ff6b6b;">
-                    <p style="color: #ff6b6b;">Retornos Losses</p>
-                    <h3 id="meta-losses" style="color: #ff6b6b;">0</h3>
-                </div>
-                <div class="metric-mini-card">
-                    <p>Aproveitamento Líquido</p>
-                    <h3 id="meta-assertividade" style="color: #3abff8;">0%</h3>
-                </div>
+        <div class="tables-row">
+            <div class="table-panel">
+                <h3>Relatórios de Auditoria (Clique para Replay do Contrato)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ativo</th>
+                            <th>Métrica ADX</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supabase-table-body"></tbody>
+                </table>
             </div>
-
-            <div class="workspace-grid">
-                <div class="chart-panel">
-                    <div class="chart-header-controls">
-                        <div class="chart-engine-title">📡 Telemetria Real-Time: <span
-                                id="active-asset-title">R_100</span>
-                        </div>
-                        <div class="asset-switcher-group">
-                            <button id="btn-R_100" class="btn-asset-select active"
-                                onclick="mudarAtivoGrafico('R_100', '1HZ_100V')">R_100</button>
-                            <button id="btn-R_75" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_75', '1HZ_75V')">R_75</button>
-                            <button id="btn-R_50" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_50', '1HZ_50V')">R_50</button>
-                            <button id="btn-R_25" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_25', '1HZ_25V')">R_25</button>
-                            <button id="btn-R_10" class="btn-asset-select"
-                                onclick="mudarAtivoGrafico('R_10', '1HZ_10V')">R_10</button>
-                        </div>
-                    </div>
-                    <div class="viewport-wrapper" style="padding: 10px; box-sizing: border-box;">
-                        <button id="btn-restore-live" class="btn-reset-realtime" onclick="restaurarTempoReal()">
-                            <i class="fas fa-sync-alt"></i> Voltar para o Tempo Real
-                        </button>
-                        <div id="deriv-realtime-canvas" style="width: 100%; height: 320px;"></div>
-                    </div>
-                </div>
-
-                <div class="modules-panel">
-                    <div class="module-card">
-                        <div class="module-details">
-                            <h4><i class="fas fa-bolt"></i> Índice Volatilidade 100</h4>
-                            <div class="module-meta">
-                                <span>Filtro: <strong>ADX 4.50</strong></span>
-                                <span>Mecânica: <strong>Coice 2.20</strong></span>
-                            </div>
-                        </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                    </div>
-                    <div class="module-card">
-                        <div class="module-details">
-                            <h4><i class="fas fa-bolt"></i> Índice Volatilidade 75</h4>
-                            <div class="module-meta">
-                                <span>Filtro: <strong>ADX 4.50</strong></span>
-                                <span>Mecânica: <strong>Coice 2.20</strong></span>
-                            </div>
-                        </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                    </div>
-                    <div class="module-card">
-                        <div class="module-details">
-                            <h4><i class="fas fa-bolt"></i> Índice Volatilidade 50</h4>
-                            <div class="module-meta">
-                                <span>Filtro: <strong>ADX 4.50</strong></span>
-                                <span>Mecânica: <strong>Coice 2.20</strong></span>
-                            </div>
-                        </div>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tables-row">
-                <div class="table-panel">
-                    <h3>Relatórios de Auditoria (Clique para Replay)</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Ativo</th>
-                                <th>Métrica ADX</th>
-                                <th>Resultado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="supabase-table-body"></tbody>
-                    </table>
-                </div>
-
-                <div class="table-panel">
-                    <h3>Últimas Operações (Clique para Replay)</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Operação</th>
-                                <th>Fator Coice</th>
-                            </tr>
-                        </thead>
-                        <tbody id="antigravity-table-body"></tbody>
-                    </table>
-                </div>
+            <div class="table-panel">
+                <h3>Últimas Operações (Clique para Replay do Contrato)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Operação</th>
+                            <th>Fator ADX</th>
+                        </tr>
+                    </thead>
+                    <tbody id="antigravity-table-body"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- 🧠 CORE BLINDADO DE PRODUÇÃO CONTRA DADOS NULOS -->
     <script>
         let chartInstance = null;
         let socketSaldoPrivado = null;
-        let socketTicksPublico = null;
         let loopSupabaseId = null;
-
         let ativoAmigavelAtual = 'R_100';
-        let codigoDerivAtual = '1HZ_100V';
         let modoVisualizacaoHistorica = false;
 
-        let bufferTicksTempoReal = [];
-
         const MAPA_ATIVOS_DERIV = {
-            'R_100': '1HZ_100V',
-            'R_75': '1HZ_75V',
-            'R_50': '1HZ_50V',
-            'R_25': '1HZ_25V',
-            'R_10': '1HZ_10V'
+            'R_100': '1HZ_100V', 'R_75': '1HZ_75V', 'R_50': '1HZ_50V', 'R_25': '1HZ_25V', 'R_10': '1HZ_10V'
         };
 
         function construirGraficoApex() {
-            const el = document.getElementById('deriv-realtime-canvas');
+            const el = document.getElementById('apex-chart-canvas');
             if (!el) return;
             el.innerHTML = '';
 
             const options = {
                 chart: {
                     type: 'area',
-                    height: 300,
-                    animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 200 } },
+                    height: 320,
                     toolbar: { show: false },
-                    background: 'transparent'
+                    background: 'transparent',
+                    animations: { enabled: true }
                 },
                 colors: ['#39e68d'],
                 stroke: { curve: 'smooth', width: 3 },
                 fill: {
                     type: 'gradient',
-                    gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05, stops: [0, 90, 100] }
+                    gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.02, stops: [0, 90, 100] }
                 },
-                series: [{ name: 'Preço', data: [] }],
+                series: [{ name: 'Métrica ADX', data: [] }],
                 xaxis: {
-                    type: 'category',
-                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false }
+                    categories: [],
+                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } }
                 },
                 yaxis: {
-                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } },
-                    forceNiceScale: true
+                    labels: { style: { colors: '#6b7f75', fontSize: '10px' } }
                 },
                 grid: { borderColor: 'rgba(57, 230, 141, 0.03)' },
                 tooltip: { theme: 'dark' }
@@ -672,84 +475,31 @@
             socketSaldoPrivado.onclose = () => { setTimeout(inicializarCanalSaldoPrivado, 4000); };
         }
 
-        function inicializarCanalTicksPublico() {
-            if (socketTicksPublico) { try { socketTicksPublico.close(); } catch (e) { } }
-
-            socketTicksPublico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
-
-            socketTicksPublico.onopen = function () {
-                if (!modoVisualizacaoHistorica) {
-                    socketTicksPublico.send(JSON.stringify({ ticks: codigoDerivAtual, subscribe: 1 }));
-                }
-            };
-
-            socketTicksPublico.onmessage = function (event) {
-                const payload = JSON.parse(event.data);
-
-                if (payload.tick && !modoVisualizacaoHistorica) {
-                    if (payload.tick.symbol === codigoDerivAtual) {
-                        const horaMinutoSegundo = new Date(payload.tick.epoch * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        const precoAtual = parseFloat(payload.tick.quote);
-
-                        bufferTicksTempoReal.push({ x: horaMinutoSegundo, y: precoAtual });
-                        if (bufferTicksTempoReal.length > 25) bufferTicksTempoReal.shift();
-
-                        if (chartInstance) {
-                            chartInstance.updateSeries([{
-                                name: 'Preço ao Vivo',
-                                data: bufferTicksTempoReal.map(t => t.y)
-                            }]);
-                            chartInstance.updateOptions({
-                                xaxis: { categories: bufferTicksTempoReal.map(t => t.x) }
-                            });
-                        }
-                    }
-                }
-            };
-
-            socketTicksPublico.onclose = () => {
-                if (!modoVisualizacaoHistorica) setTimeout(inicializarCanalTicksPublico, 3000);
-            };
-        }
-
-        function mudarAtivoGrafico(nomeAmigavel, codigoDeriv) {
+        function mudarAtivoGrafico(nomeAmigavel) {
             modoVisualizacaoHistorica = false;
             ativoAmigavelAtual = nomeAmigavel;
-            codigoDerivAtual = code = codigoDeriv;
-            bufferTicksTempoReal = [];
-
-            const title = document.getElementById('active-asset-title');
-            if (title) title.innerHTML = nomeAmigavel;
 
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
+
+            const title = document.getElementById('active-asset-title');
+            if (title) title.innerHTML = nomeAmigavel;
 
             document.querySelectorAll('.btn-asset-select').forEach(btn => btn.classList.remove('active'));
             const btnAtivo = document.getElementById(`btn-${nomeAmigavel}`);
             if (btnAtivo) btnAtivo.classList.add('active');
 
-            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
-                socketTicksPublico.send(JSON.stringify({ ticks: codigoDeriv, subscribe: 1 }));
-            } else {
-                inicializarCanalTicksPublico();
-            }
-
-            construirGraficoApex();
+            sincronizarMalhaCompleta();
         }
 
-        function exibirGraficoAnexoDaEntrada(ativo, timestampIso, valorDirecao, fatorCoice, resultado) {
+        // 🛰️ LEITURA DE REPLAY CONTRATADO DE 1 MINUTO NA DERIV
+        function exibirGraficoAnexoDaEntrada(ativo, timestampIso, valorDirecao, resultado, adxNoTiro) {
             modoVisualizacaoHistorica = true;
-
-            if (socketTicksPublico && socketTicksPublico.readyState === WebSocket.OPEN) {
-                socketTicksPublico.send(JSON.stringify({ forget_all: "ticks" }));
-            }
-
-            const title = document.getElementById('active-asset-title');
-            if (title) title.innerHTML = `ANEXO HISTÓRICO: ${ativo} (${resultado}) - COICE: ${fatorCoice}`;
-
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'block';
+
+            const title = document.getElementById('active-asset-title');
+            if (title) title.innerHTML = `REPLAY CONTRATO: ${ativo} (${resultado}) | ADX NO TIRO: ${adxNoTiro}`;
 
             const epochAlvo = Math.floor(new Date(timestampIso).getTime() / 1000);
             const wsHistorico = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
@@ -757,8 +507,8 @@
             wsHistorico.onopen = () => {
                 wsHistorico.send(JSON.stringify({
                     ticks_history: MAPA_ATIVOS_DERIV[ativo] || '1HZ_100V',
-                    end: epochAlvo + 40,
-                    count: 30,
+                    end: epochAlvo + 60,
+                    count: 35,
                     style: 'ticks'
                 }));
             };
@@ -780,7 +530,7 @@
                         colors: [resultado === 'WIN' ? '#39e68d' : '#ff6b6b']
                     });
                     chartInstance.updateSeries([{
-                        name: `Preço no Contrato ${valorDirecao}`,
+                        name: `Preço do Ativo (${valorDirecao})`,
                         data: valoresPreco
                     }]);
                 }
@@ -792,7 +542,7 @@
             modoVisualizacaoHistorica = false;
             const btnRestore = document.getElementById('btn-restore-live');
             if (btnRestore) btnRestore.style.display = 'none';
-            mudarAtivoGrafico(ativoAmigavelAtual, codigoDerivAtual);
+            mudarAtivoGrafico(ativoAmigavelAtual);
         }
 
         async function sincronizarMalhaCompleta() {
@@ -809,7 +559,7 @@
                     }
                 });
 
-                if (!resposta.ok) throw new Error(`Erro REST`);
+                if (!resposta.ok) return;
                 const trades = await resposta.json();
 
                 const tabelaSupabase = document.getElementById("supabase-table-body");
@@ -818,42 +568,50 @@
 
                 let htmlSupabase = "";
                 let htmlAntigravity = "";
-                let wins = 0;
-                let losses = 0;
+                let wins = 0, losses = 0;
+
+                let valoresEixoY = [];
+                let rotulosEixoX = [];
 
                 trades.forEach(trade => {
-                    // 🛡️ TRATAMENTO ABSOLUTO ANTI-QUEBRA (FALLBACK CONTRA CAMPOS NULOS)
                     const resultadoTrade = (trade.resultado || "LOSS").toUpperCase();
-                    if (resultadoTrade === "WIN") wins++;
-                    else losses++;
+                    if (resultadoTrade === "WIN") wins++; else losses++;
 
                     const timestampSeguro = trade.timestamp ? new Date(trade.timestamp) : new Date();
                     const dataCompleta = timestampSeguro.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                    const horaMinuto = timestampSeguro.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
                     const valorReal = parseFloat(trade.valor || 0);
                     const prefixoSinal = valorReal >= 0 ? "+ USD " : "- USD ";
                     const direcaoCalculada = (trade.direcao || (valorReal >= 0 ? 'CALL' : 'PUT')).toUpperCase();
-
                     const ativoLimpo = (trade.ativo || 'R_100').trim().toUpperCase();
-                    const coiceFormatado = trade.coice_no_tiro ? parseFloat(trade.coice_no_tiro).toFixed(2) : '0.00';
+                    const adxFormatado = trade.adx_no_tiro ? parseFloat(trade.adx_no_tiro).toFixed(2) : '0.00';
                     const classeBadge = (resultadoTrade === "WIN") ? "win-badge" : "loss-badge";
 
-                    // Injeta a string montada blindada contra null-pointers
+                    // Injeção limpa de linhas interativas na tabela
+                    const triggerClick = `exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp || ''}', '${direcaoCalculada}', '${resultadoTrade}', '${adxFormatado}')`;
+
                     htmlSupabase += `
-                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp || ''}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
+                        <tr class="clickable-row" onclick="${triggerClick}">
                             <td><strong>${ativoLimpo}</strong></td>
-                            <td>ADX ${trade.adx_no_tiro ? parseFloat(trade.adx_no_tiro).toFixed(2) : '0.00'}</td>
+                            <td>ADX ${adxFormatado}</td>
                             <td class="${classeBadge}">${prefixoSinal}${Math.abs(valorReal).toFixed(2)}</td>
                         </tr>
                     `;
 
                     htmlAntigravity += `
-                        <tr class="clickable-row" onclick="exibirGraficoAnexoDaEntrada('${ativoLimpo}', '${trade.timestamp || ''}', '${direcaoCalculada}', '${coiceFormatado}', '${resultadoTrade}')">
+                        <tr class="clickable-row" onclick="${triggerClick}">
                             <td>${dataCompleta}</td>
                             <td style="color: ${valorReal >= 0 ? 'var(--axiom-neon)' : '#ff6b6b'}; font-weight:600;">${direcaoCalculada}</td>
-                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${coiceFormatado}</td>
+                            <td style="font-family:'JetBrains Mono'; font-size:12px;">${adxFormatado}</td>
                         </tr>
                     `;
+
+                    // Puxa as coordenadas do ativo selecionado para compor o fluxo geral do gráfico
+                    if (ativoLimpo === ativoAmigavelAtual && valoresEixoY.length < 15) {
+                        valoresEixoY.push(parseFloat(adxFormatado));
+                        rotulosEixoX.push(horaMinuto);
+                    }
                 });
 
                 tabelaSupabase.innerHTML = htmlSupabase;
@@ -864,31 +622,21 @@
                 document.getElementById("meta-losses").innerText = losses;
                 document.getElementById("meta-assertividade").innerText = `${wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0}%`;
 
+                // Plota o fluxo do ADX no ApexCharts de forma cronológica
+                if (chartInstance && valoresEixoY.length > 0 && !modoVisualizacaoHistorica) {
+                    chartInstance.updateOptions({ xaxis: { categories: rotulosEixoX.reverse() }, colors: ['#39e68d'] });
+                    chartInstance.updateSeries([{ name: 'Métrica ADX', data: valoresEixoY.reverse() }]);
+                }
+
             } catch (erro) {
-                console.error("Aviso de sincronização da malha de dados:", erro);
+                console.error(erro);
             }
-        }
-
-        function alternarSecao(idSecaoAlvo) {
-            if (idSecaoAlvo === 'secao-dashboard') {
-                sincronizarMalhaCompleta();
-                setTimeout(construirGraficoApex, 100);
-            }
-        }
-
-        function toggleTemaVisual() {
-            const corpoDoc = document.body;
-            if (corpoDoc.classList.contains("light-mode")) corpoDoc.classList.remove("light-mode");
-            else corpoDoc.classList.add("light-mode");
         }
 
         window.onload = () => {
             construirGraficoApex();
             inicializarCanalSaldoPrivado();
-            inicializarCanalTicksPublico();
             sincronizarMalhaCompleta();
-
-            if (loopSupabaseId) clearInterval(loopSupabaseId);
             loopSupabaseId = setInterval(sincronizarMalhaCompleta, 5000);
         };
     </script>
